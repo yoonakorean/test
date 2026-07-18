@@ -201,7 +201,7 @@
         }
         .stamp-tag.active { opacity: 1; }
 
-        /* 右上角功能小按鈕 (正面喇叭、反面燈泡) */
+        /* 右上角正面喇叭 */
         .btn-top-action {
             background: none;
             border: none;
@@ -209,11 +209,9 @@
             cursor: pointer;
             padding: 6px;
             transition: transform 0.2s, color 0.2s;
+            color: var(--text-dark);
         }
-        .card-front .btn-top-action { color: var(--text-dark); }
-        .card-back .btn-top-action { color: #64748b; }
-        .card-front .btn-top-action.playing { color: var(--primary); }
-        .card-back .btn-top-action.active { color: #fff; }
+        .btn-top-action.playing { color: var(--primary); }
 
         /* 核心大按鈕框架 (正反面位置完全同座標重疊) */
         .center-action-box {
@@ -224,7 +222,7 @@
             margin-bottom: 5px;
         }
 
-        /* 核心圓形大按鈕 (正面麥克風、反面語音播放) */
+        /* 核心圓形大按鈕 (正面麥克風、反面語音播放位置與正面相同) */
         .btn-center-circle {
             border: none;
             width: 55px;
@@ -247,14 +245,15 @@
             color: var(--danger);
             animation: pulse 1.3s infinite;
         }
-        /* 反面大喇叭色彩 */
+        /* 反面大喇叭色彩 (改為白色背景，與設計圖相同) */
         .card-back .btn-center-circle {
-            background: #f1f5f9;
+            background: #ffffff;
             color: #64748b;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .card-back .btn-center-circle.playing {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
+            background: var(--primary-light);
+            color: var(--primary);
         }
         .btn-center-circle:active { transform: scale(0.92); }
 
@@ -330,36 +329,68 @@
             margin: 0;
         }
 
-        /* 底部釋義區塊外殼容器（用來做相對定位） */
+        /* 底部釋義與控制區外殼容器 */
         .definition-wrapper {
             position: relative;
             width: 100%;
             margin-bottom: 5px;
         }
 
-        /* 新增：獨立出來的中文答案小卡片（定位在釋義框框外的右上方） */
-        .chinese-answer-badge {
+        /* 控制列：將燈泡💡移到原設計圖紅色區塊的位置（釋義框外右上方） */
+        .back-control-row {
             position: absolute;
-            top: -32px; /* 浮動在釋義框上方 */
-            right: 0;    /* 靠右對齊 */
+            top: -45px; 
+            right: 10px;    
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 15;
+        }
+
+        /* 中文答案彈出小方框 */
+        .chinese-answer-badge {
             background: var(--orange);
             color: white;
-            padding: 4px 12px;
-            border-radius: 10px;
-            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.9rem;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 5;
-            pointer-events: none; /* 純顯示用 */
-            display: none; /* 預設隱藏，按💡燈泡切換開關 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(5px);
+            transition: all 0.2s ease;
         }
         .chinese-answer-badge.show {
-            display: inline-block;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* 移到紅色區塊位置的燈泡💡按鈕 */
+        .btn-inline-lightbulb {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-inline-lightbulb.active {
+            background: var(--orange);
+            color: white;
         }
 
         /* 反面最下方釋義區 */
         .definition-block {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 18px;
             text-align: center;
@@ -464,7 +495,7 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
-                        <!-- 【對調：語音播放鍵換到右上角】 -->
+                        <!-- 右上角固定為正面喇叭播放鍵 -->
                         <button class="btn-top-action" id="speakerFront" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
@@ -475,7 +506,7 @@
                         <span class="no-img-text" id="noImgText"> canva 圖片放置區 </span>
                     </div>
 
-                    <!-- 【對調：麥克風錄音功能換到大中央】 -->
+                    <!-- 正面大中央：麥克風錄音 -->
                     <div class="center-action-box">
                         <button class="btn-center-circle" id="btnMic" onclick="toggleRecord(event)">
                             <i class="fa-solid fa-microphone"></i>
@@ -488,10 +519,7 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
-                        <!-- 右上角固定為💡單字提示控制鈕 -->
-                        <button class="btn-top-action" id="btnLightbulb" onclick="toggleTooltip(event)">
-                            <i class="fa-solid fa-lightbulb"></i>
-                        </button>
+                        <span style="width:30px;"></span> <!-- 右上角留空，維持對齊美感 -->
                     </div>
 
                     <!-- 反面核心內文區 -->
@@ -500,19 +528,28 @@
                         <span class="korean-pronunciation" id="koreanPron">發音標記</span>
                     </div>
 
-                    <!-- 【對調：反面語音播放鍵，精準對齊正面大中央座標】 -->
+                    <!-- 反面大中央：語音播放鍵（位置與正面大麥克風完全一致） -->
                     <div class="center-action-box">
                         <button class="btn-center-circle" id="speakerBack" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
 
-                    <!-- 底部釋義與中文答案提示外殼 -->
+                    <!-- 底部釋義與新中文控制區 -->
                     <div class="definition-wrapper">
-                        <!-- 【新增：中文答案小按鈕，完美定位於釋義框右上方】 -->
-                        <div class="chinese-answer-badge" id="chineseAnswerBox">
-                            <span id="hintPart">詞性</span> ｜ <span id="hintCh">中文意思</span>
+                        
+                        <!-- 控制列：內含點擊會消失的方框以及移至此處的燈泡💡 -->
+                        <div class="back-control-row">
+                            <!-- 點選方框本身也可以讓方框隱藏 -->
+                            <div class="chinese-answer-badge" id="chineseAnswerBox" onclick="toggleTooltip(event)">
+                                <span id="hintPart">詞性</span> ｜ <span id="hintCh">中文意思</span>
+                            </div>
+                            <!-- 移到右下方的燈泡按鈕 -->
+                            <button class="btn-inline-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
+                                <i class="fa-solid fa-lightbulb"></i>
+                            </button>
                         </div>
+
                         <div class="definition-block" id="definitionText">
                             釋義
                         </div>
@@ -689,9 +726,8 @@
         const wordName = currentWords[currentIndex];
         const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "尚未建立字典敘述", img: "" };
         
-        // 預設將提示框隱藏
-        document.getElementById('chineseAnswerBox').classList.remove('show');
-        document.getElementById('btnLightbulb').classList.remove('active');
+        // 換字（切換、跳出畫面）時，預設將提示框與燈泡高亮狀態通通隱藏消除
+        hideTooltip();
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
         document.getElementById('frontCategory').innerText = data.cate;
@@ -841,13 +877,19 @@
         document.getElementById('btnMic').classList.remove('recording');
     }
 
-    // 控制「右上方中文答案卡」切換顯示
+    // 控制「中文釋義提示方框」切換顯示（點擊燈泡或方框都會觸發切換與隱藏）
     function toggleTooltip(event) {
-        event.stopPropagation(); // 阻止翻牌
+        event.stopPropagation(); // 阻止觸發翻牌
         const ansBox = document.getElementById('chineseAnswerBox');
         const bulb = document.getElementById('btnLightbulb');
         ansBox.classList.toggle('show');
         bulb.classList.toggle('active');
+    }
+
+    // 強制穩固關閉方框（用於切換頁面或換字卡時）
+    function hideTooltip() {
+        document.getElementById('chineseAnswerBox').classList.remove('show');
+        document.getElementById('btnLightbulb').classList.remove('active');
     }
 
     function showToast(msg) {
