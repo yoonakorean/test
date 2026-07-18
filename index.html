@@ -85,7 +85,7 @@
         /* 進度條容器：稍微往下移一些 */
         .progress-container {
             width: 100%;
-            padding: 10px 20px 0 20px; /* 增加了上方間距 (10px) */
+            padding: 10px 20px 0 20px;
             box-sizing: border-box;
             flex-shrink: 0;
         }
@@ -222,10 +222,10 @@
             100% { transform: scale(1); }
         }
 
-        /* 圖片容器：精準壓縮，確保正反面喇叭按鈕坐標完全一致 */
+        /* 圖片容器 */
         .img-container {
             width: 100%;
-            height: 250px; /* 固定高度，完美鎖定下方結構坐標 */
+            height: 250px;
             margin: 1.5vh 0;
             border: 2px solid #eef2f6;
             border-radius: 18px;
@@ -249,7 +249,7 @@
             letter-spacing: 1px;
         }
 
-        /* 喇叭按鈕固定框架（正反面共用相同的尺寸與空間比率） */
+        /* 喇叭按鈕固定框架 */
         .audio-absolute-box {
             display: flex;
             justify-content: center;
@@ -314,7 +314,6 @@
             transition: all 0.3s ease;
             z-index: 99;
         }
-        /* 避免提示框內容因為父級 card-back 的 Y 軸旋轉而文字顛倒 */
         .card-back .tooltip-box {
             transform: translateY(-10px);
         }
@@ -335,7 +334,7 @@
         .tooltip-part { font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px; }
         .tooltip-ch { font-size: 1.1rem; font-weight: bold; }
 
-        /* 反面核心內文區（固定高度，與正面圖片高度做視覺鏡像匹配） */
+        /* 反面核心內文區 */
         .back-main-content {
             height: 250px;
             margin: 1.5vh 0;
@@ -355,7 +354,7 @@
             text-align: center;
         }
 
-        /* 新增：直覺式韓文發音標記 */
+        /* 韓文發音標記 */
         .korean-pronunciation {
             font-size: 1.4rem;
             font-weight: bold;
@@ -452,7 +451,7 @@
         <div class="badge-progress" id="progressText">學習進度 : 0 / 0</div>
     </div>
 
-    <!-- 進度條 (已往下微調) -->
+    <!-- 進度條 -->
     <div class="progress-container">
         <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="progressBar"></div>
@@ -473,7 +472,7 @@
                 <div class="card-face card-front">
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
-                        <span class="stamp-tag" id="stampTag_front">✓ 發音正確</span>
+                        <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
                         <button class="btn-mic" id="btnMic" onclick="toggleRecord(event)">
                             <i class="fa-solid fa-microphone"></i>
                         </button>
@@ -493,13 +492,11 @@
 
                 <!-- 反面 (深色) -->
                 <div class="card-face card-back">
-                    <!-- 反面獨立頂部欄，修正翻轉顯示問題 -->
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
-                        <span class="stamp-tag" id="stampTag_back">✓ 發音正確</span>
+                        <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
                         <button class="btn-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
                             <i class="fa-solid fa-lightbulb"></i>
-                            <!-- 單字提示卡 (Tooltip) -->
                             <div class="tooltip-box" id="tooltipBox">
                                 <div class="tooltip-part" id="hintPart">詞性</div>
                                 <div class="tooltip-ch" id="hintCh">中文意思</div>
@@ -507,14 +504,11 @@
                         </button>
                     </div>
 
-                    <!-- 反面核心內文區 -->
                     <div class="back-main-content">
                         <h1 class="korean-word" id="koreanWord">韓文單字</h1>
-                        <!-- 新增：純韓文字直覺發音標記 -->
                         <span class="korean-pronunciation" id="koreanPron">發音標記</span>
                     </div>
 
-                    <!-- 與正面完全重疊、相同比例與坐標的喇叭按鈕 -->
                     <div class="audio-absolute-box">
                         <button class="btn-speaker-icon" id="speakerBack" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
@@ -543,10 +537,8 @@
 <script>
     // ==========================================
     // 【 系統全字典數據庫 】
-    // pron 改為精準、直覺的「純韓文實際發音標記」
     // ==========================================
     const vocabDictionary = {
-        // 第一單元
         "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", pron: "[짐]", def: "旅行或搬家時攜帶的物品箱包", img: "" },
         "볼펜": { ch: "原子筆", part: "名詞", cate: "文具", pron: "[볼펜]", def: "筆尖有小滾珠、書寫流暢的筆", img: "" },
         "담요": { ch: "毯子", part: "名詞", cate: "生活", pron: "[담뇨]", def: "睡覺或保暖時蓋在身上的厚織物（音變現象）", img: "" },
@@ -555,17 +547,16 @@
         "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", pron: "[지우개]", def: "用來擦除鉛筆字跡的工具", img: "" },
         "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", pron: "[컴퓨터]", def: "進行資料處理與上網運算的電子計算機", img: "" },
         "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
-        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
+        "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
         "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", img: "" },
         "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品", img: "" },
         "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
         "우산": { ch: "雨傘", part: "名詞", cate: "生活", pron: "[우산]", def: "下雨天用來遮雨、擋水的隨身工具", img: "" },
 
-        // 第二單元
         "하나": { ch: "一 (固有詞)", part: "數詞", cate: "數字", pron: "[하나]", def: "數字中的第一個，表示單一數量", img: "" },
         "둘": { ch: "二 (固有詞)", part: "數詞", cate: "數字", pron: "[둘]", def: "一加上一之後的數量", img: "" },
         "셋": { ch: "三 (固有詞)", part: "數詞", cate: "數字", pron: "[섿]", def: "二加上一之後的數量（尾音代表音）", img: "" },
-        "넷": { ch: "四 (固有詞)", part: "數詞", cate: "數字", pron: "[เนㄷ/넫]", pron: "[넫]", def: "三加上一之後的數量", img: "" },
+        "넷": { ch: "四 (固有詞)", part: "數詞", cate: "數字", pron: "[넫]", def: "三加上一之後的數量", img: "" },
         "다섯": { ch: "五 (固有詞)", part: "數詞", cate: "數字", pron: "[다섣]", def: "四加上一之後的數量", img: "" },
         "여섯": { ch: "六 (固有詞)", part: "數詞", cate: "數字", pron: "[여섣]", def: "五加上一之後的數量", img: "" },
         "일곱": { ch: "七 (固有詞)", part: "數詞", cate: "數字", pron: "[일곱]", def: "六加上一之後的數量", img: "" },
@@ -581,7 +572,7 @@
     };
 
     const unitData = {
-        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜라", "지갑", "커피", "메뉴", "우산"],
+        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨圖", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
         unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
     };
 
@@ -592,9 +583,13 @@
     
     let isRecording = false;
     let recognition = null;
-    let autoCloseTimer = null;
+    let singleSpeechTimer = null; // 單次語音無聲關閉計時器
     let touchStartX = 0;
     let touchEndX = 0;
+
+    // 新增：智慧休眠相關變數
+    let globalIdleTimer = null;   // 全局5分鐘閒置計時器
+    const IDLE_LIMIT = 5 * 60 * 1000; // 5分鐘 (毫秒)
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -603,7 +598,7 @@
         recognition.interimResults = false;
 
         recognition.onresult = function(event) {
-            clearTimeout(autoCloseTimer);
+            clearTimeout(singleSpeechTimer);
             stopRecordState();
 
             const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, "");
@@ -611,7 +606,7 @@
             const originalIndex = unitData[currentUnit].indexOf(currentWords[currentIndex]);
 
             if (studentSpeech === targetWord) {
-                showToast("🎉 發音正確！");
+                showToast("🎉 發音正確！印記已蓋上！");
                 if (originalIndex !== -1) {
                     passedWordsMap[currentUnit].add(originalIndex);
                 }
@@ -619,12 +614,61 @@
             } else {
                 showToast(`😢 聽起來像「${studentSpeech}」，再試一次！`);
             }
+            resetIdleTimer(); // 有互動，重設閒置計時
         };
 
-        recognition.onend = function() { if (isRecording) stopRecordState(); };
-        recognition.onerror = function() { stopRecordState(); showToast("錄音辨識出錯，請重新嘗試。"); };
+        recognition.onend = function() { 
+            if (isRecording) stopRecordState(); 
+        };
+        recognition.onerror = function() { 
+            stopRecordState(); 
+            showToast("錄音辨識出錯或已自動休眠。"); 
+        };
     }
 
+    // ==========================================
+    // 【 核心智慧休眠邏輯 】
+    // ==========================================
+    
+    // 重設全局閒置計時器（5分鐘）
+    function resetIdleTimer() {
+        clearTimeout(globalIdleTimer);
+        globalIdleTimer = setTimeout(triggerMicrophoneSleep, IDLE_LIMIT);
+    }
+
+    // 觸發麥克風休眠
+    function triggerMicrophoneSleep() {
+        if (isRecording && recognition) {
+            recognition.stop();
+        }
+        stopRecordState();
+        showToast("💤 偵測到畫面閒置過久，麥克風已自動休息。");
+    }
+
+    // 監聽網頁可見性（離開畫面/切換分頁/關閉螢幕）
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            // 只要离开畫面，立即切斷語音功能，安全休息
+            if (isRecording && recognition) {
+                recognition.stop();
+            }
+            stopRecordState();
+            clearTimeout(globalIdleTimer);
+        } else {
+            // 重新進入頁面時，重設閒置計時，等待使用者主動點擊重啟錄音
+            resetIdleTimer();
+        }
+    });
+
+    // 監聽任何使用者與畫面的互動行為，藉此重置5分鐘計時器
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+
+    // ==========================================
+    // 【 核心功能控制 】
+    // ==========================================
     function shuffleArray(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -654,12 +698,10 @@
         const wordName = currentWords[currentIndex];
         const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "尚未建立字典敘述", img: "" };
         
-        // 隱藏上一張牌留下來的提示框
         document.getElementById('tooltipBox').classList.remove('show');
         document.getElementById('btnLightbulb').classList.remove('active');
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
-        // 正面填值
         document.getElementById('frontCategory').innerText = data.cate;
         if (data.img && data.img.trim() !== "") {
             document.getElementById('vocabImg').src = data.img;
@@ -670,15 +712,13 @@
             document.getElementById('noImgText').style.display = "block";
         }
 
-        // 反面填值
         document.getElementById('backCategory').innerText = data.cate;
         document.getElementById('koreanWord').innerText = wordName;
-        document.getElementById('koreanPron').innerText = data.pron; // 注入直覺的韓文音標
+        document.getElementById('koreanPron').innerText = data.pron;
         document.getElementById('hintPart').innerText = `詞性：${data.part}`;
         document.getElementById('hintCh').innerText = data.ch;
         document.getElementById('definitionText').innerText = data.def;
 
-        // 進度蓋印狀態（正反同步更新）
         const originalIndex = unitData[currentUnit].indexOf(wordName);
         const stampFront = document.getElementById('stampTag_front');
         const stampBack = document.getElementById('stampTag_back');
@@ -747,7 +787,7 @@
     }
 
     function speakStandard(event) {
-        if (event) event.stopPropagation(); // 阻止翻牌
+        if (event) event.stopPropagation();
         if (isRecording) return; 
 
         const targetText = currentWords[currentIndex];
@@ -777,17 +817,24 @@
         } catch(e) { console.error(e); }
     }
 
+    // 使用者主動按下錄音鍵，會直接打斷休眠、重啟錄音
     function toggleRecord(event) {
-        if (event) event.stopPropagation(); // 阻止翻牌
+        if (event) event.stopPropagation();
         if (!recognition) { showToast("瀏覽器不支援錄音。"); return; }
+
+        resetIdleTimer(); // 使用者點擊，重新計算閒置5分鐘
 
         if (!isRecording) {
             isRecording = true;
             document.getElementById('btnMic').classList.add('recording');
             showToast("🎤 錄音中，請開始發音...");
-            recognition.start();
+            
+            try {
+                recognition.start();
+            } catch(e) { console.log("錄音重啟中..."); }
 
-            autoCloseTimer = setTimeout(() => {
+            // 5秒沒聲音的基礎防呆
+            singleSpeechTimer = setTimeout(() => {
                 if (isRecording) {
                     recognition.stop();
                     showToast("⏰ 偵測不到聲音，麥克風已關閉");
@@ -799,13 +846,13 @@
     }
 
     function stopRecordState() {
-        clearTimeout(autoCloseTimer);
+        clearTimeout(singleSpeechTimer);
         isRecording = false;
         document.getElementById('btnMic').classList.remove('recording');
     }
 
     function toggleTooltip(event) {
-        event.stopPropagation(); // 阻止翻牌
+        event.stopPropagation();
         const tooltip = document.getElementById('tooltipBox');
         const bulb = document.getElementById('btnLightbulb');
         tooltip.classList.toggle('show');
@@ -816,7 +863,7 @@
         const toast = document.getElementById('statusToast');
         toast.innerText = msg;
         toast.style.opacity = "1";
-        setTimeout(() => { toast.style.opacity = "0"; }, 2000);
+        setTimeout(() => { toast.style.opacity = "0"; }, 2300);
     }
 
     // 電腦鍵盤
@@ -857,7 +904,11 @@
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    window.onload = () => { changeUnit("unit1"); };
+    // 初始化載入
+    window.onload = () => { 
+        changeUnit("unit1"); 
+        resetIdleTimer(); // 啟動全網頁5分鐘閒置計算
+    };
 </script>
 </body>
 </html>
