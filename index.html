@@ -6,45 +6,125 @@
     <title>韓文單字印記學習</title>
     <style>
         :root {
-            --primary: #4a90e2;
+            --primary: #5c4be2;
+            --primary-light: #eef0ff;
+            --dark-card: #12192c;
+            --bg: #f5f7fc;
+            --text-dark: #0f172a;
+            --text-light: #94a3b8;
             --success: #2ecc71;
             --danger: #e74c3c;
-            --dark: #2c3e50;
-            --bg: #f5f7fa;
+            --orange: #ff9200;
         }
 
         body {
             font-family: 'Noto Sans KR', 'Microsoft JhengHei', sans-serif;
             background-color: var(--bg);
-            color: var(--dark);
+            color: var(--text-dark);
             margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
         }
 
-        .container {
+        .phone-window {
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
+            max-width: 430px;
+            height: 920px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
         }
 
-        .progress-text {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
+        /* 頂部標題與進度 */
+        .header {
+            padding: 25px 20px 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 單元切換下拉選單 */
+        .unit-select {
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            background: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .badge-progress {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: bold;
         }
 
-        /* 閃卡 3D 翻轉容器 */
+        /* 進度條容器 */
+        .progress-container {
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        /* 提示操作語 */
+        .tip-text {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin: 12px 0;
+            text-align: center;
+        }
+        .tip-text span {
+            background: #e2e8f0;
+            color: var(--text-dark);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 0 4px;
+        }
+
+        /* 核心閃卡舞台 */
+        .stage {
+            flex: 1;
+            padding: 0 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         .card-container {
             perspective: 1000px;
             width: 100%;
-            height: 450px;
-            margin-bottom: 20px;
+            height: 520px;
             position: relative;
         }
 
@@ -53,11 +133,10 @@
             height: 100%;
             position: absolute;
             transform-style: preserve-3d;
-            transition: transform 0.6s ease;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
 
-        /* 控制翻轉的 Class */
         .card.is-flipped {
             transform: rotateY(180deg);
         }
@@ -67,421 +146,599 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            background: white;
+            border-radius: 24px;
             box-sizing: border-box;
-            padding: 25px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 正面樣式 (純白) */
+        .card-front {
+            background: white;
+            border: 2px solid #eef2f6;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        }
+
+        .card-top-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 30px;
+        }
+
+        .category-tag {
+            color: var(--text-dark);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .stamp-tag {
+            background: #e8f8f0;
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .stamp-tag.active { opacity: 1; }
+
+        /* 正面錄音鈕 */
+        .btn-mic {
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: transform 0.2s;
+            padding: 5px;
+        }
+        .btn-mic.recording {
+            color: var(--danger);
+            animation: pulse 1.3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* 圖片容器 */
+        .img-container {
+            width: 100%;
+            height: 260px;
+            border: 2px solid #eef2f6;
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+        }
+
+        .vocab-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-img-text {
+            color: var(--text-dark);
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        /* 底部喇叭大鈕 */
+        .audio-center-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-speaker-large {
+            background: none;
+            border: none;
+            font-size: 3.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.1s;
+        }
+        .btn-speaker-large:active { transform: scale(0.95); }
+        .btn-speaker-large.playing { color: var(--primary); }
+
+        /* 反面樣式 (深色) */
+        .card-back {
+            background: var(--dark-card);
+            transform: rotateY(180deg);
+            color: white;
+            justify-content: space-between;
+        }
+
+        .btn-lightbulb {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 5px;
+            position: relative;
+        }
+        .btn-lightbulb.active { color: #fff; }
+
+        /* 橘黃色對話框提示 (Tooltip) */
+        .tooltip-box {
+            position: absolute;
+            top: 45px;
+            right: -10px;
+            background: var(--orange);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 16px;
+            width: 120px;
+            text-align: left;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+        .tooltip-box::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 18px;
+            border-width: 0 8px 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent var(--orange) transparent;
+        }
+        .tooltip-box.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .tooltip-part { font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px; }
+        .tooltip-ch { font-size: 1.1rem; font-weight: bold; }
+
+        /* 反面文字核心置中區 */
+        .back-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .korean-word {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        /* 反面最下方釋義區 */
+        .definition-block {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        /* 底部導覽按鈕列 */
+        .nav-footer {
+            padding: 20px 25px 40px 25px;
+            background: #f8fafc;
+            display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        /* 卡片正面 */
-        .card-front {
-            background: #ffffff;
-        }
-
-        /* 卡片反面 */
-        .card-back {
-            background: #fdfefe;
-            transform: rotateY(180deg);
-            justify-content: center; /* 讓內容完全置中 */
-            gap: 20px;
-        }
-
-        /* 提示按鈕 */
-        .hint-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #eee;
-            border: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* 圖片區 */
-        .vocab-img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
+        .btn-nav {
+            padding: 14px 28px;
             border-radius: 12px;
-            background: #eee; /* 沒圖片時的預留底色 */
-        }
-
-        /* 核心控制鈕（正面下方） */
-        .control-group {
-            display: flex;
-            gap: 15px;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 50px;
-            border: none;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
+            border: none;
             display: flex;
             align-items: center;
             gap: 8px;
             transition: all 0.2s;
         }
 
-        .btn-audio { background: var(--primary); color: white; }
-        .btn-record { background: #e67e22; color: white; }
-        .btn-record.recording { background: var(--danger); animation: pulse 1.5s infinite; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .btn-prev {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
         }
 
-        /* 反面字體設計（完全置中） */
-        .korean-word {
-            font-size: 3.5rem;
-            font-weight: bold;
-            color: var(--dark);
-            margin: 0;
+        .btn-next {
+            background: var(--primary);
+            color: white;
         }
-
-        .pronunciation {
-            font-size: 1.2rem;
-            color: #7f8c8d;
-            margin: 0;
-        }
-
-        /* 彈出小視窗 (Modal) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        
+        /* 語音狀態文字回饋 */
+        .status-toast {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 100;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            width: 80%;
-            max-width: 300px;
-            position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 10px; right: 15px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            border: none; background: none;
-            color: #aaa;
-        }
-
-        .modal-content h3 { margin-top: 0; font-size: 1.5rem; color: var(--primary); }
-        .modal-content p { font-size: 1.2rem; margin: 10px 0 0 0; }
-
-        /* 狀態提示文字 */
-        .status-msg {
-            font-size: 1rem;
-            height: 24px;
-            color: #7f8c8d;
-            font-weight: 500;
+            transition: opacity 0.3s;
+            z-index: 99;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- 進度條文字 -->
-    <div class="progress-text" id="progressText">載入中...</div>
+<div class="phone-window">
+    <!-- 頂部標頭 -->
+    <div class="header">
+        <div class="title-area">
+            <div style="font-size:1.3rem; margin-right:4px;">📖</div>
+            <!-- 單元切換選單 -->
+            <select class="unit-select" id="unitSelector" onchange="changeUnit(this.value)">
+                <option value="unit1">單元一</option>
+                <option value="unit2">單元二</option>
+            </select>
+        </div>
+        <div class="badge-progress" id="progressText">學習進度 : 0 / 0</div>
+    </div>
 
-    <!-- 閃卡容器 -->
-    <div class="card-container">
-        <!-- 點擊問號跳出提示 -->
-        <button class="hint-btn" onclick="openModal(event)">?</button>
-        
-        <div class="card" id="vocabCard" onclick="flipCard()">
-            <!-- 正面 -->
-            <div class="card-face card-front">
-                <!-- Canva 免費素材或 AI 生成圖預留位（可貼網址，不放就是灰色底色） -->
-                <img src="" alt="單字圖片" class="vocab-img" id="vocabImg">
-                <div class="control-group" onclick="event.stopPropagation();">
-                    <button class="btn btn-audio" id="btnAudioFront" onclick="speakStandard()">🔊 播音</button>
-                    <button class="btn btn-record" id="btnRecord" onclick="toggleRecord()">🎤 錄音</button>
-                </div>
-            </div>
+    <!-- 進度條 -->
+    <div class="progress-container">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+    </div>
 
-            <!-- 反面 (完全置中) -->
-            <div class="card-face card-back">
-                <h1 class="korean-word" id="koreanWord">사과</h1>
-                <p class="pronunciation" id="pronunciation">[sa-gwa]</p>
-                <div onclick="event.stopPropagation();">
-                    <button class="btn btn-audio" id="btnAudioBack" onclick="speakStandard()">🔊 播音</button>
+    <!-- 操作提示 -->
+    <div class="tip-text">
+        <span>Space</span> 或點擊卡片翻面 <span>←</span> / <span>→</span> 切換上下張
+    </div>
+
+    <!-- 卡片舞台 -->
+    <div class="stage">
+        <div class="card-container">
+            <div class="card" id="vocabCard" onclick="flipCard()">
+                
+                <!-- 正面 (白色) -->
+                <div class="card-face card-front">
+                    <div class="card-top-info">
+                        <span class="category-tag" id="frontCategory">分類</span>
+                        <span class="stamp-tag" id="stampTag">✓ 已蓋印</span>
+                        <button class="btn-mic" id="btnMic" onclick="toggleRecord(event)">🎤</button>
+                    </div>
+                    
+                    <div class="img-container">
+                        <img src="" alt="單字圖片" class="vocab-img" id="vocabImg" style="display:none;">
+                        <span class="no-img-text" id="noImgText">圖片區</span>
+                    </div>
+
+                    <div class="audio-center-box">
+                        <button class="btn-speaker-large" id="speakerFront" onclick="speakStandard(event)">🔊</button>
+                    </div>
                 </div>
+
+                <!-- 反面 (深色) -->
+                <div class="card-face card-back">
+                    <div class="card-top-info">
+                        <span class="category-tag" id="backCategory" style="color:#64748b;">分類</span>
+                        <button class="btn-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
+                            💡
+                            <!-- 橘黃色對話框 -->
+                            <div class="tooltip-box" id="tooltipBox">
+                                <div class="tooltip-part" id="hintPart">詞性</div>
+                                <div class="tooltip-ch" id="hintCh">中文意思</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="back-main-content">
+                        <h1 class="korean-word" id="koreanWord">韓文單字</h1>
+                        <button class="btn-speaker-large" id="speakerBack" onclick="speakStandard(event)">🔊</button>
+                    </div>
+
+                    <div class="definition-block" id="definitionText">
+                        釋義
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- 狀態回饋 -->
-    <div class="status-msg" id="statusMsg">點擊卡片可翻面</div>
-</div>
-
-<!-- 中文與詞性提示小視窗 -->
-<div class="modal-overlay" id="hintModal" onclick="closeModal()">
-    <div class="modal" onclick="event.stopPropagation();">
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-        <div class="modal-content">
-            <h3 id="hintPart">詞性：名詞</h3>
-            <p id="hintCh">中文：蘋果</p>
-        </div>
+    <!-- 底部導覽按鈕 -->
+    <div class="nav-footer">
+        <button class="btn-nav btn-prev" onclick="prevCard()">〈 上一個</button>
+        <button class="btn-nav btn-next" onclick="nextCard()">下一個 〉</button>
     </div>
+
+    <!-- 狀態提示框 -->
+    <div class="status-toast" id="statusToast">提示訊息</div>
 </div>
 
 <script>
     // ==========================================
-    // 這裡可以直接修改單字、發音法、中譯、詞性、圖片
-    // 備註：已經移除舊有的 audio 欄位，發音改由 AI 原生自動合成
+    // 【 系統全字典數據庫 】
+    // 移除了 pron (羅馬拼音) 欄位，未來增加單字更精簡。
     // ==========================================
-    const vocabList = [
-        { 
-            word: "사과", 
-            pron: "sa-gwa",
-            ch: "蘋果", 
-            part: "名詞",
-            img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" 
-        },
-        { 
-            word: "우유", 
-            pron: "u-yu",
-            ch: "牛奶", 
-            part: "名詞",
-            img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400" 
-        }
-    ];
+    const vocabDictionary = {
+        // 第一單元單字
+        "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", def: "旅行或搬家時攜帶的物品箱包", img: "" },
+        "볼펜": { ch: "原子筆", part: "名詞", cate: "文具", def: "筆尖有小滾珠、書寫流暢的筆", img: "" },
+        "담요": { ch: "毯子", part: "名詞", cate: "生活", def: "睡覺或保暖時蓋在身上的厚織物", img: "" },
+        "휴지": { ch: "衛生紙", part: "名詞", cate: "生活", def: "用來擦拭髒污或擦手的薄紙張", img: "" },
+        "시계": { ch: "手錶/時鐘", part: "名詞", cate: "生活", def: "用來觀看、計算時間的機械或電子儀器", img: "" },
+        "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", def: "用來擦除鉛筆字跡的工具", img: "" },
+        "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", def: "進行資料處理與上網運算的電子計算機", img: "" },
+        "라면": { ch: "泡麵", part: "名詞", cate: "食物", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
+        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
+        "지갑": { ch: "錢包", part: "名詞", cate: "生活", def: "用來收納現金、信用卡和證件的小包", img: "" },
+        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", def: "用烘焙咖啡豆萃取出的提神苦味飲品", img: "" },
+        "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
+        "우산": { ch: "雨傘", part: "名詞", cate: "生活", def: "下雨天用來遮雨、擋水的隨身工具", img: "" },
 
-    let currentPool = []; // 儲存當前單元還沒過關的隨機單字索引
-    let currentIndex = 0; // 目前畫面上顯示的單字索引
+        // 第二單元單字
+        "하나": { ch: "一 (固有詞)", part: "數詞", cate: "數字", def: "數字中的第一個，表示單一數量", img: "" },
+        "둘": { ch: "二 (固有詞)", part: "數詞", cate: "數字", def: "一加上一之後的數量", img: "" },
+        "셋": { ch: "三 (固有詞)", part: "數詞", cate: "數字", def: "二加上一之後的數量", img: "" },
+        "넷": { ch: "四 (固有詞)", part: "數詞", cate: "數字", def: "三加上一之後的數量", img: "" },
+        "다섯": { ch: "五 (固有詞)", part: "數詞", cate: "數字", def: "四加上一之後的數量", img: "" },
+        "여섯": { ch: "六 (固有詞)", part: "數詞", cate: "數字", def: "五加上一之後的數量", img: "" },
+        "일곱": { ch: "七 (固有詞)", part: "數詞", cate: "數字", def: "六加上一之後的數量", img: "" },
+        "여덟": { ch: "八 (固有詞)", part: "數詞", cate: "數字", def: "七加上一之後的數量", img: "" },
+        "아홉": { ch: "九 (固有詞)", part: "數詞", cate: "數字", def: "八加上一之後的數量", img: "" },
+        "열": { ch: "十 (固有詞)", part: "數詞", cate: "數字", def: "九加上一之後的數量", img: "" },
+        "손님": { ch: "客人", part: "名詞", cate: "社交", def: "前來拜訪、消費或接受招待的人", img: "" },
+        "정장": { ch: "正裝/西裝", part: "名詞", cate: "服飾", def: "出席正式場合穿著的規格服飾", img: "" },
+        "맥주": { ch: "啤酒", part: "名詞", cate: "飲料", def: "大麥發酵、含有氣泡與微量酒精的飲料", img: "" },
+        "잡지": { ch: "雜誌", part: "名詞", cate: "書籍", def: "定期出版、包含多種話題與圖片的刊物", img: "" },
+        "여권": { ch: "護照", part: "名詞", cate: "旅遊", def: "出入國境時，政府用來證明身分的官方手冊", img: "" },
+        "핸드폰": { ch: "手機", part: "名詞", cate: "電子", def: "可以隨身攜帶、打電話與上網的無線移動電話", img: "" }
+    };
+
+    // ==========================================
+    // 【 單元單字設定清單 】
+    // 修改、更換單字只要動這裡即可！
+    // ==========================================
+    const unitData = {
+        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
+        unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
+    };
+
+    let currentUnit = "unit1";      
+    let currentWords = [];          
+    let currentIndex = 0;           
+    let passedWordsMap = {};        
+    
     let isRecording = false;
     let recognition = null;
     let autoCloseTimer = null;
 
-    // 初始化語音辨識
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
-        recognition.lang = 'ko-KR'; // 鎖定辨識語言為「韓文」
+        recognition.lang = 'ko-KR';
         recognition.interimResults = false;
 
-        // 語音辨識成功回傳
         recognition.onresult = function(event) {
-            clearTimeout(autoCloseTimer); // 有收到聲音，清除自動關閉計時器
-            stopRecordState(); // 辨識結束，立刻自動關閉麥克風功能
+            clearTimeout(autoCloseTimer);
+            stopRecordState();
 
-            const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, ""); // 去除空格
-            const targetWord = vocabList[currentIndex].word.replace(/\s+/g, "");
+            const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, "");
+            const targetWord = currentWords[currentIndex].replace(/\s+/g, "");
 
             if (studentSpeech === targetWord) {
-                document.getElementById('statusMsg').innerText = "🎉 太棒了！發音完全正確！";
-                document.getElementById('statusMsg').style.color = "var(--success)";
-                
-                // 從隨機庫中移除此題
-                currentPool = currentPool.filter(index => index !== currentIndex);
-                
-                // 延遲 1.5 秒後進下一題
-                setTimeout(() => {
-                    nextQuestion();
-                }, 1500);
+                showToast("🎉 發音正確！印記已蓋上！");
+                passedWordsMap[currentUnit].add(currentIndex);
+                updateProgress();
             } else {
-                document.getElementById('statusMsg').innerText = `😢 聽起來像「${studentSpeech}」，再試一次！`;
-                document.getElementById('statusMsg').style.color = "var(--danger)";
+                showToast(`😢 聽起來像「${studentSpeech}」，再試一次！`);
             }
         };
 
-        // 處理錄音過程中，如果完全沒說話或辨識停止
-        recognition.onend = function() {
-            if (isRecording) {
-                stopRecordState();
-            }
-        };
-
-        recognition.onerror = function() {
-            stopRecordState();
-            document.getElementById('statusMsg').innerText = "錄音辨識出錯，請再試一次。";
-        };
-    } else {
-        alert("很抱歉，您的瀏覽器不支援 Web Speech API 語音辨識，建議使用 Google Chrome 瀏覽器。");
+        recognition.onend = function() { if (isRecording) stopRecordState(); };
+        recognition.onerror = function() { stopRecordState(); showToast("錄音辨識出錯，請重新嘗試。"); };
     }
 
-    // 初始化單元遊戲
-    function initUnit() {
-        currentPool = vocabList.map((_, i) => i);
-        nextQuestion();
-    }
-
-    // 隨機下一題
-    function nextQuestion() {
-        const card = document.getElementById('vocabCard');
-        card.classList.remove('is-flipped'); // 強制翻回正面
-
-        if (currentPool.length === 0) {
-            document.getElementById('progressText').innerText = "單元完成！";
-            document.getElementById('statusMsg').innerText = "恭喜解鎖下一階段！🏆";
-            localStorage.setItem("unit_completed", "true"); // 記錄結果至本地
-            return;
+    function changeUnit(unitKey) {
+        if (isRecording) return;
+        currentUnit = unitKey;
+        currentIndex = 0;
+        
+        if (!passedWordsMap[currentUnit]) {
+            passedWordsMap[currentUnit] = new Set();
         }
 
-        // 從剩餘題庫中隨機抽一題
-        const randomIndex = Math.floor(Math.random() * currentPool.length);
-        currentIndex = currentPool[randomIndex];
-
-        // 更新畫面資訊
-        const data = vocabList[currentIndex];
-        document.getElementById('vocabImg').src = data.img;
-        document.getElementById('koreanWord').innerText = data.word;
-        document.getElementById('pronunciation').innerText = `[ ${data.pron} ]`;
-        document.getElementById('hintPart').innerText = `詞性：${data.part}`;
-        document.getElementById('hintCh').innerText = `中文：${data.ch}`;
+        currentWords = unitData[unitKey] || [];
         
-        const total = vocabList.length;
-        const currentProgress = total - currentPool.length + 1;
-        document.getElementById('progressText').innerText = `進度：${currentProgress} / ${total}`;
-        document.getElementById('statusMsg').innerText = "點擊卡片可翻面觀看答案";
-        document.getElementById('statusMsg').style.color = "#7f8c8d";
+        renderCard();
+        updateProgress();
     }
 
-    // 翻轉卡片
+    function renderCard() {
+        const wordName = currentWords[currentIndex];
+        const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", def: "尚未建立字典敘述", img: "" };
+        
+        document.getElementById('tooltipBox').classList.remove('show');
+        document.getElementById('btnLightbulb').classList.remove('active');
+        document.getElementById('vocabCard').classList.remove('is-flipped');
+
+        // 正面
+        document.getElementById('frontCategory').innerText = data.cate;
+        if (data.img && data.img.trim() !== "") {
+            document.getElementById('vocabImg').src = data.img;
+            document.getElementById('vocabImg').style.display = "block";
+            document.getElementById('noImgText').style.display = "none";
+        } else {
+            document.getElementById('vocabImg').style.display = "none";
+            document.getElementById('noImgText').style.display = "block";
+        }
+
+        // 反面
+        document.getElementById('backCategory').innerText = data.cate;
+        document.getElementById('koreanWord').innerText = wordName; // 直接呈現精緻的韓文字母
+        document.getElementById('hintPart').innerText = `詞性：${data.part}`;
+        document.getElementById('hintCh').innerText = data.ch;
+        document.getElementById('definitionText').innerText = data.def;
+
+        const stamp = document.getElementById('stampTag');
+        if (passedWordsMap[currentUnit].has(currentIndex)) {
+            stamp.classList.add('active');
+        } else {
+            stamp.classList.remove('active');
+        }
+    }
+
+    function updateProgress() {
+        const total = currentWords.length;
+        const passedCount = passedWordsMap[currentUnit].size;
+        
+        document.getElementById('progressText').innerText = `學習進度 : ${passedCount} / ${total}`;
+        
+        const percent = total > 0 ? (passedCount / total) * 100 : 0;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+
+        const stamp = document.getElementById('stampTag');
+        if (passedWordsMap[currentUnit].has(currentIndex)) {
+            stamp.classList.add('active');
+        } else {
+            stamp.classList.remove('active');
+        }
+
+        if (passedCount === total && total > 0) {
+            setTimeout(() => {
+                alert(`🏆 恭喜！您已完美通過【${document.getElementById('unitSelector').selectedOptions[0].text}】的所有單字蓋印！`);
+            }, 500);
+        }
+    }
+
     function flipCard() {
-        if (isRecording) return; // 如果正在錄音，不允許翻牌
+        if (isRecording) return;
         document.getElementById('vocabCard').classList.toggle('is-flipped');
     }
 
-    // 🔊 播放標準女聲 (整合原生優質女聲發音系統)
-    function speakStandard() {
-        // 修正需求：錄音時不可以播放音檔
-        if (isRecording) return; 
-
-        // 串接當前卡片的單字 (vocabList[currentIndex].word)
-        const targetText = vocabList[currentIndex].word;
-        console.log("正在播放標準韓文女聲：" + targetText);
-        
-        try {
-            window.speechSynthesis.cancel(); 
-
-            const utterance = new SpeechSynthesisUtterance(targetText);
-            utterance.lang = 'ko-KR'; 
-            utterance.rate = 0.85; // 維持原設定之略慢速，方便學生聽得更清楚
-
-            const voices = window.speechSynthesis.getVoices();
-            
-            // 強制過濾並選取最溫柔自然的韓語「女聲」發音人
-            const femaleKoreanVoice = voices.find(v => v.lang.startsWith('ko') && 
-                (v.name.toLowerCase().includes('female') || 
-                 v.name.toLowerCase().includes('sunhi') || 
-                 v.name.toLowerCase().includes('google') || 
-                 v.name.toLowerCase().includes('siri') ||
-                 v.name.toLowerCase().includes('yuna') ||
-                 v.name.toLowerCase().includes('hj'))); 
-            
-            if (femaleKoreanVoice) {
-                utterance.voice = femaleKoreanVoice;
-                console.log("成功套用標準女聲: " + femaleKoreanVoice.name);
-            } else {
-                const defaultKo = voices.find(v => v.lang.startsWith('ko'));
-                if (defaultKo) utterance.voice = defaultKo;
-            }
-            
-            window.speechSynthesis.speak(utterance);
-
-        } catch(e) {
-            console.error("語音播放失敗：", e);
+    function prevCard() {
+        if (isRecording) return;
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderCard();
+        } else {
+            showToast("這是本單元的第一個字囉！");
         }
     }
 
-    // 預先觸發一次以喚醒 Chrome 的 getVoices 系統（防止部分手機和瀏覽器首發沒聲音）
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    function nextCard() {
+        if (isRecording) return;
+        if (currentIndex < currentWords.length - 1) {
+            currentIndex++;
+            renderCard();
+        } else {
+            showToast("這已經是本單元的最後一個字囉！");
+        }
     }
 
-    // 開啟/關閉 錄音功能
-    function toggleRecord() {
-        if (!recognition) return;
+    function speakStandard(event) {
+        if (event) event.stopPropagation();
+        if (isRecording) return; 
+
+        const targetText = currentWords[currentIndex];
+        if (!targetText) return;
+        
+        try {
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(targetText);
+            utterance.lang = 'ko-KR'; 
+            utterance.rate = 0.85; 
+
+            const spkFront = document.getElementById('speakerFront');
+            const spkBack = document.getElementById('speakerBack');
+            spkFront.classList.add('playing');
+            spkBack.classList.add('playing');
+            
+            utterance.onend = () => {
+                spkFront.classList.remove('playing');
+                spkBack.classList.remove('playing');
+            };
+
+            const voices = window.speechSynthesis.getVoices();
+            const defaultKo = voices.find(v => v.lang.startsWith('ko'));
+            if (defaultKo) utterance.voice = defaultKo;
+            
+            window.speechSynthesis.speak(utterance);
+        } catch(e) { console.error(e); }
+    }
+
+    function toggleRecord(event) {
+        if (event) event.stopPropagation();
+        if (!recognition) { showToast("瀏覽器不支援錄音。"); return; }
 
         if (!isRecording) {
-            // 啟動錄音
             isRecording = true;
-            document.getElementById('btnRecord').classList.add('recording');
-            document.getElementById('btnRecord').innerText = "🛑 辨識中";
-            document.getElementById('statusMsg').innerText = "請開始發音...";
-            
-            // 禁用播音按鈕防止誤觸
-            document.getElementById('btnAudioFront').style.opacity = "0.5";
-            document.getElementById('btnAudioBack').style.opacity = "0.5";
-
+            document.getElementById('btnMic').classList.add('recording');
+            showToast("🎤 錄音中，請開始發音...");
             recognition.start();
 
-            // 畫面停滯（無聲音輸入）時，5 秒自動關閉麥克風
             autoCloseTimer = setTimeout(() => {
                 if (isRecording) {
                     recognition.stop();
-                    document.getElementById('statusMsg').innerText = "⏰ 偵測不到聲音，麥克風已關閉";
-                    document.getElementById('statusMsg').style.color = "var(--danger)";
+                    showToast("⏰ 偵測不到聲音，麥克風已關閉");
                 }
             }, 5000);
-
         } else {
-            // 手動停止錄音
             recognition.stop();
         }
     }
 
-    // 重設錄音按鈕狀態，釋放麥克風
     function stopRecordState() {
         clearTimeout(autoCloseTimer);
         isRecording = false;
-        document.getElementById('btnRecord').classList.remove('recording');
-        document.getElementById('btnRecord').innerText = "🎤 錄音";
-        document.getElementById('btnAudioFront').style.opacity = "1";
-        document.getElementById('btnAudioBack').style.opacity = "1";
+        document.getElementById('btnMic').classList.remove('recording');
     }
 
-    // 提示視窗控制
-    function openModal(event) {
-        event.stopPropagation(); // 阻止卡片翻轉
-        document.getElementById('hintModal').classList.add('active');
+    function toggleTooltip(event) {
+        event.stopPropagation();
+        const tooltip = document.getElementById('tooltipBox');
+        const bulb = document.getElementById('btnLightbulb');
+        tooltip.classList.toggle('show');
+        bulb.classList.toggle('active');
     }
 
-    function closeModal() {
-        document.getElementById('hintModal').classList.remove('active');
+    function showToast(msg) {
+        const toast = document.getElementById('statusToast');
+        toast.innerText = msg;
+        toast.style.opacity = "1";
+        setTimeout(() => { toast.style.opacity = "0"; }, 2000);
     }
 
-    // 網頁載入後啟動
-    window.onload = initUnit;
+    document.addEventListener('keydown', function(e) {
+        if (e.code === 'Space') { e.preventDefault(); flipCard(); }
+        else if (e.code === 'ArrowLeft') { prevCard(); }
+        else if (e.code === 'ArrowRight') { nextCard(); }
+    });
+
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    window.onload = () => { changeUnit("unit1"); };
 </script>
-
 </body>
 </html>
