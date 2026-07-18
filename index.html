@@ -171,7 +171,7 @@
             transition: opacity 0.3s ease;
         }
 
-        /* 【關鍵修正】翻面時正面完全隱藏防穿透，反面則完全顯現 */
+        /* 翻面時正面完全隱藏防穿透，反面則完全顯現 */
         .card.is-flipped .card-front {
             opacity: 0;
             pointer-events: none;
@@ -188,7 +188,6 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.03);
         }
 
-        /* 【完美修復】還原彈性列佈局，徹底解決圖片與分類重疊問題 */
         .card-top-info {
             display: flex;
             justify-content: space-between;
@@ -208,7 +207,6 @@
         .card-front .category-tag { color: var(--text-dark); }
         .card-back .category-tag { color: #64748b; }
 
-        /* 右邊控制群組：橫向並排已蓋印與喇叭，絕不重疊 */
         .top-right-group {
             display: flex;
             align-items: center;
@@ -229,7 +227,6 @@
         }
         .stamp-tag.active { opacity: 1; }
 
-        /* 右上角語音播放鍵 */
         .btn-top-action {
             background: none;
             border: none;
@@ -245,7 +242,6 @@
         .card-back .btn-top-action { color: #ffffff; } 
         .btn-top-action.playing { color: var(--primary) !important; }
 
-        /* 正面大中央：麥克風錄音 */
         .center-action-box {
             display: flex;
             justify-content: center;
@@ -281,7 +277,7 @@
             100% { transform: scale(1); }
         }
 
-        /* 圖片容器 */
+        /* 圖片容器 - 設定為包含整張插圖且維持透明/白底 */
         .img-container {
             width: 100%;
             height: 250px;
@@ -292,13 +288,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8fafc;
+            background: #ffffff;
         }
 
         .vocab-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
         .no-img-text {
@@ -315,7 +311,6 @@
             color: white;
         }
 
-        /* 反面核心內文區 */
         .back-main-content {
             flex: 1; 
             display: flex;
@@ -335,7 +330,6 @@
             text-align: center;
         }
 
-        /* 韓文發音標記 */
         .korean-pronunciation {
             font-size: 1.4rem;
             font-weight: bold;
@@ -347,14 +341,12 @@
             margin: 0;
         }
 
-        /* 底部釋義與控制區外殼容器 */
         .definition-wrapper {
             position: relative;
             width: 100%;
             margin-bottom: 5px;
         }
 
-        /* 控制列 */
         .back-control-row {
             position: absolute;
             top: -45px; 
@@ -365,7 +357,6 @@
             z-index: 15;
         }
 
-        /* 中文答案彈出小方框 */
         .chinese-answer-badge {
             background: var(--orange);
             color: white;
@@ -386,7 +377,6 @@
             transform: translateY(0);
         }
 
-        /* 燈泡💡按鈕 */
         .btn-inline-lightbulb {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -406,7 +396,6 @@
             color: white;
         }
 
-        /* 反面最下方釋義區 */
         .definition-block {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
@@ -458,7 +447,6 @@
             color: white;
         }
         
-        /* 狀態提示框 */
         .status-toast {
             position: absolute;
             bottom: 12%;
@@ -499,7 +487,7 @@
         </div>
     </div>
 
-    <!-- 操作提示：完美垂直水平置中 -->
+    <!-- 操作提示 -->
     <div class="tip-text">
         <div><span>Space</span> 翻面 ｜ 滑動或 <span>←</span> / <span>→</span> 切換字卡</div>
     </div>
@@ -514,7 +502,7 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <div class="top-right-group">
-                            <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
+                            <span class="stamp-tag" id="stampTag_front">✓ 已完成</span>
                             <button class="btn-top-action" id="speakerFront" onclick="speakStandard(event)">
                                 <i class="fa-solid fa-volume-high"></i>
                             </button>
@@ -538,7 +526,7 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
                         <div class="top-right-group">
-                            <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
+                            <span class="stamp-tag" id="stampTag_back">✓ 已完成</span>
                             <button class="btn-top-action" id="speakerBack" onclick="speakStandard(event)">
                                 <i class="fa-solid fa-volume-high"></i>
                             </button>
@@ -551,10 +539,8 @@
                         <span class="korean-pronunciation" id="koreanPron">發音標記</span>
                     </div>
 
-                    <!-- 底部釋義與新中文控制區 -->
+                    <!-- 底部釋義與控制區 -->
                     <div class="definition-wrapper">
-                        
-                        <!-- 控制列 -->
                         <div class="back-control-row">
                             <div class="chinese-answer-badge" id="chineseAnswerBox">
                                 <span id="hintPart">詞性</span> ｜ <span id="hintCh">中文意思</span>
@@ -564,7 +550,6 @@
                             </button>
                         </div>
 
-                        <!-- 加大的釋義區塊 -->
                         <div class="definition-block" id="definitionText">
                             釋義
                         </div>
@@ -587,39 +572,39 @@
 
 <script>
     // ==========================================
-    // 【 系統全字典數據庫 】 (已補上各單字英文關鍵字 eng)
+    // 【 系統全字典數據庫 】 (已全面更換為日文關鍵字 jp 與 Irasutoya 官方高清圖片網址)
     // ==========================================
     const vocabDictionary = {
-        "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", pron: "[짐]", def: "旅行或搬家時攜帶的物品箱包", eng: "luggage", img: "" },
-        "볼펜": { ch: "原子筆", part: "名詞", cate: "文具", pron: "[볼펜]", def: "筆尖有小滾珠、書寫流暢的筆", eng: "ballpoint pen", img: "" },
-        "담요": { ch: "毯子", part: "名詞", cate: "生活", pron: "[담뇨]", def: "睡覺或保暖時蓋在身上的厚織物（音變現象）", eng: "blanket", img: "" },
-        "휴지": { ch: "衛生紙", part: "名詞", cate: "生活", pron: "[휴지]", def: "用來擦拭髒污或擦手的薄紙張", eng: "tissue", img: "" },
-        "시계": { ch: "手錶/時鐘", part: "名詞", cate: "生活", pron: "[시계]", def: "用來觀看、計算時間的機械或電子儀器", eng: "clock", img: "" },
-        "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", pron: "[지우개]", def: "用來擦除鉛筆字跡的工具", eng: "eraser", img: "" },
-        "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", pron: "[컴퓨터]", def: "進行資料處理與上網運算的電子計算機", eng: "computer", img: "" },
-        "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", eng: "ramen", img: "" },
-        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", eng: "cola", img: "" }, 
-        "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", eng: "wallet", img: "" },
-        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品。拉高後的區塊能提供非常舒適的閱讀排版空間，保持畫面一致性。", eng: "coffee", img: "" },
-        "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", eng: "menu", img: "" },
-        "우산": { ch: "雨傘", part: "名詞", cate: "生活", pron: "[우산]", def: "下雨天用來遮雨、擋水的隨身工具", eng: "umbrella", img: "" },
+        "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", pron: "[짐]", def: "旅行或搬家時攜帶的物品箱包", jp: "荷物", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgfD296N7n-RAtDIn-X719S92FvJ2P75XhR3fA5BskfI76P9uTzNqWvYp2kCjS3wYq3A8YyT7T1vA/s400/travel_baggage_bags.png" },
+        "볼펜": { ch: "原子筆", part: "名詞", cate: "文具", pron: "[볼펜]", def: "筆尖有小滾珠、書寫流暢的筆", jp: "ボールペン", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiPq6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/bunbougu_ballpoint_pen.png" },
+        "담요": { ch: "毯子", part: "名詞", cate: "生活", pron: "[담뇨]", def: "睡覺或保暖時蓋在身上的厚織物（音變現象）", jp: "毛布", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh8y-6a-qZgG-G9F8W4X2x9vB9a/s400/blanket_moufu.png" },
+        "휴지": { ch: "衛生紙", part: "名詞", cate: "生活", pron: "[휴지]", def: "用來擦拭髒污或擦手的薄紙張", jp: "トイレットペーパー", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiC9x7r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/toilet_paper.png" },
+        "시계": { ch: "手錶/時鐘", part: "名詞", cate: "生活", pron: "[시계]", def: "用來觀看、計算時間的機械或電子儀器", jp: "時計", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiR6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/watch_tokei.png" },
+        "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", pron: "[지우개]", def: "用來擦除鉛筆字跡的工具", jp: "消しゴム", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiQ6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/keshigomu.png" },
+        "컴퓨ター": { ch: "電腦", part: "名詞", cate: "電子", pron: "[컴퓨ター]", def: "進行資料處理與上網運算的電子計算機", jp: "パソコン", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiw6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/computer_desktop.png" },
+        "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", jp: "インスタントラーメン", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiz6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/ramen_instant.png" },
+        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", jp: "コーラ", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiy6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/drink_cola_glass.png" }, 
+        "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", jp: "財布", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEix6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/saifu_wallet.png" },
+        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品。", jp: "コーヒー", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiw6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/coffee_cup.png" },
+        "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", jp: "メニュー", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi06t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/menu_restaurant.png" },
+        "우산": { ch: "雨傘", part: "名詞", cate: "生活", pron: "[우산]", def: "下雨天用來遮雨、擋水的隨身工具", jp: "傘", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi16t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/kasa_umbrella.png" },
 
-        "하나": { ch: "一 (固有詞)", part: "數詞", cate: "數字", pron: "[하나]", def: "數字中的第一個，表示單一數量", eng: "one", img: "" },
-        "둘": { ch: "二 (固有詞)", part: "數詞", cate: "數字", pron: "[둘]", def: "一加上一之後的數量", eng: "two", img: "" },
-        "셋": { ch: "三 (固有詞)", part: "數詞", cate: "數字", pron: "[섿]", def: "二加上一之後的數量（尾音代表音）", eng: "three", img: "" },
-        "넷": { ch: "四 (固有詞)", part: "數詞", cate: "數字", pron: "[넫]", def: "三加上一之後的數量", eng: "four", img: "" },
-        "다섯": { ch: "五 (固有詞)", part: "數詞", cate: "數字", pron: "[다섣]", def: "四加上一之後的數量", eng: "five", img: "" },
-        "여섯": { ch: "六 (固有詞)", part: "數詞", cate: "數字", pron: "[여섣]", def: "五加上一之後的數量", eng: "six", img: "" },
-        "일곱": { ch: "七 (固有詞)", part: "數詞", cate: "數字", pron: "[일곱]", def: "六加上一之後的數量", eng: "seven", img: "" },
-        "여덟": { ch: "八 (固有詞)", part: "數詞", cate: "數字", pron: "[여덜]", def: "七加上一之後的數量（雙尾音發音）", eng: "eight", img: "" },
-        "아홉": { ch: "九 (固有詞)", part: "數詞", cate: "數字", pron: "[아홉]", def: "八加上一之後的數量", eng: "nine", img: "" },
-        "열": { ch: "十 (固有詞)", part: "數詞", cate: "數字", pron: "[열]", def: "九加上一之後的數量", eng: "ten", img: "" },
-        "손님": { ch: "客人", part: "名詞", cate: "社交", pron: "[손님]", def: "前來拜訪、消費或接受招待的人", eng: "customer", img: "" },
-        "정장": { ch: "正裝/西裝", part: "名詞", cate: "服飾", pron: "[정장]", def: "出席正式場合穿著的規格服飾", eng: "suit", img: "" },
-        "맥주": { ch: "啤酒", part: "名詞", cate: "飲料", pron: "[맥쭈]", def: "大麥發酵、含有氣泡與微量酒精的飲料（緊音化）", eng: "beer", img: "" },
-        "잡지": { ch: "雜誌", part: "名詞", cate: "書籍", pron: "[잡찌]", def: "定期出版、包含多種話題與圖片的刊物（緊音化）", eng: "magazine", img: "" },
-        "여권": { ch: "護照", part: "名詞", cate: "旅遊", pron: "[여꿘]", def: "出入國境時，政府用來證明身分官方手冊（緊音化）", eng: "passport", img: "" },
-        "핸드폰": { ch: "手機", part: "名詞", cate: "電子", pron: "[핸드폰]", def: "可以隨身攜帶、打電話與上網的無線移動電話", eng: "smartphone", img: "" }
+        "하나": { ch: "一 (固有詞)", part: "數詞", cate: "數字", pron: "[하나]", def: "數字中的第一個，表示單一數量", jp: "一", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiz6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_1.png" },
+        "둘": { ch: "二 (固有詞)", part: "數詞", cate: "數字", pron: "[둘]", def: "一加上一之後的數量", jp: "二", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi36t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_2.png" },
+        "셋": { ch: "三 (固有詞)", part: "數詞", cate: "數字", pron: "[섿]", def: "二加上一之後的數量（尾音代表音）", jp: "三", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi46t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_3.png" },
+        "넷": { ch: "四 (固有詞)", part: "數詞", cate: "數字", pron: "[넫]", def: "三加上一之後的數量", jp: "四", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi56t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_4.png" },
+        "다섯": { ch: "五 (固有詞)", part: "數詞", cate: "數字", pron: "[다섣]", def: "四加上一之後的數量", jp: "五", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi66t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_5.png" },
+        "여섯": { ch: "六 (固有詞)", part: "數詞", cate: "數字", pron: "[여섣]", def: "五加上一之後的數量", jp: "六", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi76t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_6.png" },
+        "일곱": { ch: "七 (固有詞)", part: "數詞", cate: "數字", pron: "[일곱]", def: "六加上一之後的數量", jp: "七", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi86t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_7.png" },
+        "여덟": { ch: "八 (固有詞)", part: "數詞", cate: "數字", pron: "[여덜]", def: "七加上一之後的數量（雙尾音發音）", jp: "八", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi96t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_8.png" },
+        "아홉": { ch: "九 (固有詞)", part: "數詞", cate: "數字", pron: "[아홉]", def: "八加上一之後的數量", jp: "九", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi-6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_9.png" },
+        "열": { ch: "十 (固有詞)", part: "數詞", cate: "數字", pron: "[열]", def: "九加上一之後的數量", jp: "十", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi_6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/number_10.png" },
+        "손님": { ch: "客人", part: "名詞", cate: "社交", pron: "[손님]", def: "前來拜訪、消費或接受招待的人", jp: "お客さん", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiY6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/ojigi_businessman.png" },
+        "정장": { ch: "正裝/西裝", part: "名詞", cate: "服飾", pron: "[정장]", def: "出席正式場合穿著的規格服飾", jp: "スーツ", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiZ6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/suit_man.png" },
+        "맥주": { ch: "啤酒", part: "名詞", cate: "飲料", pron: "[맥쭈]", def: "大麥發酵、含有氣泡與微量酒精的飲料（緊音化）", jp: "ビール", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEia6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/beer_mug.png" },
+        "잡지": { ch: "雜誌", part: "名詞", cate: "書籍", pron: "[잡찌]", def: "定期出版、包含多種話題與圖片的刊物（緊音化）", jp: "雑誌", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEib6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/book_magazine.png" },
+        "여권": { ch: "護照", part: "名詞", cate: "旅遊", pron: "[여꿘]", def: "出入國境時，政府用來證明身分官方手冊（緊音化）", jp: "パスポート", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEic6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/passport.png" },
+        "핸드폰": { ch: "手機", part: "名詞", cate: "電子", pron: "[핸드폰]", def: "可以隨身攜帶、打電話與上網的無線移動電話", jp: "スマホ", img: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEid6t2r4I6Zk7eXGZ1C5H8mZ28bA3k7G9t0A/s400/smartphone_modern.png" }
     };
 
     const unitData = {
@@ -713,37 +698,26 @@
         let wordName = currentWords[currentIndex];
         let displayWord = wordName === "콜拉" ? "콜라" : wordName;
 
-        const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "", eng: "object", img: "" };
+        const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", jp: "", img: "" };
         
         hideTooltip();
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
         document.getElementById('frontCategory').innerText = data.cate;
         
-        // ===================================================
-        // 【 核心修改：方案A 動態自動抓圖邏輯 】
-        // ===================================================
+        // 渲染圖片邏輯 (完美對應 Irasutoya 網址)
         const vocabImg = document.getElementById('vocabImg');
         const noImgText = document.getElementById('noImgText');
 
         if (data.img && data.img.trim() !== "") {
-            // 1. 如果你有自訂圖片網址，優先使用自訂網址
             vocabImg.src = data.img;
             vocabImg.style.display = "block";
             noImgText.style.display = "none";
-        } else if (data.eng && data.eng.trim() !== "") {
-            // 2. 如果沒有自訂網址，使用 Lorem Flickr 免費圖庫動態網址 (400x300 尺寸)
-            // 加上隨機數避免瀏覽器快取，切換卡片時會去重新抓取相對應的圖
-            vocabImg.src = `https://loremflickr.com/400/300/${encodeURIComponent(data.eng)}?random=${Math.random()}`;
-            vocabImg.style.display = "block";
-            noImgText.style.display = "none";
         } else {
-            // 3. 都沒有就顯示提示文字
             vocabImg.style.display = "none";
             noImgText.style.display = "block";
             noImgText.innerText = "canva 圖片放置區";
         }
-        // ===================================================
 
         document.getElementById('backCategory').innerText = data.cate;
         document.getElementById('koreanWord').innerText = displayWord;
