@@ -2,8 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>韓文單字印記學習</title>
+    <!-- 引入全球免費專業 Icon 庫 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #5c4be2;
@@ -17,21 +19,26 @@
             --orange: #ff9200;
         }
 
-        body {
-            font-family: 'Noto Sans KR', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-dark);
+        /* 完美鎖定全螢幕，禁止不必要的上下捲動 */
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg);
+            font-family: 'Noto Sans KR', 'Microsoft JhengHei', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
         }
 
+        /* 手機外殼視窗：根據螢幕高度動態縮放 */
         .phone-window {
             width: 100%;
             max-width: 430px;
-            height: 920px;
+            height: 100vh; /* 滿版高度 */
+            max-height: 920px;
             background: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             display: flex;
@@ -40,21 +47,21 @@
             overflow: hidden;
         }
 
-        /* 頂部標題與進度 */
+        /* 1. 頂部標題與進度 (動態配比高度) */
         .header {
-            padding: 25px 20px 10px 20px;
+            padding: 4vh 20px 1.5vh 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .title-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        /* 單元切換下拉選單 */
         .unit-select {
             font-size: 1.3rem;
             font-weight: bold;
@@ -80,6 +87,7 @@
             width: 100%;
             padding: 0 20px;
             box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         .progress-bar-bg {
@@ -97,34 +105,38 @@
             transition: width 0.3s ease;
         }
 
-        /* 提示操作語 */
+        /* 操作提示語 */
         .tip-text {
             color: var(--text-light);
-            font-size: 0.85rem;
-            margin: 12px 0;
+            font-size: 0.8rem;
+            margin: 1.5vh 0;
             text-align: center;
+            flex-shrink: 0;
         }
         .tip-text span {
             background: #e2e8f0;
             color: var(--text-dark);
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
-            margin: 0 4px;
+            margin: 0 2px;
         }
 
-        /* 核心閃卡舞台 */
+        /* 2. 核心閃卡舞台 */
         .stage {
             flex: 1;
             padding: 0 25px;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 0;
         }
 
         .card-container {
             perspective: 1000px;
             width: 100%;
-            height: 520px;
+            height: 100%;
+            max-height: 520px;
+            aspect-ratio: 3 / 4;
             position: relative;
         }
 
@@ -165,13 +177,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 30px;
+            height: 35px;
+            position: relative;
+            z-index: 10;
         }
 
         .category-tag {
             color: var(--text-dark);
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .stamp-tag {
@@ -186,15 +200,15 @@
         }
         .stamp-tag.active { opacity: 1; }
 
-        /* 正面錄音鈕 */
+        /* 麥克風按鈕 */
         .btn-mic {
             background: none;
             border: none;
-            font-size: 1.6rem;
+            font-size: 1.3rem;
             cursor: pointer;
             color: var(--text-dark);
-            transition: transform 0.2s;
-            padding: 5px;
+            transition: transform 0.2s, color 0.2s;
+            padding: 6px;
         }
         .btn-mic.recording {
             color: var(--danger);
@@ -210,7 +224,8 @@
         /* 圖片容器 */
         .img-container {
             width: 100%;
-            height: 260px;
+            flex: 1;
+            margin: 2vh 0;
             border: 2px solid #eef2f6;
             border-radius: 18px;
             overflow: hidden;
@@ -218,6 +233,7 @@
             align-items: center;
             justify-content: center;
             background: #f8fafc;
+            min-height: 0;
         }
 
         .vocab-img {
@@ -227,29 +243,40 @@
         }
 
         .no-img-text {
-            color: var(--text-dark);
-            font-weight: bold;
-            font-size: 1.4rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
         }
 
-        /* 底部喇叭大鈕 */
-        .audio-center-box {
+        /* 喇叭按鈕固定框 */
+        .audio-absolute-box {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
+            height: 60px;
+            margin-bottom: 10px;
         }
 
-        .btn-speaker-large {
-            background: none;
+        .btn-speaker-icon {
+            background: #f1f5f9;
             border: none;
-            font-size: 3.5rem;
-            color: #94a3b8;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            color: #64748b;
             cursor: pointer;
-            transition: color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
-        .btn-speaker-large:active { transform: scale(0.95); }
-        .btn-speaker-large.playing { color: var(--primary); }
+        .btn-speaker-icon:active { transform: scale(0.92); }
+        .btn-speaker-icon.playing { 
+            background: var(--primary-light);
+            color: var(--primary); 
+        }
 
         /* 反面樣式 (深色) */
         .card-back {
@@ -262,15 +289,15 @@
         .btn-lightbulb {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #64748b;
             cursor: pointer;
-            padding: 5px;
+            padding: 6px;
             position: relative;
         }
         .btn-lightbulb.active { color: #fff; }
 
-        /* 橘黃色對話框提示 (Tooltip) */
+        /* 橘黃色對話框提示 */
         .tooltip-box {
             position: absolute;
             top: 45px;
@@ -305,14 +332,15 @@
         .tooltip-part { font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px; }
         .tooltip-ch { font-size: 1.1rem; font-weight: bold; }
 
-        /* 反面文字核心置中區 */
+        /* 反面核心內文區 */
         .back-main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            min-height: 0;
         }
 
         .korean-word {
@@ -321,32 +349,35 @@
             color: #ffffff;
             margin: 0;
             letter-spacing: 1px;
+            text-align: center;
         }
 
         /* 反面最下方釋義區 */
         .definition-block {
             background: rgba(255, 255, 255, 0.04);
             border-radius: 16px;
-            padding: 20px;
+            padding: 18px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #94a3b8;
             margin-bottom: 5px;
+            line-height: 1.5;
         }
 
-        /* 底部導覽按鈕列 */
+        /* 3. 底部導覽列 */
         .nav-footer {
-            padding: 20px 25px 40px 25px;
+            padding: 2vh 25px 4vh 25px;
             background: #f8fafc;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .btn-nav {
-            padding: 14px 28px;
+            padding: 12px 24px;
             border-radius: 12px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
             border: none;
@@ -367,21 +398,22 @@
             color: white;
         }
         
-        /* 語音狀態文字回饋 */
+        /* 狀態提示框 */
         .status-toast {
             position: absolute;
-            bottom: 120px;
+            bottom: 12%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
             z-index: 99;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -391,8 +423,7 @@
     <!-- 頂部標頭 -->
     <div class="header">
         <div class="title-area">
-            <div style="font-size:1.3rem; margin-right:4px;">📖</div>
-            <!-- 單元切換選單 -->
+            <i class="fa-solid fa-book-open" style="color: var(--primary); font-size: 1.1rem;"></i>
             <select class="unit-select" id="unitSelector" onchange="changeUnit(this.value)">
                 <option value="unit1">單元一</option>
                 <option value="unit2">單元二</option>
@@ -410,12 +441,12 @@
 
     <!-- 操作提示 -->
     <div class="tip-text">
-        <span>Space</span> 或點擊卡片翻面 <span>←</span> / <span>→</span> 切換上下張
+        <span>Space</span> 翻面 ｜ 滑動或 <span>←</span> / <span>→</span> 切換字卡
     </div>
 
     <!-- 卡片舞台 -->
     <div class="stage">
-        <div class="card-container">
+        <div class="card-container" id="swipeArea">
             <div class="card" id="vocabCard" onclick="flipCard()">
                 
                 <!-- 正面 (白色) -->
@@ -423,16 +454,20 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <span class="stamp-tag" id="stampTag">✓ 已蓋印</span>
-                        <button class="btn-mic" id="btnMic" onclick="toggleRecord(event)">🎤</button>
+                        <button class="btn-mic" id="btnMic" onclick="toggleRecord(event)">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
                     </div>
                     
                     <div class="img-container">
                         <img src="" alt="單字圖片" class="vocab-img" id="vocabImg" style="display:none;">
-                        <span class="no-img-text" id="noImgText">圖片區</span>
+                        <span class="no-img-text" id="noImgText"> canva 圖片放置區 </span>
                     </div>
 
-                    <div class="audio-center-box">
-                        <button class="btn-speaker-large" id="speakerFront" onclick="speakStandard(event)">🔊</button>
+                    <div class="audio-absolute-box">
+                        <button class="btn-speaker-icon" id="speakerFront" onclick="speakStandard(event)">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -441,8 +476,7 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory" style="color:#64748b;">分類</span>
                         <button class="btn-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
-                            💡
-                            <!-- 橘黃色對話框 -->
+                            <i class="fa-regular fa-lightbulb"></i>
                             <div class="tooltip-box" id="tooltipBox">
                                 <div class="tooltip-part" id="hintPart">詞性</div>
                                 <div class="tooltip-ch" id="hintCh">中文意思</div>
@@ -452,7 +486,13 @@
 
                     <div class="back-main-content">
                         <h1 class="korean-word" id="koreanWord">韓文單字</h1>
-                        <button class="btn-speaker-large" id="speakerBack" onclick="speakStandard(event)">🔊</button>
+                    </div>
+
+                    <!-- 與正面完全對齊對稱的同坐標喇叭 -->
+                    <div class="audio-absolute-box">
+                        <button class="btn-speaker-icon" id="speakerBack" onclick="speakStandard(event)">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
                     </div>
 
                     <div class="definition-block" id="definitionText">
@@ -466,8 +506,8 @@
 
     <!-- 底部導覽按鈕 -->
     <div class="nav-footer">
-        <button class="btn-nav btn-prev" onclick="prevCard()">〈 上一個</button>
-        <button class="btn-nav btn-next" onclick="nextCard()">下一個 〉</button>
+        <button class="btn-nav btn-prev" onclick="prevCard()"><i class="fa-solid fa-chevron-left"></i> 上一個</button>
+        <button class="btn-nav btn-next" onclick="nextCard()">下一個 <i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
     <!-- 狀態提示框 -->
@@ -477,10 +517,8 @@
 <script>
     // ==========================================
     // 【 系統全字典數據庫 】
-    // 移除了 pron (羅馬拼音) 欄位，未來增加單字更精簡。
     // ==========================================
     const vocabDictionary = {
-        // 第一單元單字
         "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", def: "旅行或搬家時攜帶的物品箱包", img: "" },
         "볼펜": { ch: "原子筆", part: "名詞", cate: "文具", def: "筆尖有小滾珠、書寫流暢的筆", img: "" },
         "담요": { ch: "毯子", part: "名詞", cate: "生活", def: "睡覺或保暖時蓋在身上的厚織物", img: "" },
@@ -489,13 +527,12 @@
         "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", def: "用來擦除鉛筆字跡的工具", img: "" },
         "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", def: "進行資料處理與上網運算的電子計算機", img: "" },
         "라면": { ch: "泡麵", part: "名詞", cate: "食物", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
-        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
+        "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
         "지갑": { ch: "錢包", part: "名詞", cate: "生活", def: "用來收納現金、信用卡和證件的小包", img: "" },
         "커피": { ch: "咖啡", part: "名詞", cate: "飲料", def: "用烘焙咖啡豆萃取出的提神苦味飲品", img: "" },
         "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
         "우산": { ch: "雨傘", part: "名詞", cate: "生活", def: "下雨天用來遮雨、擋水的隨身工具", img: "" },
 
-        // 第二單元單字
         "하나": { ch: "一 (固有詞)", part: "數詞", cate: "數字", def: "數字中的第一個，表示單一數量", img: "" },
         "둘": { ch: "二 (固有詞)", part: "數詞", cate: "數字", def: "一加上一之後的數量", img: "" },
         "셋": { ch: "三 (固有詞)", part: "數詞", cate: "數字", def: "二加上一之後的數量", img: "" },
@@ -510,14 +547,10 @@
         "정장": { ch: "正裝/西裝", part: "名詞", cate: "服飾", def: "出席正式場合穿著的規格服飾", img: "" },
         "맥주": { ch: "啤酒", part: "名詞", cate: "飲料", def: "大麥發酵、含有氣泡與微量酒精的飲料", img: "" },
         "잡지": { ch: "雜誌", part: "名詞", cate: "書籍", def: "定期出版、包含多種話題與圖片的刊物", img: "" },
-        "여권": { ch: "護照", part: "名詞", cate: "旅遊", def: "出入國境時，政府用來證明身分的官方手冊", img: "" },
+        "여권": { ch: "護照", part: "名詞", cate: "旅遊", def: "出入國境時，政府用來證明身分官方手冊", img: "" },
         "핸드폰": { ch: "手機", part: "名詞", cate: "電子", def: "可以隨身攜帶、打電話與上網的無線移動電話", img: "" }
     };
 
-    // ==========================================
-    // 【 單元單字設定清單 】
-    // 修改、更換單字只要動這裡即可！
-    // ==========================================
     const unitData = {
         unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
         unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
@@ -531,7 +564,10 @@
     let isRecording = false;
     let recognition = null;
     let autoCloseTimer = null;
+    let touchStartX = 0;
+    let touchEndX = 0;
 
+    // 語音辨識初始化
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
@@ -545,9 +581,14 @@
             const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, "");
             const targetWord = currentWords[currentIndex].replace(/\s+/g, "");
 
+            // 由於打亂了順序，我們利用字串本身在原始單元陣列中的索引，來勾選已蓋印狀態
+            const originalIndex = unitData[currentUnit].indexOf(currentWords[currentIndex]);
+
             if (studentSpeech === targetWord) {
                 showToast("🎉 發音正確！印記已蓋上！");
-                passedWordsMap[currentUnit].add(currentIndex);
+                if (originalIndex !== -1) {
+                    passedWordsMap[currentUnit].add(originalIndex);
+                }
                 updateProgress();
             } else {
                 showToast(`😢 聽起來像「${studentSpeech}」，再試一次！`);
@@ -556,6 +597,18 @@
 
         recognition.onend = function() { if (isRecording) stopRecordState(); };
         recognition.onerror = function() { stopRecordState(); showToast("錄音辨識出錯，請重新嘗試。"); };
+    }
+
+    // ==========================================
+    // 【 核心洗牌演算法 (Fisher-Yates Shuffle) 】
+    // ==========================================
+    function shuffleArray(array) {
+        const arr = [...array]; // 複製一份，不破壞原始對照陣列
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
     }
 
     function changeUnit(unitKey) {
@@ -567,7 +620,9 @@
             passedWordsMap[currentUnit] = new Set();
         }
 
-        currentWords = unitData[unitKey] || [];
+        // 核心改動：每次切換單元時，都將單字表隨機打亂
+        const baseWords = unitData[unitKey] || [];
+        currentWords = shuffleArray(baseWords);
         
         renderCard();
         updateProgress();
@@ -581,7 +636,7 @@
         document.getElementById('btnLightbulb').classList.remove('active');
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
-        // 正面
+        // 正面資料
         document.getElementById('frontCategory').innerText = data.cate;
         if (data.img && data.img.trim() !== "") {
             document.getElementById('vocabImg').src = data.img;
@@ -592,15 +647,17 @@
             document.getElementById('noImgText').style.display = "block";
         }
 
-        // 反面
+        // 反面資料
         document.getElementById('backCategory').innerText = data.cate;
-        document.getElementById('koreanWord').innerText = wordName; // 直接呈現精緻的韓文字母
+        document.getElementById('koreanWord').innerText = wordName;
         document.getElementById('hintPart').innerText = `詞性：${data.part}`;
         document.getElementById('hintCh').innerText = data.ch;
         document.getElementById('definitionText').innerText = data.def;
 
+        // 檢查當前隨機到的單字在原始字典的進度狀態
+        const originalIndex = unitData[currentUnit].indexOf(wordName);
         const stamp = document.getElementById('stampTag');
-        if (passedWordsMap[currentUnit].has(currentIndex)) {
+        if (originalIndex !== -1 && passedWordsMap[currentUnit].has(originalIndex)) {
             stamp.classList.add('active');
         } else {
             stamp.classList.remove('active');
@@ -616,8 +673,10 @@
         const percent = total > 0 ? (passedCount / total) * 100 : 0;
         document.getElementById('progressBar').style.width = `${percent}%`;
 
+        const wordName = currentWords[currentIndex];
+        const originalIndex = unitData[currentUnit].indexOf(wordName);
         const stamp = document.getElementById('stampTag');
-        if (passedWordsMap[currentUnit].has(currentIndex)) {
+        if (originalIndex !== -1 && passedWordsMap[currentUnit].has(originalIndex)) {
             stamp.classList.add('active');
         } else {
             stamp.classList.remove('active');
@@ -625,7 +684,7 @@
 
         if (passedCount === total && total > 0) {
             setTimeout(() => {
-                alert(`🏆 恭喜！您已完美通過【${document.getElementById('unitSelector').selectedOptions[0].text}】的所有單字蓋印！`);
+                alert(`🏆 恭喜！您已隨機完成【${document.getElementById('unitSelector').selectedOptions[0].text}】的所有單字蓋印！`);
             }, 500);
         }
     }
@@ -641,7 +700,7 @@
             currentIndex--;
             renderCard();
         } else {
-            showToast("這是本單元的第一個字囉！");
+            showToast("這是第一個單字囉！");
         }
     }
 
@@ -651,7 +710,7 @@
             currentIndex++;
             renderCard();
         } else {
-            showToast("這已經是本單元的最後一個字囉！");
+            showToast("這是最後一個單字囉！");
         }
     }
 
@@ -728,11 +787,40 @@
         setTimeout(() => { toast.style.opacity = "0"; }, 2000);
     }
 
+    // 電腦鍵盤監聽
     document.addEventListener('keydown', function(e) {
-        if (e.code === 'Space') { e.preventDefault(); flipCard(); }
-        else if (e.code === 'ArrowLeft') { prevCard(); }
-        else if (e.code === 'ArrowRight') { nextCard(); }
+        if (e.code === 'Space') { 
+            e.preventDefault(); 
+            flipCard(); 
+        } else if (e.code === 'ArrowLeft') { 
+            prevCard(); 
+        } else if (e.code === 'ArrowRight') { 
+            nextCard(); 
+        }
     });
+
+    // 手機滑動（Swipe）監聽
+    const swipeArea = document.getElementById('swipeArea');
+    
+    swipeArea.addEventListener('touchstart', function(e) {
+        if (e.target.closest('button') || e.target.closest('.tooltip-box')) return;
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    swipeArea.addEventListener('touchend', function(e) {
+        if (e.target.closest('button') || e.target.closest('.tooltip-box')) return;
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }, false);
+
+    function handleSwipeGesture() {
+        const threshold = 60;
+        if (touchStartX - touchEndX > threshold) {
+            nextCard();
+        } else if (touchEndX - touchStartX > threshold) {
+            prevCard();
+        }
+    }
 
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
