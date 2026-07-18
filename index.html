@@ -1,293 +1,458 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大漢老師的每日韓文微練習</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 { color: #333; font-size: 24px; margin-bottom: 5px; }
-        .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
-        .section {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-        h2 { font-size: 18px; color: #4a5568; margin-top: 0; border-left: 4px solid #4f46e5; padding-left: 8px; }
-        
-        /* 1. 葡萄串樣式 */
-        .grape-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            min-height: 180px;
-        }
-        .main-grape {
-            background: #8b5cf6;
-            color: white;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);
-            z-index: 2;
-            transition: transform 0.2s;
-        }
-        .main-grape:active { transform: scale(0.95); }
-        .sub-grapes {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.5s ease;
-            pointer-events: none;
-        }
-        .sub-grapes.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-        .grape-card {
-            background: #f3e8ff;
-            border: 2px solid #d8b4fe;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            min-width: 60px;
-        }
-        .kr-word { font-size: 18px; font-weight: bold; color: #6b21a8; }
-        .bopomofo {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            display: none;
-        }
-        .hint-btn {
-            background: #e9d5ff;
-            border: none;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 10px;
-            cursor: pointer;
-            margin-top: 4px;
-            color: #7e22ce;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韓文單字印記學習</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --bg: #f5f7fa;
+        }
 
-        /* 2. 積木拖拉樣式 */
-        .drag-box-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            min-height: 50px;
-        }
-        .block {
-            background: #4f46e5;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: grab;
-            font-weight: bold;
-            touch-action: none;
-            user-select: none;
-        }
-        .drop-zone-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            background: #edf2f7;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px dashed #cbd5e1;
-        }
-        .drop-zone {
-            background: white;
-            border: 2px solid #cbd5e1;
-            border-radius: 6px;
-            width: 70px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .drop-zone.correct {
-            border-color: #10b981;
-            background: #ecfdf5;
-        }
-        .success-msg {
-            color: #10b981;
-            text-align: center;
-            font-weight: bold;
-            margin-top: 10px;
-            display: none;
-        }
-    </style>
+        body {
+            font-family: 'Noto Sans KR', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg);
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .progress-text {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* 閃卡 3D 翻轉容器 */
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            height: 450px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+            cursor: pointer;
+        }
+
+        /* 控制翻轉的 Class */
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: white;
+            box-sizing: border-box;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 卡片正面 */
+        .card-front {
+            background: #ffffff;
+        }
+
+        /* 卡片反面 */
+        .card-back {
+            background: #fdfefe;
+            transform: rotateY(180deg);
+            justify-content: center; /* 讓內容完全置中 */
+            gap: 20px;
+        }
+
+        /* 提示按鈕 */
+        .hint-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #eee;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 圖片區 */
+        .vocab-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #eee; /* 沒圖片時的預留底色 */
+        }
+
+        /* 核心控制鈕（正面下方） */
+        .control-group {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-audio { background: var(--primary); color: white; }
+        .btn-record { background: #e67e22; color: white; }
+        .btn-record.recording { background: var(--danger); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 反面字體設計（完全置中） */
+        .korean-word {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .pronunciation {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin: 0;
+        }
+
+        /* 彈出小視窗 (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 300px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: none; background: none;
+            color: #aaa;
+        }
+
+        .modal-content h3 { margin-top: 0; font-size: 1.5rem; color: var(--primary); }
+        .modal-content p { font-size: 1.2rem; margin: 10px 0 0 0; }
+
+        /* 狀態提示文字 */
+        .status-msg {
+            font-size: 1rem;
+            height: 24px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>韓文微學習 App原型</h1>
-    <div class="subtitle">🎯 今日核心目標：學會表達「去哪裡」</div>
+<div class="container">
+    <!-- 進度條文字 -->
+    <div class="progress-text" id="progressText">載入中...</div>
 
-    <!-- 1. 葡萄串單字模組 -->
-    <div class="section">
-        <h2>1. 🍇 點擊葡萄串大爆發</h2>
-        <p style="font-size:13px; color:#888;">點擊紫色大葡萄展開單字，點 [?] 看注音，點卡片聽發音。</p>
-        <div class="grape-container">
-            <div class="main-grape" id="mainGrape">買 (사다)</div>
-            <div class="sub-grapes" id="subGrapes">
-                <!-- 單字 1 -->
-                <div class="grape-card" onclick="playSound()">
-                    <div class="bopomofo" id="pop1">ㄘㄜ　ㄎ</div>
-                    <div class="kr-word">책</div>
-                    <div style="font-size:12px; color:#666;">書</div>
-                    <button class="hint-btn" onclick="toggleHint(event, 'pop1')">?</button>
-                </div>
-                <!-- 單字 2 -->
-                <div class="grape-card" onclick="playSound()">
-                    <div class="bopomofo" id="pop2">ㄛ ㄉ</div>
-                    <div class="kr-word">옷</div>
-                    <div style="font-size:12px; color:#666;">衣服</div>
-                    <button class="hint-btn" onclick="toggleHint(event, 'pop2')">?</button>
-                </div>
-                <!-- 單字 3 -->
-                <div class="grape-card" onclick="playSound()">
-                    <div class="bopomofo" id="pop3">ㄙㄚ ㄍㄨㄚ</div>
-                    <div class="kr-word">사과</div>
-                    <div style="font-size:12px; color:#666;">蘋果</div>
-                    <button class="hint-btn" onclick="toggleHint(event, 'pop3')">?</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- 閃卡容器 -->
+    <div class="card-container">
+        <!-- 點擊問號跳出提示，阻擋冒泡不翻牌 -->
+        <button class="hint-btn" onclick="openModal(event)">?</button>
+        
+        <div class="card" id="vocabCard" onclick="flipCard()">
+            <!-- 正面 -->
+            <div class="card-face card-front">
+                <!-- Canva 免費素材或 AI 生成圖預留位 -->
+                <img src="" alt="單字圖片" class="vocab-img" id="vocabImg">
+                <div class="control-group" onclick="event.stopPropagation();">
+                    <button class="btn btn-audio" id="btnAudioFront" onclick="playAudio()">🔊 播音</button>
+                    <button class="btn btn-record" id="btnRecord" onclick="toggleRecord()">🎤 錄音</button>
+                </div>
+            </div>
 
-    <!-- 2. 積木拖拉模組 -->
-    <div class="section">
-        <h2>2. 🧩 語法積木連連看</h2>
-        <p style="font-size:13px; color:#888;">請用滑鼠或手指將藍色積木拖入下方格子，拼出「去公司 (회사에 가요)」</p>
-        
-        <!-- 待拖拽的積木區 -->
-        <div class="drag-box-container" id="dragContainer">
-            <div class="block" draggable="true" id="b1" data-word="회사">회사</div>
-            <div class="block" draggable="true" id="b2" data-word="가요">가요</div>
-            <div class="block" draggable="true" id="b3" data-word="에">에</div>
-        </div>
+            <!-- 反面 (完全置中) -->
+            <div class="card-face card-back">
+                <h1 class="korean-word" id="koreanWord">사과</h1>
+                <p class="pronunciation" id="pronunciation">[sa-gwa]</p>
+                <div onclick="event.stopPropagation();">
+                    <button class="btn btn-audio" id="btnAudioBack" onclick="playAudio()">🔊 播音</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- 放置格區 -->
-        <div class="drop-zone-container">
-            <div class="drop-zone" data-correct="회사"></div>
-            <div class="drop-zone" data-correct="에"></div>
-            <div class="drop-zone" data-correct="가요"></div>
-        </div>
-        <div class="success-msg" id="successMsg">🎉 太棒了！語序完全正確！</div>
-    </div>
+    <!-- 狀態回饋 -->
+    <div class="status-msg" id="statusMsg">點擊卡片可翻面</div>
+</div>
 
-    <!-- 隱藏的音效標籤 -->
-    <audio id="audioPlayer" src="sound.mp3"></audio>
+<!-- 中文與詞性提示小視窗 -->
+<div class="modal-overlay" id="hintModal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation();">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div class="modal-content">
+            <h3 id="hintPart">詞性：名詞</h3>
+            <p id="hintCh">中文：蘋果</p>
+        </div>
+    </div>
+</div>
 
-    <script>
-        // --- 1. 葡萄串點擊展開邏輯 ---
-        const mainGrape = document.getElementById('mainGrape');
-        const subGrapes = document.getElementById('subGrapes');
-        
-        mainGrape.addEventListener('click', () => {
-            subGrapes.classList.toggle('active');
-            playSound();
-        });
+<script>
+    // ==========================================
+    // 這裡可以直接修改單字、發音法、中譯、音檔與圖片
+    // ==========================================
+    const vocabList = [
+        { 
+            word: "사과", 
+            pron: "sa-gwa",
+            ch: "蘋果", 
+            part: "名詞",
+            img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400", // 預留 Canva / AI 圖位
+            audio: "https://actions.google.com/sounds/v1/cartoon/cartoon_cowbell.ogg" // 預留韓文標準音檔
+        },
+        { 
+            word: "우유", 
+            pron: "u-yu",
+            ch: "牛奶", 
+            part: "名詞",
+            img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400", 
+            audio: "https://actions.google.com/sounds/v1/cartoon/pop.ogg" 
+        }
+    ];
 
-        // 懸浮注音切換
-        function toggleHint(event, id) {
-            event.stopPropagation(); // 防止觸發卡片的點擊發音
-            const hint = document.getElementById(id);
-            if(hint.style.display === 'block') {
-                hint.style.display = 'none';
-            } else {
-                hint.style.display = 'block';
-                // 3秒後自動關閉，給成人貼心的體驗
-                setTimeout(() => hint.style.display = 'none', 3000);
-            }
-        }
+    let currentPool = []; // 儲存當前單元還沒過關的隨機單字索引
+    let currentIndex = 0; // 目前畫面上顯示的單字索引
+    let isRecording = false;
+    let recognition = null;
+    let autoCloseTimer = null;
 
-        function playSound() {
-            const audio = document.getElementById('audioPlayer');
-            audio.currentTime = 0;
-            audio.play().catch(e => console.log("請先在資料夾放入 sound.mp3 檔案"));
-        }
+    // 初始化語音辨識
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ko-KR'; // 鎖定辨識語言為「韓文」
+        recognition.interimResults = false;
 
-        // --- 2. 積木拖拉邏輯 ---
-        const blocks = document.querySelectorAll('.block');
-        const zones = document.querySelectorAll('.drop-zone');
-        let correctCount = 0;
+        // 語音辨識成功回傳
+        recognition.onresult = function(event) {
+            clearTimeout(autoCloseTimer); // 有收到聲音，清除自動關閉計時器
+            stopRecordState(); // 辨識結束，立刻自動關閉麥克風功能
 
-        blocks.forEach(block => {
-            block.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', e.target.id);
-            });
-            // 支援手機觸控拖拉 (Touch Events)
-            block.addEventListener('touchmove', (e) => {
-                var touchLocation = e.targetTouches[0];
-                block.style.position = 'absolute';
-                block.style.left = touchLocation.pageX - 40 + 'px';
-                block.style.top = touchLocation.pageY - 20 + 'px';
-            });
-            block.addEventListener('touchend', (e) => {
-                // 手機端簡化檢測：放開即觸發檢查位置邏輯，此處主要先以網頁模擬展示
-                checkTouchDrop(block);
-            });
-        });
+            const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, ""); // 去除空格
+            const targetWord = vocabList[currentIndex].word.replace(/\s+/g, "");
 
-        zones.forEach(zone => {
-            zone.addEventListener('dragover', (e) => e.preventDefault());
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const blockId = e.dataTransfer.getData('text');
-                const block = document.getElementById(blockId);
-                
-                // 檢查是否放對格子
-                if (zone.getAttribute('data-correct') === block.getAttribute('data-word') && !zone.hasChildNodes()) {
-                    zone.appendChild(block);
-                    zone.classList.add('correct');
-                    block.setAttribute('draggable', 'false'); // 固定住
-                    correctCount++;
-                    playSound();
-                    checkWin();
-                }
-            });
-        });
+            if (studentSpeech === targetWord) {
+                document.getElementById('statusMsg').innerText = "🎉 太棒了！發音完全正確！";
+                document.getElementById('statusMsg').style.color = "var(--success)";
+                
+                // 從隨機庫中移除此題
+                currentPool = currentPool.filter(index => index !== currentIndex);
+                
+                // 延遲 1.5 秒後進下一題
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1500);
+            } else {
+                document.getElementById('statusMsg').innerText = `😢 聽起來像「${studentSpeech}」，再試一次！`;
+                document.getElementById('statusMsg').style.color = "var(--danger)";
+            }
+        };
 
-        function checkTouchDrop(block) {
-            // 提供手機桌面的基本相容預留
-            // 正式 MVP 可以請 AI 在步驟二進一步優化手機端拖拉
-        }
+        // 處理錄音過程中，如果完全沒說話或辨識停止
+        recognition.onend = function() {
+            if (isRecording) {
+                stopRecordState();
+            }
+        };
 
-        function checkWin() {
-            if (correctCount === 3) {
-                document.getElementById('successMsg').style.display = 'block';
+        recognition.onerror = function() {
+            stopRecordState();
+            document.getElementById('statusMsg').innerText = "錄音辨識出錯，請再試一次。";
+        };
+    } else {
+        alert("很抱歉，您的瀏覽器不支援 Web Speech API 語音辨識，建議使用 Google Chrome 瀏覽器。");
+    }
+
+    // 初始化單元遊戲
+    function initUnit() {
+        // 讀取本地進度（若未來要串接，此處可做判斷）
+        // 隨機打亂題目庫
+        currentPool = vocabList.map((_, i) => i);
+        nextQuestion();
+    }
+
+    // 隨機下一題
+    function nextQuestion() {
+        const card = document.getElementById('vocabCard');
+        card.classList.remove('is-flipped'); // 強制翻回正面
+
+        if (currentPool.length === 0) {
+            document.getElementById('progressText').innerText = "單元完成！";
+            document.getElementById('statusMsg').innerText = "恭喜解鎖下一階段！🏆";
+            localStorage.setItem("unit_completed", "true"); // 記錄結果至本地
+            return;
+        }
+
+        // 從剩餘題庫中隨機抽一題
+        const randomIndex = Math.floor(Math.random() * currentPool.length);
+        currentIndex = currentPool[randomIndex];
+
+        // 更新畫面資訊
+        const data = vocabList[currentIndex];
+        document.getElementById('vocabImg').src = data.img;
+        document.getElementById('koreanWord').innerText = data.word;
+        document.getElementById('pronunciation').innerText = `[ ${data.pron} ]`;
+        document.getElementById('hintPart').innerText = `詞性：${data.part}`;
+        document.getElementById('hintCh').innerText = `中文：${data.ch}`;
+        
+        const total = vocabList.length;
+        const currentProgress = total - currentPool.length + 1;
+        document.getElementById('progressText').innerText = `進度：${currentProgress} / ${total}`;
+        document.getElementById('statusMsg').innerText = "點擊卡片可翻面觀看答案";
+        document.getElementById('statusMsg').style.color = "#7f8c8d";
+    }
+
+    // 翻轉卡片
+    function flipCard() {
+        // 如果正在錄音，不允許翻牌
+        if (isRecording) return;
+        document.getElementById('vocabCard').classList.toggle('is-flipped');
+    }
+
+    // 播放標準音檔
+    function playAudio() {
+        // 修正需求：錄音時不可以播放音檔
+        if (isRecording) return; 
+
+        const audioUrl = vocabList[currentIndex].audio;
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => {
+            console.log("音檔播放失敗，請檢查 URL 是否正確：", e);
+            document.getElementById('statusMsg').innerText = "🔊 暫無音檔或載入失敗";
+        });
+    }
+
+    // 開啟/關閉 錄音功能
+    function toggleRecord() {
+        if (!recognition) return;
+
+        if (!isRecording) {
+            // 啟動錄音
+            isRecording = true;
+            document.getElementById('btnRecord').classList.add('recording');
+            document.getElementById('btnRecord').innerText = "🛑 辨識中";
+            document.getElementById('statusMsg').innerText = "請開始發音...";
+            
+            // 禁用播音按鈕防止誤觸
+            document.getElementById('btnAudioFront').style.opacity = "0.5";
+            document.getElementById('btnAudioBack').style.opacity = "0.5";
+
+            recognition.start();
+
+            // 修正需求：畫面停滯（無聲音輸入）時，自動關閉麥克風
+            // 設定 5 秒靜音計時器，5 秒內沒說話自動切斷麥克風
+            autoCloseTimer = setTimeout(() => {
+                if (isRecording) {
+                    recognition.stop();
+                    document.getElementById('statusMsg').innerText = "⏰ 偵測不到聲音，麥克風已關閉";
+                    document.getElementById('statusMsg').style.color = "var(--danger)";
+                }
+            }, 5000);
+
+        } else {
+            // 手動停止錄音
+            recognition.stop();
+        }
+    }
+
+    // 重設錄音按鈕狀態，釋放麥克風
+    function stopRecordState() {
+        clearTimeout(autoCloseTimer);
+        isRecording = false;
+        document.getElementById('btnRecord').classList.remove('recording');
+        document.getElementById('btnRecord').innerText = "🎤 錄音";
+        document.getElementById('btnAudioFront').style.opacity = "1";
+        document.getElementById('btnAudioBack').style.opacity = "1";
+    }
+
+    // 提示視窗控制
+    function openModal(event) {
+        event.stopPropagation(); // 阻止卡片翻轉
+        document.getElementById('hintModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('hintModal').classList.remove('active');
+    }
+
+    // 網頁載入後啟動
+    window.onload = initUnit;
+</script>
+
+</body>
+</html>
