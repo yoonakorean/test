@@ -33,7 +33,7 @@
             align-items: center;
         }
 
-        /* 手機外殼視窗：根據螢幕高度動態縮放 */
+        /* 手機外殼視窗 */
         .phone-window {
             width: 100%;
             max-width: 430px;
@@ -82,7 +82,7 @@
             font-weight: bold;
         }
 
-        /* 進度條容器：稍微往下移一些 */
+        /* 進度條容器 */
         .progress-container {
             width: 100%;
             padding: 10px 20px 0 20px;
@@ -201,24 +201,66 @@
         }
         .stamp-tag.active { opacity: 1; }
 
-        /* 麥克風按鈕 */
-        .btn-mic {
+        /* 右上角功能小按鈕 (正面喇叭、反面燈泡) */
+        .btn-top-action {
             background: none;
             border: none;
             font-size: 1.3rem;
             cursor: pointer;
-            color: var(--text-dark);
-            transition: transform 0.2s, color 0.2s;
             padding: 6px;
+            transition: transform 0.2s, color 0.2s;
         }
-        .btn-mic.recording {
+        .card-front .btn-top-action { color: var(--text-dark); }
+        .card-back .btn-top-action { color: #64748b; }
+        .card-front .btn-top-action.playing { color: var(--primary); }
+        .card-back .btn-top-action.active { color: #fff; }
+
+        /* 核心大按鈕框架 (正反面位置完全同座標重疊) */
+        .center-action-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            margin-bottom: 5px;
+        }
+
+        /* 核心圓形大按鈕 (正面麥克風、反面語音播放) */
+        .btn-center-circle {
+            border: none;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        /* 正面大麥克風色彩 */
+        .card-front .btn-center-circle {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .card-front .btn-center-circle.recording {
+            background: #fde8e8;
             color: var(--danger);
             animation: pulse 1.3s infinite;
         }
+        /* 反面大喇叭色彩 */
+        .card-back .btn-center-circle {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        .card-back .btn-center-circle.playing {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+        .btn-center-circle:active { transform: scale(0.92); }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            50% { transform: scale(1.12); }
             100% { transform: scale(1); }
         }
 
@@ -249,90 +291,12 @@
             letter-spacing: 1px;
         }
 
-        /* 喇叭按鈕固定框架 */
-        .audio-absolute-box {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 60px;
-            margin-bottom: 5px;
-        }
-
-        .btn-speaker-icon {
-            background: #f1f5f9;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            color: #64748b;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .btn-speaker-icon:active { transform: scale(0.92); }
-        .btn-speaker-icon.playing { 
-            background: var(--primary-light);
-            color: var(--primary); 
-        }
-
         /* 反面樣式 (深色) */
         .card-back {
             background: var(--dark-card);
             transform: rotateY(180deg);
             color: white;
         }
-
-        .btn-lightbulb {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            color: #64748b;
-            cursor: pointer;
-            padding: 6px;
-            position: relative;
-        }
-        .btn-lightbulb.active { color: #fff; }
-
-        /* 橘黃色對話框提示 (單字提示卡) */
-        .tooltip-box {
-            position: absolute;
-            top: 45px;
-            right: -10px;
-            background: var(--orange);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 16px;
-            width: 140px;
-            text-align: left;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 99;
-        }
-        .card-back .tooltip-box {
-            transform: translateY(-10px);
-        }
-        .tooltip-box::after {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 18px;
-            border-width: 0 8px 8px 8px;
-            border-style: solid;
-            border-color: transparent transparent var(--orange) transparent;
-        }
-        .tooltip-box.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0) !important;
-        }
-        .tooltip-part { font-size: 0.8rem; opacity: 0.9; margin-bottom: 4px; }
-        .tooltip-ch { font-size: 1.1rem; font-weight: bold; }
 
         /* 反面核心內文區 */
         .back-main-content {
@@ -366,6 +330,33 @@
             margin: 0;
         }
 
+        /* 底部釋義區塊外殼容器（用來做相對定位） */
+        .definition-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        /* 新增：獨立出來的中文答案小卡片（定位在釋義框框外的右上方） */
+        .chinese-answer-badge {
+            position: absolute;
+            top: -32px; /* 浮動在釋義框上方 */
+            right: 0;    /* 靠右對齊 */
+            background: var(--orange);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 5;
+            pointer-events: none; /* 純顯示用 */
+            display: none; /* 預設隱藏，按💡燈泡切換開關 */
+        }
+        .chinese-answer-badge.show {
+            display: inline-block;
+        }
+
         /* 反面最下方釋義區 */
         .definition-block {
             background: rgba(255, 255, 255, 0.04);
@@ -374,13 +365,13 @@
             text-align: center;
             font-size: 0.95rem;
             color: #94a3b8;
-            margin-bottom: 5px;
             line-height: 1.5;
             height: 65px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
+            width: 100%;
         }
 
         /* 3. 底部導覽列 */
@@ -473,8 +464,9 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
-                        <button class="btn-mic" id="btnMic" onclick="toggleRecord(event)">
-                            <i class="fa-solid fa-microphone"></i>
+                        <!-- 【對調：語音播放鍵換到右上角】 -->
+                        <button class="btn-top-action" id="speakerFront" onclick="speakStandard(event)">
+                            <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
                     
@@ -483,9 +475,10 @@
                         <span class="no-img-text" id="noImgText"> canva 圖片放置區 </span>
                     </div>
 
-                    <div class="audio-absolute-box">
-                        <button class="btn-speaker-icon" id="speakerFront" onclick="speakStandard(event)">
-                            <i class="fa-solid fa-volume-high"></i>
+                    <!-- 【對調：麥克風錄音功能換到大中央】 -->
+                    <div class="center-action-box">
+                        <button class="btn-center-circle" id="btnMic" onclick="toggleRecord(event)">
+                            <i class="fa-solid fa-microphone"></i>
                         </button>
                     </div>
                 </div>
@@ -495,28 +488,34 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
-                        <button class="btn-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
+                        <!-- 右上角固定為💡單字提示控制鈕 -->
+                        <button class="btn-top-action" id="btnLightbulb" onclick="toggleTooltip(event)">
                             <i class="fa-solid fa-lightbulb"></i>
-                            <div class="tooltip-box" id="tooltipBox">
-                                <div class="tooltip-part" id="hintPart">詞性</div>
-                                <div class="tooltip-ch" id="hintCh">中文意思</div>
-                            </div>
                         </button>
                     </div>
 
+                    <!-- 反面核心內文區 -->
                     <div class="back-main-content">
                         <h1 class="korean-word" id="koreanWord">韓文單字</h1>
                         <span class="korean-pronunciation" id="koreanPron">發音標記</span>
                     </div>
 
-                    <div class="audio-absolute-box">
-                        <button class="btn-speaker-icon" id="speakerBack" onclick="speakStandard(event)">
+                    <!-- 【對調：反面語音播放鍵，精準對齊正面大中央座標】 -->
+                    <div class="center-action-box">
+                        <button class="btn-center-circle" id="speakerBack" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
 
-                    <div class="definition-block" id="definitionText">
-                        釋義
+                    <!-- 底部釋義與中文答案提示外殼 -->
+                    <div class="definition-wrapper">
+                        <!-- 【新增：中文答案小按鈕，完美定位於釋義框右上方】 -->
+                        <div class="chinese-answer-badge" id="chineseAnswerBox">
+                            <span id="hintPart">詞性</span> ｜ <span id="hintCh">中文意思</span>
+                        </div>
+                        <div class="definition-block" id="definitionText">
+                            釋義
+                        </div>
                     </div>
                 </div>
 
@@ -547,7 +546,7 @@
         "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", pron: "[지우개]", def: "用來擦除鉛筆字跡的工具", img: "" },
         "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", pron: "[컴퓨터]", def: "進行資料處理與上網運算的電子計算機", img: "" },
         "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
-        "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
+        "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜拉]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
         "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", img: "" },
         "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品", img: "" },
         "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
@@ -572,7 +571,7 @@
     };
 
     const unitData = {
-        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨圖", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
+        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
         unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
     };
 
@@ -583,13 +582,12 @@
     
     let isRecording = false;
     let recognition = null;
-    let singleSpeechTimer = null; // 單次語音無聲關閉計時器
+    let singleSpeechTimer = null; 
     let touchStartX = 0;
     let touchEndX = 0;
 
-    // 新增：智慧休眠相關變數
-    let globalIdleTimer = null;   // 全局5分鐘閒置計時器
-    const IDLE_LIMIT = 5 * 60 * 1000; // 5分鐘 (毫秒)
+    let globalIdleTimer = null;   
+    const IDLE_LIMIT = 5 * 60 * 1000; 
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -614,7 +612,7 @@
             } else {
                 showToast(`😢 聽起來像「${studentSpeech}」，再試一次！`);
             }
-            resetIdleTimer(); // 有互動，重設閒置計時
+            resetIdleTimer();
         };
 
         recognition.onend = function() { 
@@ -629,14 +627,11 @@
     // ==========================================
     // 【 核心智慧休眠邏輯 】
     // ==========================================
-    
-    // 重設全局閒置計時器（5分鐘）
     function resetIdleTimer() {
         clearTimeout(globalIdleTimer);
         globalIdleTimer = setTimeout(triggerMicrophoneSleep, IDLE_LIMIT);
     }
 
-    // 觸發麥克風休眠
     function triggerMicrophoneSleep() {
         if (isRecording && recognition) {
             recognition.stop();
@@ -645,22 +640,18 @@
         showToast("💤 偵測到畫面閒置過久，麥克風已自動休息。");
     }
 
-    // 監聽網頁可見性（離開畫面/切換分頁/關閉螢幕）
     document.addEventListener("visibilitychange", function() {
         if (document.hidden) {
-            // 只要离开畫面，立即切斷語音功能，安全休息
             if (isRecording && recognition) {
                 recognition.stop();
             }
             stopRecordState();
             clearTimeout(globalIdleTimer);
         } else {
-            // 重新進入頁面時，重設閒置計時，等待使用者主動點擊重啟錄音
             resetIdleTimer();
         }
     });
 
-    // 監聽任何使用者與畫面的互動行為，藉此重置5分鐘計時器
     ['click', 'touchstart', 'keydown'].forEach(evt => {
         document.addEventListener(evt, resetIdleTimer, { passive: true });
     });
@@ -698,7 +689,8 @@
         const wordName = currentWords[currentIndex];
         const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "尚未建立字典敘述", img: "" };
         
-        document.getElementById('tooltipBox').classList.remove('show');
+        // 預設將提示框隱藏
+        document.getElementById('chineseAnswerBox').classList.remove('show');
         document.getElementById('btnLightbulb').classList.remove('active');
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
@@ -715,7 +707,7 @@
         document.getElementById('backCategory').innerText = data.cate;
         document.getElementById('koreanWord').innerText = wordName;
         document.getElementById('koreanPron').innerText = data.pron;
-        document.getElementById('hintPart').innerText = `詞性：${data.part}`;
+        document.getElementById('hintPart').innerText = data.part;
         document.getElementById('hintCh').innerText = data.ch;
         document.getElementById('definitionText').innerText = data.def;
 
@@ -787,7 +779,7 @@
     }
 
     function speakStandard(event) {
-        if (event) event.stopPropagation();
+        if (event) event.stopPropagation(); // 阻止翻牌
         if (isRecording) return; 
 
         const targetText = currentWords[currentIndex];
@@ -817,12 +809,11 @@
         } catch(e) { console.error(e); }
     }
 
-    // 使用者主動按下錄音鍵，會直接打斷休眠、重啟錄音
     function toggleRecord(event) {
-        if (event) event.stopPropagation();
+        if (event) event.stopPropagation(); // 阻止翻牌
         if (!recognition) { showToast("瀏覽器不支援錄音。"); return; }
 
-        resetIdleTimer(); // 使用者點擊，重新計算閒置5分鐘
+        resetIdleTimer(); 
 
         if (!isRecording) {
             isRecording = true;
@@ -833,7 +824,6 @@
                 recognition.start();
             } catch(e) { console.log("錄音重啟中..."); }
 
-            // 5秒沒聲音的基礎防呆
             singleSpeechTimer = setTimeout(() => {
                 if (isRecording) {
                     recognition.stop();
@@ -851,11 +841,12 @@
         document.getElementById('btnMic').classList.remove('recording');
     }
 
+    // 控制「右上方中文答案卡」切換顯示
     function toggleTooltip(event) {
-        event.stopPropagation();
-        const tooltip = document.getElementById('tooltipBox');
+        event.stopPropagation(); // 阻止翻牌
+        const ansBox = document.getElementById('chineseAnswerBox');
         const bulb = document.getElementById('btnLightbulb');
-        tooltip.classList.toggle('show');
+        ansBox.classList.toggle('show');
         bulb.classList.toggle('active');
     }
 
@@ -881,12 +872,12 @@
     // 手機滑動
     const swipeArea = document.getElementById('swipeArea');
     swipeArea.addEventListener('touchstart', function(e) {
-        if (e.target.closest('button') || e.target.closest('.tooltip-box')) return;
+        if (e.target.closest('button') || e.target.closest('#chineseAnswerBox')) return;
         touchStartX = e.changedTouches[0].screenX;
     }, false);
 
     swipeArea.addEventListener('touchend', function(e) {
-        if (e.target.closest('button') || e.target.closest('.tooltip-box')) return;
+        if (e.target.closest('button') || e.target.closest('#chineseAnswerBox')) return;
         touchEndX = e.changedTouches[0].screenX;
         handleSwipeGesture();
     }, false);
@@ -904,10 +895,9 @@
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    // 初始化載入
     window.onload = () => { 
         changeUnit("unit1"); 
-        resetIdleTimer(); // 啟動全網頁5分鐘閒置計算
+        resetIdleTimer(); 
     };
 </script>
 </body>
