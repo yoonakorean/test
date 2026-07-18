@@ -173,6 +173,7 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.03);
         }
 
+        /* 【優化防重疊】頂部資訊列佈局調校 */
         .card-top-info {
             display: flex;
             justify-content: space-between;
@@ -180,11 +181,14 @@
             height: 35px;
             position: relative;
             z-index: 10;
+            gap: 8px; /* 加上間距防止擠壓 */
         }
 
         .category-tag {
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            white-space: nowrap; /* 防止中文換行 */
+            flex-shrink: 0;
         }
         .card-front .category-tag { color: var(--text-dark); }
         .card-back .category-tag { color: #64748b; }
@@ -192,12 +196,15 @@
         .stamp-tag {
             background: #e8f8f0;
             color: var(--success);
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             opacity: 0;
             transition: opacity 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: auto; /* 自動將已蓋印推向中間偏右 */
         }
         .stamp-tag.active { opacity: 1; }
 
@@ -205,13 +212,14 @@
         .btn-top-action {
             background: none;
             border: none;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             cursor: pointer;
             padding: 6px;
             transition: transform 0.2s, color 0.2s;
+            flex-shrink: 0;
         }
         .card-front .btn-top-action { color: var(--text-dark); }
-        .card-back .btn-top-action { color: #ffffff; } /* 反面右上角喇叭改為白色 */
+        .card-back .btn-top-action { color: #ffffff; } 
         .btn-top-action.playing { color: var(--primary) !important; }
 
         /* 正面大中央：麥克風錄音 */
@@ -286,7 +294,7 @@
 
         /* 反面核心內文區 */
         .back-main-content {
-            flex: 1; /* 彈性拉伸，取代原先寫死的固定高度 */
+            flex: 1; 
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -323,7 +331,7 @@
             margin-bottom: 5px;
         }
 
-        /* 控制列：點選燈泡💡會在右上方紅色區塊顯示 */
+        /* 控制列 */
         .back-control-row {
             position: absolute;
             top: -45px; 
@@ -355,7 +363,7 @@
             transform: translateY(0);
         }
 
-        /* 紅色區塊位置的燈泡💡按鈕 */
+        /* 燈泡💡按鈕 */
         .btn-inline-lightbulb {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -375,7 +383,7 @@
             color: white;
         }
 
-        /* 【優化放大】反面最下方釋義區：放大高度以容納長說明，保持畫面一致性 */
+        /* 反面最下方釋義區 */
         .definition-block {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
@@ -384,13 +392,13 @@
             font-size: 0.95rem;
             color: #94a3b8;
             line-height: 1.6;
-            height: 95px; /* 高度從 65px 加大到 95px，容納更多行數 */
+            height: 95px; 
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
             width: 100%;
-            overflow-y: auto; /* 若字數真的極多，允許微幅內部捲動 */
+            overflow-y: auto; 
         }
 
         /* 底部導覽列 */
@@ -446,9 +454,9 @@
         }
     </style>
 </head>
-<body>
+<body onclick="handleGlobalClick()">
 
-<div class="phone-window" onclick="handleGlobalClick()">
+<div class="phone-window">
     <!-- 頂部標頭 -->
     <div class="header">
         <div class="title-area">
@@ -483,7 +491,6 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
-                        <!-- 正面右上角語音播放鍵 -->
                         <button class="btn-top-action" id="speakerFront" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
@@ -506,7 +513,6 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
-                        <!-- 反面右上角語音播放鍵（與正面位置一模一樣） -->
                         <button class="btn-top-action" id="speakerBack" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
@@ -554,7 +560,7 @@
 
 <script>
     // ==========================================
-    // 【 系統全字典數據庫 】
+    // 【 系統全字典數據庫 】 (已修正 콜라)
     // ==========================================
     const vocabDictionary = {
         "짐": { ch: "行李/貨物", part: "名詞", cate: "生活", pron: "[짐]", def: "旅行或搬家時攜帶的物品箱包", img: "" },
@@ -565,9 +571,9 @@
         "지우개": { ch: "橡皮擦", part: "名詞", cate: "文具", pron: "[지우개]", def: "用來擦除鉛筆字跡的工具", img: "" },
         "컴퓨터": { ch: "電腦", part: "名詞", cate: "電子", pron: "[컴퓨터]", def: "進行資料處理與上網運算的電子計算機", img: "" },
         "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
-        "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜拉]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
+        "콜라": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜라]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" }, // 這裡已修正為 콜라
         "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", img: "" },
-        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品。未來如果此處有較長的敘述說明文字，拉高後的區塊也能提供非常舒適的閱讀排版空間，保持畫面一致性。", img: "" },
+        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品。拉高後的區塊能提供非常舒適的閱讀排版空間，保持畫面一致性。", img: "" },
         "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
         "우산": { ch: "雨傘", part: "名詞", cate: "生活", pron: "[우산]", def: "下雨天用來遮雨、擋水的隨身工具", img: "" },
 
@@ -590,9 +596,12 @@
     };
 
     const unitData = {
-        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
+        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"], // 這裡的對應鍵名也一併支援
         unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
     };
+
+    // 處理鍵值對應相容（將舊的 "콜拉" 鍵自動映射至正確的字典資料）
+    vocabDictionary["콜拉"] = vocabDictionary["콜라"];
 
     let currentUnit = "unit1";      
     let currentWords = [];          
@@ -619,10 +628,12 @@
             stopRecordState();
 
             const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, "");
-            const targetWord = currentWords[currentIndex].replace(/\s+/g, "");
+            let targetWord = currentWords[currentIndex].replace(/\s+/g, "");
+            if (targetWord === "콜라" || targetWord === "콜拉") targetWord = "콜라";
+
             const originalIndex = unitData[currentUnit].indexOf(currentWords[currentIndex]);
 
-            if (studentSpeech === targetWord) {
+            if (studentSpeech === "콜라" && (targetWord === "콜라" || targetWord === "콜拉") || studentSpeech === targetWord) {
                 showToast("🎉 發音正確！印記已蓋上！");
                 if (originalIndex !== -1) {
                     passedWordsMap[currentUnit].add(originalIndex);
@@ -672,7 +683,10 @@
     }
 
     function renderCard() {
-        const wordName = currentWords[currentIndex];
+        let wordName = currentWords[currentIndex];
+        // 畫面上顯示修正後的正體字
+        let displayWord = wordName === "콜拉" ? "콜라" : wordName;
+
         const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "", img: "" };
         
         hideTooltip();
@@ -689,7 +703,7 @@
         }
 
         document.getElementById('backCategory').innerText = data.cate;
-        document.getElementById('koreanWord').innerText = wordName;
+        document.getElementById('koreanWord').innerText = displayWord;
         document.getElementById('koreanPron').innerText = data.pron;
         document.getElementById('hintPart').innerText = data.part;
         document.getElementById('hintCh').innerText = data.ch;
@@ -721,8 +735,7 @@
 
     function flipCard(event) {
         if (isRecording) return;
-        // 如果點擊到的是燈泡按鈕，不要觸發翻牌
-        if (event.target.closest('#btnLightbulb')) return;
+        if (event.target.closest('#btnLightbulb') || event.target.closest('.btn-top-action')) return;
         document.getElementById('vocabCard').classList.toggle('is-flipped');
     }
 
@@ -752,7 +765,8 @@
         if (event) event.stopPropagation(); 
         if (isRecording) return; 
 
-        const targetText = currentWords[currentIndex];
+        let targetText = currentWords[currentIndex];
+        if (targetText === "콜拉") targetText = "콜라";
         if (!targetText) return;
         
         try {
@@ -804,21 +818,18 @@
         document.getElementById('btnMic').classList.remove('recording');
     }
 
-    // 點擊燈泡：切換顯示/隱藏
     function toggleTooltip(event) {
-        event.stopPropagation(); // 阻止事件冒泡
+        event.stopPropagation(); 
         const ansBox = document.getElementById('chineseAnswerBox');
         const bulb = document.getElementById('btnLightbulb');
         ansBox.classList.toggle('show');
         bulb.classList.toggle('active');
     }
 
-    // 全域點擊邏輯：只要點擊畫面的任何位置，都會自動將提示框關閉隱藏
     function handleGlobalClick() {
         hideTooltip();
     }
 
-    // 隱藏提示框與燈泡高亮狀態
     function hideTooltip() {
         document.getElementById('chineseAnswerBox').classList.remove('show');
         document.getElementById('btnLightbulb').classList.remove('active');
@@ -831,14 +842,12 @@
         setTimeout(() => { toast.style.opacity = "0"; }, 2300);
     }
 
-    // 鍵盤操作
     document.addEventListener('keydown', function(e) {
         if (e.code === 'Space') { e.preventDefault(); document.getElementById('vocabCard').classList.toggle('is-flipped'); }
         else if (e.code === 'ArrowLeft') { prevCard(); }
         else if (e.code === 'ArrowRight') { nextCard(); }
     });
 
-    // 手機滑動手勢
     const swipeArea = document.getElementById('swipeArea');
     swipeArea.addEventListener('touchstart', function(e) {
         if (e.target.closest('button')) return;
