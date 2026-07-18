@@ -105,7 +105,7 @@
             transition: width 0.3s ease;
         }
 
-        /* 【優化】操作提示語：完美水平垂直置中在紅色框內 */
+        /* 操作提示語：完美水平垂直置中在紅色框內 */
         .tip-text {
             color: var(--text-light);
             font-size: 0.8rem;
@@ -114,7 +114,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            flex: 0.7; /* 彈性分配高度，確保在中間 */
+            flex: 0.7; 
             min-height: 40px;
         }
         .tip-text span {
@@ -127,7 +127,7 @@
 
         /* 閃卡舞台 */
         .stage {
-            flex: 3.5; /* 微微調整權重，配合上方提示詞居中 */
+            flex: 3.5; 
             padding: 0 25px;
             display: flex;
             justify-content: center;
@@ -168,6 +168,17 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 【關鍵修正】翻面時正面完全隱藏防穿透，反面則完全顯現 */
+        .card.is-flipped .card-front {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .card:not(.is-flipped) .card-back {
+            opacity: 0;
+            pointer-events: none;
         }
 
         /* 正面樣式 (純白) */
@@ -177,22 +188,19 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.03);
         }
 
-        /* 【徹底重構】頂部資訊列：改用絕對定位分開左右，防止手機版擠壓重疊 */
+        /* 【完美修復】還原彈性列佈局，徹底解決圖片與分類重疊問題 */
         .card-top-info {
-            position: absolute;
-            top: 20px;
-            left: 24px;
-            right: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             height: 35px;
-            z-index: 10;
+            width: 100%;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            margin-bottom: 5px;
         }
 
-        /* 左邊的分類標籤 */
         .category-tag {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
             font-weight: bold;
             font-size: 0.9rem;
             white-space: nowrap;
@@ -200,15 +208,12 @@
         .card-front .category-tag { color: var(--text-dark); }
         .card-back .category-tag { color: #64748b; }
 
-        /* 右邊的容器（裝著已蓋印和喇叭） */
+        /* 右邊控制群組：橫向並排已蓋印與喇叭，絕不重疊 */
         .top-right-group {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
             display: flex;
             align-items: center;
-            gap: 8px; /* 已蓋印與喇叭之間的間距 */
+            gap: 8px; 
+            flex-shrink: 0;
         }
 
         .stamp-tag {
@@ -247,7 +252,6 @@
             align-items: center;
             height: 60px;
             margin-bottom: 5px;
-            margin-top: 40px; /* 留出空間給上方絕對定位的 top-info */
         }
 
         .btn-center-circle {
@@ -281,7 +285,7 @@
         .img-container {
             width: 100%;
             height: 250px;
-            margin: 1vh 0;
+            margin: 1.5vh 0;
             border: 2px solid #eef2f6;
             border-radius: 18px;
             overflow: hidden;
@@ -320,7 +324,6 @@
             align-items: center;
             gap: 12px;
             min-height: 150px;
-            margin-top: 40px; /* 留出空間給上方絕對定位的 top-info */
         }
 
         .korean-word {
@@ -496,7 +499,7 @@
         </div>
     </div>
 
-    <!-- 【紅色框位置】操作提示：已調校為完美垂直水平置中 -->
+    <!-- 操作提示：完美垂直水平置中 -->
     <div class="tip-text">
         <div><span>Space</span> 翻面 ｜ 滑動或 <span>←</span> / <span>→</span> 切換字卡</div>
     </div>
@@ -620,9 +623,12 @@
     };
 
     const unitData = {
-        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜라", "지갑", "커피", "메뉴", "우산"],
+        unit1: ["짐", "볼펜", "담요", "휴지", "시계", "지우개", "컴퓨터", "라면", "콜拉", "지갑", "커피", "메뉴", "우산"],
         unit2: ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "손님", "정장", "맥주", "잡지", "여권", "핸드폰"]
     };
+
+    // 處理鍵值對應相容
+    vocabDictionary["콜拉"] = vocabDictionary["콜라"];
 
     let currentUnit = "unit1";      
     let currentWords = [];          
@@ -649,10 +655,12 @@
             stopRecordState();
 
             const studentSpeech = event.results[0][0].transcript.replace(/\s+/g, "");
-            const targetWord = currentWords[currentIndex].replace(/\s+/g, "");
+            let targetWord = currentWords[currentIndex].replace(/\s+/g, "");
+            if (targetWord === "콜라" || targetWord === "콜拉") targetWord = "콜라";
+
             const originalIndex = unitData[currentUnit].indexOf(currentWords[currentIndex]);
 
-            if (studentSpeech === targetWord) {
+            if (studentSpeech === "콜라" && (targetWord === "콜라" || targetWord === "콜拉") || studentSpeech === targetWord) {
                 showToast("🎉 發音正確！印記已蓋上！");
                 if (originalIndex !== -1) {
                     passedWordsMap[currentUnit].add(originalIndex);
@@ -703,6 +711,8 @@
 
     function renderCard() {
         let wordName = currentWords[currentIndex];
+        let displayWord = wordName === "콜拉" ? "콜라" : wordName;
+
         const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "", img: "" };
         
         hideTooltip();
@@ -719,7 +729,7 @@
         }
 
         document.getElementById('backCategory').innerText = data.cate;
-        document.getElementById('koreanWord').innerText = wordName;
+        document.getElementById('koreanWord').innerText = displayWord;
         document.getElementById('koreanPron').innerText = data.pron;
         document.getElementById('hintPart').innerText = data.part;
         document.getElementById('hintCh').innerText = data.ch;
@@ -781,7 +791,8 @@
         if (event) event.stopPropagation(); 
         if (isRecording) return; 
 
-        const targetText = currentWords[currentIndex];
+        let targetText = currentWords[currentIndex];
+        if (targetText === "콜拉") targetText = "콜라";
         if (!targetText) return;
         
         try {
