@@ -19,7 +19,7 @@
             --orange: #ff9200;
         }
 
-        /* 完美鎖定全螢幕，禁止不必要的上下捲動 */
+        /* 鎖定全螢幕，禁止不必要的上下捲動 */
         html, body {
             margin: 0;
             padding: 0;
@@ -47,7 +47,7 @@
             overflow: hidden;
         }
 
-        /* 1. 頂部標題與進度 */
+        /* 頂部標題與進度 */
         .header {
             padding: 4vh 20px 1.5vh 20px;
             display: flex;
@@ -121,7 +121,7 @@
             margin: 0 2px;
         }
 
-        /* 2. 核心閃卡舞台 */
+        /* 閃卡舞台 */
         .stage {
             flex: 1;
             padding: 0 25px;
@@ -201,7 +201,7 @@
         }
         .stamp-tag.active { opacity: 1; }
 
-        /* 右上角正面喇叭 */
+        /* 右上角語音播放鍵 (正反面統一位置) */
         .btn-top-action {
             background: none;
             border: none;
@@ -209,11 +209,12 @@
             cursor: pointer;
             padding: 6px;
             transition: transform 0.2s, color 0.2s;
-            color: var(--text-dark);
         }
-        .btn-top-action.playing { color: var(--primary); }
+        .card-front .btn-top-action { color: var(--text-dark); }
+        .card-back .btn-top-action { color: #ffffff; } /* 反面右上角喇叭改為白色 */
+        .btn-top-action.playing { color: var(--primary) !important; }
 
-        /* 核心大按鈕框架 (正反面位置完全同座標重疊) */
+        /* 正面大中央：麥克風錄音 */
         .center-action-box {
             display: flex;
             justify-content: center;
@@ -222,7 +223,6 @@
             margin-bottom: 5px;
         }
 
-        /* 核心圓形大按鈕 (正面麥克風、反面語音播放位置與正面相同) */
         .btn-center-circle {
             border: none;
             width: 55px;
@@ -234,26 +234,13 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-        }
-        /* 正面大麥克風色彩 */
-        .card-front .btn-center-circle {
             background: var(--primary-light);
             color: var(--primary);
         }
-        .card-front .btn-center-circle.recording {
+        .btn-center-circle.recording {
             background: #fde8e8;
             color: var(--danger);
             animation: pulse 1.3s infinite;
-        }
-        /* 反面大喇叭色彩 (改為白色背景，與設計圖相同) */
-        .card-back .btn-center-circle {
-            background: #ffffff;
-            color: #64748b;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
-        .card-back .btn-center-circle.playing {
-            background: var(--primary-light);
-            color: var(--primary);
         }
         .btn-center-circle:active { transform: scale(0.92); }
 
@@ -299,13 +286,13 @@
 
         /* 反面核心內文區 */
         .back-main-content {
-            height: 250px;
-            margin: 1.5vh 0;
+            flex: 1; /* 彈性拉伸，取代原先寫死的固定高度 */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 12px;
+            min-height: 150px;
         }
 
         .korean-word {
@@ -336,7 +323,7 @@
             margin-bottom: 5px;
         }
 
-        /* 控制列：將燈泡💡移到原設計圖紅色區塊的位置（釋義框外右上方） */
+        /* 控制列：點選燈泡💡會在右上方紅色區塊顯示 */
         .back-control-row {
             position: absolute;
             top: -45px; 
@@ -368,7 +355,7 @@
             transform: translateY(0);
         }
 
-        /* 移到紅色區塊位置的燈泡💡按鈕 */
+        /* 紅色區塊位置的燈泡💡按鈕 */
         .btn-inline-lightbulb {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -388,24 +375,25 @@
             color: white;
         }
 
-        /* 反面最下方釋義區 */
+        /* 【優化放大】反面最下方釋義區：放大高度以容納長說明，保持畫面一致性 */
         .definition-block {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
-            padding: 18px;
+            padding: 20px;
             text-align: center;
             font-size: 0.95rem;
             color: #94a3b8;
-            line-height: 1.5;
-            height: 65px;
+            line-height: 1.6;
+            height: 95px; /* 高度從 65px 加大到 95px，容納更多行數 */
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
             width: 100%;
+            overflow-y: auto; /* 若字數真的極多，允許微幅內部捲動 */
         }
 
-        /* 3. 底部導覽列 */
+        /* 底部導覽列 */
         .nav-footer {
             padding: 2vh 25px 4vh 25px;
             background: #f8fafc;
@@ -460,7 +448,7 @@
 </head>
 <body>
 
-<div class="phone-window">
+<div class="phone-window" onclick="handleGlobalClick()">
     <!-- 頂部標頭 -->
     <div class="header">
         <div class="title-area">
@@ -488,14 +476,14 @@
     <!-- 卡片舞台 -->
     <div class="stage">
         <div class="card-container" id="swipeArea">
-            <div class="card" id="vocabCard" onclick="flipCard()">
+            <div class="card" id="vocabCard" onclick="flipCard(event)">
                 
                 <!-- 正面 (白色) -->
                 <div class="card-face card-front">
                     <div class="card-top-info">
                         <span class="category-tag" id="frontCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_front">✓ 已蓋印</span>
-                        <!-- 右上角固定為正面喇叭播放鍵 -->
+                        <!-- 正面右上角語音播放鍵 -->
                         <button class="btn-top-action" id="speakerFront" onclick="speakStandard(event)">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
@@ -506,7 +494,6 @@
                         <span class="no-img-text" id="noImgText"> canva 圖片放置區 </span>
                     </div>
 
-                    <!-- 正面大中央：麥克風錄音 -->
                     <div class="center-action-box">
                         <button class="btn-center-circle" id="btnMic" onclick="toggleRecord(event)">
                             <i class="fa-solid fa-microphone"></i>
@@ -519,7 +506,10 @@
                     <div class="card-top-info">
                         <span class="category-tag" id="backCategory">分類</span>
                         <span class="stamp-tag" id="stampTag_back">✓ 已蓋印</span>
-                        <span style="width:30px;"></span> <!-- 右上角留空，維持對齊美感 -->
+                        <!-- 反面右上角語音播放鍵（與正面位置一模一樣） -->
+                        <button class="btn-top-action" id="speakerBack" onclick="speakStandard(event)">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
                     </div>
 
                     <!-- 反面核心內文區 -->
@@ -528,28 +518,20 @@
                         <span class="korean-pronunciation" id="koreanPron">發音標記</span>
                     </div>
 
-                    <!-- 反面大中央：語音播放鍵（位置與正面大麥克風完全一致） -->
-                    <div class="center-action-box">
-                        <button class="btn-center-circle" id="speakerBack" onclick="speakStandard(event)">
-                            <i class="fa-solid fa-volume-high"></i>
-                        </button>
-                    </div>
-
                     <!-- 底部釋義與新中文控制區 -->
                     <div class="definition-wrapper">
                         
-                        <!-- 控制列：內含點擊會消失的方框以及移至此處的燈泡💡 -->
+                        <!-- 控制列 -->
                         <div class="back-control-row">
-                            <!-- 點選方框本身也可以讓方框隱藏 -->
-                            <div class="chinese-answer-badge" id="chineseAnswerBox" onclick="toggleTooltip(event)">
+                            <div class="chinese-answer-badge" id="chineseAnswerBox">
                                 <span id="hintPart">詞性</span> ｜ <span id="hintCh">中文意思</span>
                             </div>
-                            <!-- 移到右下方的燈泡按鈕 -->
                             <button class="btn-inline-lightbulb" id="btnLightbulb" onclick="toggleTooltip(event)">
                                 <i class="fa-solid fa-lightbulb"></i>
                             </button>
                         </div>
 
+                        <!-- 加大的釋義區塊 -->
                         <div class="definition-block" id="definitionText">
                             釋義
                         </div>
@@ -562,8 +544,8 @@
 
     <!-- 底部導覽按鈕 -->
     <div class="nav-footer">
-        <button class="btn-nav btn-prev" onclick="prevCard()"><i class="fa-solid fa-chevron-left"></i> 上一個</button>
-        <button class="btn-nav btn-next" onclick="nextCard()">下一個 <i class="fa-solid fa-chevron-right"></i></button>
+        <button class="btn-nav btn-prev" onclick="prevCard(event)"><i class="fa-solid fa-chevron-left"></i> 上一個</button>
+        <button class="btn-nav btn-next" onclick="nextCard(event)">下一個 <i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
     <!-- 狀態提示框 -->
@@ -585,7 +567,7 @@
         "라면": { ch: "泡麵", part: "名詞", cate: "食物", pron: "[라면]", def: "油炸過、加熱水與調味包即可食用的速食麵", img: "" },
         "콜拉": { ch: "可樂", part: "名詞", cate: "飲料", pron: "[콜拉]", def: "一種黑色的碳酸甜味氣泡飲料", img: "" },
         "지갑": { ch: "錢包", part: "名詞", cate: "生活", pron: "[지갑]", def: "用來收納現金、信用卡和證件的小包", img: "" },
-        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品", img: "" },
+        "커피": { ch: "咖啡", part: "名詞", cate: "飲料", pron: "[커피]", def: "用烘焙咖啡豆萃取出的提神苦味飲品。未來如果此處有較長的敘述說明文字，拉高後的區塊也能提供非常舒適的閱讀排版空間，保持畫面一致性。", img: "" },
         "메뉴": { ch: "菜單", part: "名詞", cate: "餐飲", pron: "[메뉴]", def: "餐廳內記載菜色名稱與價格的單子", img: "" },
         "우산": { ch: "雨傘", part: "名詞", cate: "生活", pron: "[우산]", def: "下雨天用來遮雨、擋水的隨身工具", img: "" },
 
@@ -652,51 +634,24 @@
             resetIdleTimer();
         };
 
-        recognition.onend = function() { 
-            if (isRecording) stopRecordState(); 
-        };
-        recognition.onerror = function() { 
-            stopRecordState(); 
-            showToast("錄音辨識出錯或已自動休眠。"); 
-        };
+        recognition.onend = function() { if (isRecording) stopRecordState(); };
+        recognition.onerror = function() { stopRecordState(); showToast("錄音辨識出錯。"); };
     }
 
-    // ==========================================
-    // 【 核心智慧休眠邏輯 】
-    // ==========================================
     function resetIdleTimer() {
         clearTimeout(globalIdleTimer);
         globalIdleTimer = setTimeout(triggerMicrophoneSleep, IDLE_LIMIT);
     }
 
     function triggerMicrophoneSleep() {
-        if (isRecording && recognition) {
-            recognition.stop();
-        }
+        if (isRecording && recognition) recognition.stop();
         stopRecordState();
-        showToast("💤 偵測到畫面閒置過久，麥克風已自動休息。");
     }
-
-    document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-            if (isRecording && recognition) {
-                recognition.stop();
-            }
-            stopRecordState();
-            clearTimeout(globalIdleTimer);
-        } else {
-            resetIdleTimer();
-        }
-    });
 
     ['click', 'touchstart', 'keydown'].forEach(evt => {
         document.addEventListener(evt, resetIdleTimer, { passive: true });
     });
 
-
-    // ==========================================
-    // 【 核心功能控制 】
-    // ==========================================
     function shuffleArray(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -710,23 +665,16 @@
         if (isRecording) return;
         currentUnit = unitKey;
         currentIndex = 0;
-        
-        if (!passedWordsMap[currentUnit]) {
-            passedWordsMap[currentUnit] = new Set();
-        }
-
-        const baseWords = unitData[unitKey] || [];
-        currentWords = shuffleArray(baseWords);
-        
+        if (!passedWordsMap[currentUnit]) passedWordsMap[currentUnit] = new Set();
+        currentWords = shuffleArray(unitData[unitKey] || []);
         renderCard();
         updateProgress();
     }
 
     function renderCard() {
         const wordName = currentWords[currentIndex];
-        const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "尚未建立字典敘述", img: "" };
+        const data = vocabDictionary[wordName] || { ch: "未定義", part: "未知", cate: "一般", pron: "[]", def: "", img: "" };
         
-        // 換字（切換、跳出畫面）時，預設將提示框與燈泡高亮狀態通通隱藏消除
         hideTooltip();
         document.getElementById('vocabCard').classList.remove('is-flipped');
 
@@ -747,54 +695,39 @@
         document.getElementById('hintCh').innerText = data.ch;
         document.getElementById('definitionText').innerText = data.def;
 
-        const originalIndex = unitData[currentUnit].indexOf(wordName);
-        const stampFront = document.getElementById('stampTag_front');
-        const stampBack = document.getElementById('stampTag_back');
-        
-        if (originalIndex !== -1 && passedWordsMap[currentUnit].has(originalIndex)) {
-            stampFront.classList.add('active');
-            stampBack.classList.add('active');
-        } else {
-            stampFront.classList.remove('active');
-            stampBack.classList.remove('active');
-        }
+        updateProgress();
     }
 
     function updateProgress() {
         const total = currentWords.length;
-        const passedCount = passedWordsMap[currentUnit].size;
+        const passedCount = passedWordsMap[currentUnit] ? passedWordsMap[currentUnit].size : 0;
         
         document.getElementById('progressText').innerText = `學習進度 : ${passedCount} / ${total}`;
-        
-        const percent = total > 0 ? (passedCount / total) * 100 : 0;
-        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressBar').style.width = `${total > 0 ? (passedCount / total) * 100 : 0}%`;
 
         const wordName = currentWords[currentIndex];
         const originalIndex = unitData[currentUnit].indexOf(wordName);
         const stampFront = document.getElementById('stampTag_front');
         const stampBack = document.getElementById('stampTag_back');
         
-        if (originalIndex !== -1 && passedWordsMap[currentUnit].has(originalIndex)) {
+        if (originalIndex !== -1 && passedWordsMap[currentUnit] && passedWordsMap[currentUnit].has(originalIndex)) {
             stampFront.classList.add('active');
             stampBack.classList.add('active');
         } else {
             stampFront.classList.remove('active');
             stampBack.classList.remove('active');
         }
-
-        if (passedCount === total && total > 0) {
-            setTimeout(() => {
-                alert(`🏆 恭喜！您已隨機完成【${document.getElementById('unitSelector').selectedOptions[0].text}】的所有單字蓋印！`);
-            }, 500);
-        }
     }
 
-    function flipCard() {
+    function flipCard(event) {
         if (isRecording) return;
+        // 如果點擊到的是燈泡按鈕，不要觸發翻牌
+        if (event.target.closest('#btnLightbulb')) return;
         document.getElementById('vocabCard').classList.toggle('is-flipped');
     }
 
-    function prevCard() {
+    function prevCard(event) {
+        if (event) event.stopPropagation();
         if (isRecording) return;
         if (currentIndex > 0) {
             currentIndex--;
@@ -804,7 +737,8 @@
         }
     }
 
-    function nextCard() {
+    function nextCard(event) {
+        if (event) event.stopPropagation();
         if (isRecording) return;
         if (currentIndex < currentWords.length - 1) {
             currentIndex++;
@@ -815,7 +749,7 @@
     }
 
     function speakStandard(event) {
-        if (event) event.stopPropagation(); // 阻止翻牌
+        if (event) event.stopPropagation(); 
         if (isRecording) return; 
 
         const targetText = currentWords[currentIndex];
@@ -837,16 +771,12 @@
                 spkBack.classList.remove('playing');
             };
 
-            const voices = window.speechSynthesis.getVoices();
-            const defaultKo = voices.find(v => v.lang.startsWith('ko'));
-            if (defaultKo) utterance.voice = defaultKo;
-            
             window.speechSynthesis.speak(utterance);
         } catch(e) { console.error(e); }
     }
 
     function toggleRecord(event) {
-        if (event) event.stopPropagation(); // 阻止翻牌
+        if (event) event.stopPropagation(); 
         if (!recognition) { showToast("瀏覽器不支援錄音。"); return; }
 
         resetIdleTimer(); 
@@ -855,10 +785,7 @@
             isRecording = true;
             document.getElementById('btnMic').classList.add('recording');
             showToast("🎤 錄音中，請開始發音...");
-            
-            try {
-                recognition.start();
-            } catch(e) { console.log("錄音重啟中..."); }
+            try { recognition.start(); } catch(e) {}
 
             singleSpeechTimer = setTimeout(() => {
                 if (isRecording) {
@@ -877,16 +804,21 @@
         document.getElementById('btnMic').classList.remove('recording');
     }
 
-    // 控制「中文釋義提示方框」切換顯示（點擊燈泡或方框都會觸發切換與隱藏）
+    // 點擊燈泡：切換顯示/隱藏
     function toggleTooltip(event) {
-        event.stopPropagation(); // 阻止觸發翻牌
+        event.stopPropagation(); // 阻止事件冒泡
         const ansBox = document.getElementById('chineseAnswerBox');
         const bulb = document.getElementById('btnLightbulb');
         ansBox.classList.toggle('show');
         bulb.classList.toggle('active');
     }
 
-    // 強制穩固關閉方框（用於切換頁面或換字卡時）
+    // 全域點擊邏輯：只要點擊畫面的任何位置，都會自動將提示框關閉隱藏
+    function handleGlobalClick() {
+        hideTooltip();
+    }
+
+    // 隱藏提示框與燈泡高亮狀態
     function hideTooltip() {
         document.getElementById('chineseAnswerBox').classList.remove('show');
         document.getElementById('btnLightbulb').classList.remove('active');
@@ -899,48 +831,29 @@
         setTimeout(() => { toast.style.opacity = "0"; }, 2300);
     }
 
-    // 電腦鍵盤
+    // 鍵盤操作
     document.addEventListener('keydown', function(e) {
-        if (e.code === 'Space') { 
-            e.preventDefault(); 
-            flipCard(); 
-        } else if (e.code === 'ArrowLeft') { 
-            prevCard(); 
-        } else if (e.code === 'ArrowRight') { 
-            nextCard(); 
-        }
+        if (e.code === 'Space') { e.preventDefault(); document.getElementById('vocabCard').classList.toggle('is-flipped'); }
+        else if (e.code === 'ArrowLeft') { prevCard(); }
+        else if (e.code === 'ArrowRight') { nextCard(); }
     });
 
-    // 手機滑動
+    // 手機滑動手勢
     const swipeArea = document.getElementById('swipeArea');
     swipeArea.addEventListener('touchstart', function(e) {
-        if (e.target.closest('button') || e.target.closest('#chineseAnswerBox')) return;
+        if (e.target.closest('button')) return;
         touchStartX = e.changedTouches[0].screenX;
     }, false);
 
     swipeArea.addEventListener('touchend', function(e) {
-        if (e.target.closest('button') || e.target.closest('#chineseAnswerBox')) return;
+        if (e.target.closest('button')) return;
         touchEndX = e.changedTouches[0].screenX;
-        handleSwipeGesture();
+        const threshold = 60;
+        if (touchStartX - touchEndX > threshold) nextCard();
+        else if (touchEndX - touchStartX > threshold) prevCard();
     }, false);
 
-    function handleSwipeGesture() {
-        const threshold = 60;
-        if (touchStartX - touchEndX > threshold) {
-            nextCard();
-        } else if (touchEndX - touchStartX > threshold) {
-            prevCard();
-        }
-    }
-
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-    }
-
-    window.onload = () => { 
-        changeUnit("unit1"); 
-        resetIdleTimer(); 
-    };
+    window.onload = () => { changeUnit("unit1"); resetIdleTimer(); };
 </script>
 </body>
 </html>
