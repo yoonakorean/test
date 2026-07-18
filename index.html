@@ -222,16 +222,16 @@
 
     <!-- 閃卡容器 -->
     <div class="card-container">
-        <!-- 點擊問號跳出提示，阻擋冒泡不翻牌 -->
+        <!-- 點擊問號跳出提示 -->
         <button class="hint-btn" onclick="openModal(event)">?</button>
         
         <div class="card" id="vocabCard" onclick="flipCard()">
             <!-- 正面 -->
             <div class="card-face card-front">
-                <!-- Canva 免費素材或 AI 生成圖預留位 -->
+                <!-- Canva 免費素材或 AI 生成圖預留位（可貼網址，不放就是灰色底色） -->
                 <img src="" alt="單字圖片" class="vocab-img" id="vocabImg">
                 <div class="control-group" onclick="event.stopPropagation();">
-                    <button class="btn btn-audio" id="btnAudioFront" onclick="playAudio()">🔊 播音</button>
+                    <button class="btn btn-audio" id="btnAudioFront" onclick="speakStandard()">🔊 播音</button>
                     <button class="btn btn-record" id="btnRecord" onclick="toggleRecord()">🎤 錄音</button>
                 </div>
             </div>
@@ -241,7 +241,7 @@
                 <h1 class="korean-word" id="koreanWord">사과</h1>
                 <p class="pronunciation" id="pronunciation">[sa-gwa]</p>
                 <div onclick="event.stopPropagation();">
-                    <button class="btn btn-audio" id="btnAudioBack" onclick="playAudio()">🔊 播音</button>
+                    <button class="btn btn-audio" id="btnAudioBack" onclick="speakStandard()">🔊 播音</button>
                 </div>
             </div>
         </div>
@@ -264,7 +264,8 @@
 
 <script>
     // ==========================================
-    // 這裡可以直接修改單字、發音法、中譯、音檔與圖片
+    // 這裡可以直接修改單字、發音法、中譯、詞性、圖片
+    // 備註：已經移除舊有的 audio 欄位，發音改由 AI 原生自動合成
     // ==========================================
     const vocabList = [
         { 
@@ -272,16 +273,14 @@
             pron: "sa-gwa",
             ch: "蘋果", 
             part: "名詞",
-            img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400", // 預留 Canva / AI 圖位
-            audio: "https://actions.google.com/sounds/v1/cartoon/cartoon_cowbell.ogg" // 預留韓文標準音檔
+            img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" 
         },
         { 
             word: "우유", 
             pron: "u-yu",
             ch: "牛奶", 
             part: "名詞",
-            img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400", 
-            audio: "https://actions.google.com/sounds/v1/cartoon/pop.ogg" 
+            img: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400" 
         }
     ];
 
@@ -340,8 +339,6 @@
 
     // 初始化單元遊戲
     function initUnit() {
-        // 讀取本地進度（若未來要串接，此處可做判斷）
-        // 隨機打亂題目庫
         currentPool = vocabList.map((_, i) => i);
         nextQuestion();
     }
@@ -379,22 +376,55 @@
 
     // 翻轉卡片
     function flipCard() {
-        // 如果正在錄音，不允許翻牌
-        if (isRecording) return;
+        if (isRecording) return; // 如果正在錄音，不允許翻牌
         document.getElementById('vocabCard').classList.toggle('is-flipped');
     }
 
-    // 播放標準音檔
-    function playAudio() {
+    // 🔊 播放標準女聲 (整合原生優質女聲發音系統)
+    function speakStandard() {
         // 修正需求：錄音時不可以播放音檔
         if (isRecording) return; 
 
-        const audioUrl = vocabList[currentIndex].audio;
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => {
-            console.log("音檔播放失敗，請檢查 URL 是否正確：", e);
-            document.getElementById('statusMsg').innerText = "🔊 暫無音檔或載入失敗";
-        });
+        // 串接當前卡片的單字 (vocabList[currentIndex].word)
+        const targetText = vocabList[currentIndex].word;
+        console.log("正在播放標準韓文女聲：" + targetText);
+        
+        try {
+            window.speechSynthesis.cancel(); 
+
+            const utterance = new SpeechSynthesisUtterance(targetText);
+            utterance.lang = 'ko-KR'; 
+            utterance.rate = 0.85; // 維持原設定之略慢速，方便學生聽得更清楚
+
+            const voices = window.speechSynthesis.getVoices();
+            
+            // 強制過濾並選取最溫柔自然的韓語「女聲」發音人
+            const femaleKoreanVoice = voices.find(v => v.lang.startsWith('ko') && 
+                (v.name.toLowerCase().includes('female') || 
+                 v.name.toLowerCase().includes('sunhi') || 
+                 v.name.toLowerCase().includes('google') || 
+                 v.name.toLowerCase().includes('siri') ||
+                 v.name.toLowerCase().includes('yuna') ||
+                 v.name.toLowerCase().includes('hj'))); 
+            
+            if (femaleKoreanVoice) {
+                utterance.voice = femaleKoreanVoice;
+                console.log("成功套用標準女聲: " + femaleKoreanVoice.name);
+            } else {
+                const defaultKo = voices.find(v => v.lang.startsWith('ko'));
+                if (defaultKo) utterance.voice = defaultKo;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+
+        } catch(e) {
+            console.error("語音播放失敗：", e);
+        }
+    }
+
+    // 預先觸發一次以喚醒 Chrome 的 getVoices 系統（防止部分手機和瀏覽器首發沒聲音）
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
     // 開啟/關閉 錄音功能
@@ -414,8 +444,7 @@
 
             recognition.start();
 
-            // 修正需求：畫面停滯（無聲音輸入）時，自動關閉麥克風
-            // 設定 5 秒靜音計時器，5 秒內沒說話自動切斷麥克風
+            // 畫面停滯（無聲音輸入）時，5 秒自動關閉麥克風
             autoCloseTimer = setTimeout(() => {
                 if (isRecording) {
                     recognition.stop();
