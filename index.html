@@ -112,7 +112,6 @@
       margin-top: 8px;
     }
 
-    /* 筆畫動態展示區 */
     .stroke-animation-container {
       width: 100px;
       height: 100px;
@@ -199,66 +198,34 @@
       width: 100%;
     }
 
-    .btn-primary:hover:not(:disabled) {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background-color: #718096;
+    .btn-remember {
+      background-color: #2ECC71;
       color: white;
       border: none;
-      width: 100%;
-      padding: 12px;
-      font-size: 0.95rem;
-    }
-
-    .btn-secondary:hover {
-      background-color: #4A5568;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .speech-container {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .speech-btn {
-      background-color: #FFF0F0;
-      border: 2px solid #FFD6D6;
-      color: #E74C3C;
+      flex: 1;
       padding: 16px;
-      border-radius: 50px;
       font-size: 1.1rem;
-      font-weight: 600;
+      border-radius: 12px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s;
+      font-weight: 600;
     }
 
-    .speech-btn.recording {
+    .btn-review {
       background-color: #E74C3C;
       color: white;
-      animation: pulse 1.5s infinite;
+      border: none;
+      flex: 1;
+      padding: 16px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
     }
 
-    .speech-status {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-      70% { box-shadow: 0 0 0 12px rgba(231, 76, 60, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+    .self-eval-container {
+      display: flex;
+      gap: 12px;
+      width: 100%;
     }
 
     .feedback-panel {
@@ -283,11 +250,6 @@
       color: #C0392B;
       border: 1px solid #F9E79F;
       display: flex;
-    }
-
-    .feedback-panel .correct-answer {
-      font-size: 0.95rem;
-      color: var(--text-main);
     }
 
     .unit-selector {
@@ -321,8 +283,8 @@
     </div>
     <h1 id="stageTitle">階段一：認識字母</h1>
     <div class="nav-controls">
-      <span id="stepIndicator">Step 1 / 4</span>
-      <span id="queueIndicator">剩餘卡片: 0</span>
+      <span id="stepIndicator">解鎖題型: Step 1</span>
+      <span id="queueIndicator">待複習卡片: 0</span>
     </div>
     <div class="progress-bar-container">
       <div class="progress-bar" id="progressBar"></div>
@@ -342,11 +304,10 @@
     </button>
   </div>
 
-  <!-- 反饋與解答提示區 -->
+  <!-- 反饋提示區 -->
   <div class="feedback-panel" id="feedbackPanel">
-    <div id="feedbackText">答對了！</div>
-    <div class="correct-answer hidden" id="correctAnswerText"></div>
-    <button class="btn btn-secondary hidden" id="forcePassBtn" onclick="forcePassCard()">我確定唸對（強制通過）</button>
+    <div id="feedbackText">正解提示</div>
+    <div class="correct-answer" id="correctAnswerText"></div>
     <button class="btn btn-primary" id="nextBtn" onclick="nextCard()">繼續</button>
   </div>
 
@@ -410,77 +371,110 @@ const unitsData = {
 };
 
 let currentUnit = 1;
-let currentStage = 1;
-let currentStep = 1;
-let cardQueue = [];
-let currentCard = null;
-let previousCardId = null;
-let totalCardsCount = 0;
-let firstTryCorrectCount = 0;
-let isSecondAttempt = false;
+let currentStage = 1; // 1: 認識字母, 2: 認識單字
+let unlockedMaxStep = 1; // 當前解鎖的最大 Step (1~4 或 1~5)
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let isRecording = false;
+let activePool = []; // 混搭卡片佇列
+let currentTask = null; // 當前正在作答的項目 { item, step }
+let previousCardId = null;
+
+let totalTaskCount = 0;
+let correctTaskCount = 0;
 
 window.onload = () => {
   initStage();
 };
 
 function switchUnit() {
-  stopListening();
   currentUnit = parseInt(document.getElementById('unitSelect').value);
   currentStage = 1;
   initStage();
 }
 
 function initStage() {
-  stopListening();
-  firstTryCorrectCount = 0;
-  
+  unlockedMaxStep = 1;
+  totalTaskCount = 0;
+  correctTaskCount = 0;
+
+  // 根據階段載入原始資料
   let baseList = (currentStage === 1) 
     ? unitsData[currentUnit].stage1 
     : unitsData[currentUnit].stage2;
 
-  cardQueue = shuffle([...baseList]);
-  totalCardsCount = cardQueue.length;
-  
+  // 初始化混搭池，放第一個解鎖 Step 的任務
+  activePool = generateTasksForStep(baseList, 1);
+  totalTaskCount = activePool.length;
+
   updateHeaderUI();
-  loadNextCardInStep();
+  loadNextCard();
+}
+
+// 根據指定的 Step 生成任務卡
+function generateTasksForStep(itemList, step) {
+  return itemList.map(item => ({ item, step }));
 }
 
 function updateHeaderUI() {
+  const maxStep = (currentStage === 1) ? 4 : 5;
   document.getElementById('stageTitle').innerText = 
     `階段${currentStage === 1 ? '一：認識字母' : '二：認識單字'}`;
-  document.getElementById('stepIndicator').innerText = `Step ${currentStep} / ${currentStage === 1 ? 4 : 5}`;
-  document.getElementById('queueIndicator').innerText = `剩餘卡片: ${cardQueue.length}`;
+  document.getElementById('stepIndicator').innerText = `已解鎖題型: Step 1 ~ ${unlockedMaxStep}`;
+  document.getElementById('queueIndicator').innerText = `待練習卡片: ${activePool.length}`;
   
-  let progress = ((totalCardsCount - cardQueue.length) / totalCardsCount) * 100;
-  document.getElementById('progressBar').style.width = `${Math.max(progress, 0)}%`;
+  let progress = totalTaskCount > 0 ? (correctTaskCount / totalTaskCount) * 100 : 0;
+  document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
 }
 
-function loadNextCardInStep() {
-  stopListening();
+// 載入下一張題目
+function loadNextCard() {
   hideFeedback();
-  isSecondAttempt = false;
 
-  if (cardQueue.length === 0) {
-    checkStagePromotion();
+  // 檢查是否需要混搭下一個 Step (當前題庫正確率 >= 60%)
+  checkAndUnlockNextStep();
+
+  if (activePool.length === 0) {
+    completeStage();
     return;
   }
 
+  // 隨機抽選卡片（防連續出現）
+  activePool = shuffle(activePool);
   let cardIndex = 0;
-  if (cardQueue.length > 1 && cardQueue[0].id === previousCardId) {
+  if (activePool.length > 1 && activePool[0].item.id === previousCardId) {
     cardIndex = 1;
   }
 
-  currentCard = cardQueue.splice(cardIndex, 1)[0];
-  previousCardId = currentCard.id;
+  currentTask = activePool.splice(cardIndex, 1)[0];
+  previousCardId = currentTask.item.id;
 
   updateHeaderUI();
   renderCardUI();
 }
 
+// 判斷是否達標 60% 並解鎖下一個 Step 混搭
+function checkAndUnlockNextStep() {
+  const maxStep = (currentStage === 1) ? 4 : 5;
+  
+  if (unlockedMaxStep < maxStep) {
+    let currentRate = totalTaskCount > 0 ? (correctTaskCount / totalTaskCount) * 100 : 0;
+    
+    // 正確率達到 60% 且目前佇列數量偏少，解鎖下一個 Step 的題型進來混搭
+    if (currentRate >= 60 || activePool.length <= 2) {
+      unlockedMaxStep++;
+      let baseList = (currentStage === 1) ? unitsData[currentUnit].stage1 : unitsData[currentUnit].stage2;
+      let newTasks = generateTasksForStep(baseList, unlockedMaxStep);
+      
+      activePool.push(...newTasks);
+      totalTaskCount += newTasks.length;
+      
+      // 觸發解鎖動畫與提示
+      triggerFireworks();
+      updateHeaderUI();
+    }
+  }
+}
+
+// 渲染卡片核心介面
 function renderCardUI() {
   const mainText = document.getElementById('mainText');
   const subText = document.getElementById('subText');
@@ -494,62 +488,76 @@ function renderCardUI() {
   playAudioBtn.classList.remove('hidden');
   strokeContainer.classList.add('hidden');
 
+  const { item, step } = currentTask;
+
+  // ========== 階段一 (認識字母) 混搭題型 ==========
   if (currentStage === 1) {
-    if (currentStep === 1) {
-      mainText.innerText = currentCard.jp;
-      subText.innerText = currentCard.romaji;
-      renderStrokeAnimation(currentCard.jp);
-      playJpAudio(currentCard.jp);
-      renderSpeechInput(true);
+    if (step === 1) {
+      // Step 1: 秀日文+羅馬音+筆劃動畫，用「我記得/再複習一次」自評
+      mainText.innerText = item.jp;
+      subText.innerText = item.romaji;
+      renderStrokeAnimation(item.jp);
+      playJpAudio(item.jp);
+      renderSelfEvalButtons();
     } 
-    else if (currentStep === 2) {
-      mainText.innerText = currentCard.jp;
+    else if (step === 2) {
+      // Step 2: 秀日文選拼音
+      mainText.innerText = item.jp;
       subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage1, 'romaji', currentCard.romaji);
+      renderOptions(unitsData[currentUnit].stage1, 'romaji', item.romaji);
     } 
-    else if (currentStep === 3) {
+    else if (step === 3) {
+      // Step 3: 聽語音選日文
       mainText.innerText = '❓';
       subText.innerText = '';
-      playJpAudio(currentCard.jp);
-      renderOptions(unitsData[currentUnit].stage1, 'jp', currentCard.jp);
+      playJpAudio(item.jp);
+      renderOptions(unitsData[currentUnit].stage1, 'jp', item.jp);
     } 
-    else if (currentStep === 4) {
-      mainText.innerText = currentCard.jp;
+    else if (step === 4) {
+      // Step 4: 只秀日文，自評發音與記憶
+      mainText.innerText = item.jp;
       subText.innerText = '';
-      renderSpeechInput(false);
+      renderSelfEvalButtons();
     }
   } 
+  // ========== 階段二 (認識單字) 混搭題型 ==========
   else {
-    if (currentStep === 1) {
-      mainText.innerText = currentCard.jp;
-      subText.innerText = currentCard.zh;
-      playJpAudio(currentCard.jp);
-      renderSpeechInput(true);
+    if (step === 1) {
+      // Step 1: 秀日文+中文，自評記憶
+      mainText.innerText = item.jp;
+      subText.innerText = item.zh;
+      playJpAudio(item.jp);
+      renderSelfEvalButtons();
     } 
-    else if (currentStep === 2) {
-      mainText.innerText = currentCard.jp;
+    else if (step === 2) {
+      // Step 2: 秀日文選中文
+      mainText.innerText = item.jp;
       subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage2, 'zh', currentCard.zh);
+      renderOptions(unitsData[currentUnit].stage2, 'zh', item.zh);
     } 
-    else if (currentStep === 3) {
-      mainText.innerText = currentCard.zh;
+    else if (step === 3) {
+      // Step 3: 秀中文選日文
+      mainText.innerText = item.zh;
       subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage2, 'jp', currentCard.jp);
+      renderOptions(unitsData[currentUnit].stage2, 'jp', item.jp);
     } 
-    else if (currentStep === 4) {
+    else if (step === 4) {
+      // Step 4: 聽語音選日文
       mainText.innerText = '❓';
       subText.innerText = '';
-      playJpAudio(currentCard.jp);
-      renderOptions(unitsData[currentUnit].stage2, 'jp', currentCard.jp);
+      playJpAudio(item.jp);
+      renderOptions(unitsData[currentUnit].stage2, 'jp', item.jp);
     } 
-    else if (currentStep === 5) {
-      mainText.innerText = currentCard.jp;
+    else if (step === 5) {
+      // Step 5: 只秀日文，自評記憶
+      mainText.innerText = item.jp;
       subText.innerText = '';
-      renderSpeechInput(false);
+      renderSelfEvalButtons();
     }
   }
 }
 
+// 筆畫動畫
 function renderStrokeAnimation(char) {
   const strokeContainer = document.getElementById('strokeContainer');
   const svg = document.getElementById('strokeSvg');
@@ -572,6 +580,28 @@ function renderStrokeAnimation(char) {
   }
 }
 
+// 渲染自評按鈕 (替代語音辨識)
+function renderSelfEvalButtons() {
+  const interactiveArea = document.getElementById('interactiveArea');
+  const container = document.createElement('div');
+  container.className = 'self-eval-container';
+
+  const reviewBtn = document.createElement('button');
+  reviewBtn.className = 'btn-review';
+  reviewBtn.innerText = '🔴 再複習一次';
+  reviewBtn.onclick = () => handleSelfEval(false);
+
+  const rememberBtn = document.createElement('button');
+  rememberBtn.className = 'btn-remember';
+  rememberBtn.innerText = '🟢 我記得';
+  rememberBtn.onclick = () => handleSelfEval(true);
+
+  container.appendChild(reviewBtn);
+  container.appendChild(rememberBtn);
+  interactiveArea.appendChild(container);
+}
+
+// 渲染選擇題
 function renderOptions(sourceList, key, correctAnswer) {
   const interactiveArea = document.getElementById('interactiveArea');
   const grid = document.createElement('div');
@@ -591,238 +621,77 @@ function renderOptions(sourceList, key, correctAnswer) {
     const btn = document.createElement('button');
     btn.className = 'btn';
     btn.innerText = opt;
-    btn.onclick = () => handleAnswer(opt === correctAnswer, correctAnswer);
+    btn.onclick = () => handleOptionAnswer(opt === correctAnswer, correctAnswer);
     grid.appendChild(btn);
   });
 
   interactiveArea.appendChild(grid);
 }
 
-function renderSpeechInput(autoAdvanceOnSuccess) {
-  const interactiveArea = document.getElementById('interactiveArea');
-  
-  const container = document.createElement('div');
-  container.className = 'speech-container';
-
-  const speechBtn = document.createElement('button');
-  speechBtn.className = 'speech-btn';
-  speechBtn.id = 'speechBtn';
-  speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
-  speechBtn.onclick = () => toggleListening(autoAdvanceOnSuccess);
-
-  const statusText = document.createElement('div');
-  statusText.className = 'speech-status';
-  statusText.id = 'speechStatus';
-  statusText.innerText = '點擊按鈕授權麥克風進行發音測驗，或直接點擊「我確定唸對」';
-
-  container.appendChild(speechBtn);
-  container.appendChild(statusText);
-  interactiveArea.appendChild(container);
-
-  // 在 Step 1 自動直接提供救援通關選項
-  if (currentStep === 1) {
-    showFeedback(true, '請點擊麥克風練習發音，或直接點擊「我確定唸對」完成跟讀', '', true);
-  }
-}
-
-function toggleListening(autoAdvance) {
-  if (isRecording) {
-    stopListening();
+// 自評處理 (升級 / 降級)
+function handleSelfEval(remembered) {
+  if (remembered) {
+    correctTaskCount++;
+    playJpAudio(currentTask.item.jp);
+    loadNextCard();
   } else {
-    startListening(autoAdvance);
+    // 降級：放回題庫佇列，隨機重新複習
+    activePool.push(currentTask);
+    showFeedback(false, '已加入錯題複習佇列', `正確解答：${currentTask.item.jp} (${currentTask.item.romaji || currentTask.item.zh})`);
   }
 }
 
-function startListening(autoAdvance) {
-  if (!SpeechRecognition) {
-    updateSpeechStatus('瀏覽器不支援 Speech API，請直接點擊「我確定唸對」。');
-    showFeedback(false, '瀏覽器不支援語音收音', '請點擊下方按鈕強制通過', true);
-    return;
-  }
-
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(() => {
-      runRecognition(autoAdvance);
-    })
-    .catch((err) => {
-      updateSpeechStatus('⚠️ 麥克風未授權，請直接點擊「我確定唸對」。');
-      showFeedback(false, '無法存取麥克風', '請點擊下方按鈕強制通過', true);
-    });
-}
-
-function runRecognition(autoAdvance) {
-  try {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'ja-JP';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    const speechBtn = document.getElementById('speechBtn');
-    if (speechBtn) {
-      speechBtn.classList.add('recording');
-      speechBtn.innerHTML = '🎙️ 錄音中...請發音';
-    }
-    updateSpeechStatus('系統聆聽中，請唸出日文...');
-
-    isRecording = true;
-    recognition.start();
-
-    recognition.onresult = (event) => {
-      stopListening();
-
-      const resultText = event.results[0][0].transcript;
-      updateSpeechStatus(`辨識結果：${resultText}`);
-
-      let isMatch = checkPronunciationMatch(resultText, currentCard.jp);
-
-      if (isMatch) {
-        if (!isSecondAttempt) {
-          firstTryCorrectCount++;
-        }
-        showFeedback(true, '語音辨識成功！', '', false);
-      } else {
-        isSecondAttempt = true;
-        if (!cardQueue.some(c => c.id === currentCard.id)) {
-          cardQueue.push(currentCard);
-        }
-        showFeedback(false, `辨識為「${resultText}」，未達標準`, `目標發音：${currentCard.jp}`, true);
-      }
-    };
-
-    recognition.onerror = (event) => {
-      stopListening();
-      updateSpeechStatus(`收音超時或出錯`);
-      showFeedback(false, '未檢測到聲音', `目標發音：${currentCard.jp}`, true);
-    };
-
-    recognition.onend = () => {
-      stopListening();
-    };
-
-  } catch (e) {
-    updateSpeechStatus('語音系統初始化失敗');
-    showFeedback(false, '語音系統異常', '', true);
-  }
-}
-
-function stopListening() {
-  isRecording = false;
-  if (recognition) {
-    try { recognition.stop(); } catch(e) {}
-  }
-  const speechBtn = document.getElementById('speechBtn');
-  if (speechBtn) {
-    speechBtn.classList.remove('recording');
-    speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
-  }
-}
-
-function updateSpeechStatus(msg) {
-  const statusEl = document.getElementById('speechStatus');
-  if (statusEl) statusEl.innerText = msg;
-}
-
-function checkPronunciationMatch(spoken, target) {
-  spoken = spoken.trim().toLowerCase();
-  target = target.trim().toLowerCase();
-  return spoken === target || spoken.includes(target) || target.includes(spoken);
-}
-
-// 【修復的核心】：點擊「我確定唸對」時正確累加分數並把卡片算作通關
-function forcePassCard() {
-  stopListening();
-  cardQueue = cardQueue.filter(c => c.id !== currentCard.id);
-  
-  if (!isSecondAttempt) {
-    firstTryCorrectCount++;
-  }
-  
-  playJpAudio(currentCard.jp);
-  showFeedback(true, '確認跟讀完成！點擊「繼續」進入下一題', '', false);
-}
-
-function handleAnswer(isCorrect, correctAnswer) {
-  stopListening();
+// 選擇題回答處理
+function handleOptionAnswer(isCorrect, correctAnswer) {
   if (isCorrect) {
-    if (!isSecondAttempt) {
-      firstTryCorrectCount++;
-    }
-    playJpAudio(currentCard.jp);
-    showFeedback(true, '答對了！', '', false);
+    correctTaskCount++;
+    playJpAudio(currentTask.item.jp);
+    loadNextCard();
   } else {
-    if (!cardQueue.some(c => c.id === currentCard.id)) {
-      cardQueue.push(currentCard);
-    }
-    showFeedback(false, '答錯了！', `正確解答：${correctAnswer}`, false);
+    // 降級：放回佇列
+    activePool.push(currentTask);
+    showFeedback(false, '答錯了，進入錯題佇列！', `正解：${correctAnswer}`);
   }
 }
 
-function showFeedback(isCorrect, msg, correctInfo, showForcePass = false) {
+function showFeedback(isCorrect, msg, correctInfo) {
   const panel = document.getElementById('feedbackPanel');
   const text = document.getElementById('feedbackText');
   const corrText = document.getElementById('correctAnswerText');
-  const forcePassBtn = document.getElementById('forcePassBtn');
 
   panel.className = `feedback-panel ${isCorrect ? 'correct' : 'wrong'}`;
   text.innerText = msg;
-
-  if (correctInfo) {
-    corrText.innerText = correctInfo;
-    corrText.classList.remove('hidden');
-  } else {
-    corrText.classList.add('hidden');
-  }
-
-  if (showForcePass) {
-    forcePassBtn.classList.remove('hidden');
-  } else {
-    forcePassBtn.classList.add('hidden');
-  }
-
+  corrText.innerText = correctInfo;
+  
   panel.style.display = 'flex';
 }
 
 function hideFeedback() {
   document.getElementById('feedbackPanel').style.display = 'none';
-  document.getElementById('forcePassBtn').classList.add('hidden');
 }
 
 function nextCard() {
-  stopListening();
-  loadNextCardInStep();
+  loadNextCard();
 }
 
-// 自動晉級判定
-function checkStagePromotion() {
-  let successRate = (firstTryCorrectCount / totalCardsCount) * 100;
-  
-  if (successRate >= 80) {
-    triggerFireworks();
-    playSuccessAudio();
+// 通關切換
+function completeStage() {
+  triggerFireworks();
+  playSuccessAudio();
 
-    let maxStep = currentStage === 1 ? 4 : 5;
-    if (currentStep < maxStep) {
-      alert(`🎉 太棒了！本 Step 完成度 ${Math.round(successRate)}%！自動晉級進入 Step ${currentStep + 1}`);
-      currentStep++;
-      initStage();
-    } else {
-      if (currentStage === 1) {
-        alert(`🏆 恭喜完成【階段一：認識字母】！即將進入【階段二：認識單字】`);
-        currentStage = 2;
-        initStage();
-      } else {
-        alert(`🎉 恭喜通關本單元所有階段！間隔重複學習系統已自動為您紀錄。`);
-      }
-    }
-  } else {
-    alert(`完成度為 ${Math.round(successRate)}%（未達80%標準）。將為您重新排程本 Step 練習！`);
+  if (currentStage === 1) {
+    alert(`🏆 恭喜完成【階段一：認識字母】！點擊確定解鎖進入【階段二：認識單字】`);
+    currentStage = 2;
     initStage();
+  } else {
+    alert(`🎉 恭喜通關本單元所有單字！系統已將複習進度記錄於間隔重複學習（SRS）系統中！`);
   }
 }
 
+// 語音發音與音效
 function playCurrentAudio() {
-  if (currentCard) {
-    playJpAudio(currentCard.jp);
+  if (currentTask && currentTask.item) {
+    playJpAudio(currentTask.item.jp);
   }
 }
 
