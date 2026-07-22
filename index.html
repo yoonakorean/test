@@ -436,7 +436,6 @@ function switchUnit() {
 
 function initStage() {
   stopListening();
-  currentStep = 1;
   firstTryCorrectCount = 0;
   
   let baseList = (currentStage === 1) 
@@ -614,11 +613,16 @@ function renderSpeechInput(autoAdvanceOnSuccess) {
   const statusText = document.createElement('div');
   statusText.className = 'speech-status';
   statusText.id = 'speechStatus';
-  statusText.innerText = '點擊按鈕授權麥克風進行發音測驗';
+  statusText.innerText = '點擊按鈕授權麥克風進行發音測驗，或直接點擊「我確定唸對」';
 
   container.appendChild(speechBtn);
   container.appendChild(statusText);
   interactiveArea.appendChild(container);
+
+  // 在 Step 1 自動直接提供救援通關選項
+  if (currentStep === 1) {
+    showFeedback(true, '請點擊麥克風練習發音，或直接點擊「我確定唸對」完成跟讀', '', true);
+  }
 }
 
 function toggleListening(autoAdvance) {
@@ -631,19 +635,18 @@ function toggleListening(autoAdvance) {
 
 function startListening(autoAdvance) {
   if (!SpeechRecognition) {
-    updateSpeechStatus('您的瀏覽器不支援 Web Speech API，請改用 Chrome / Edge。');
-    showFeedback(false, '瀏覽器不支援語音收音', '請點擊下方按鈕直接通過', true);
+    updateSpeechStatus('瀏覽器不支援 Speech API，請直接點擊「我確定唸對」。');
+    showFeedback(false, '瀏覽器不支援語音收音', '請點擊下方按鈕強制通過', true);
     return;
   }
 
-  // 先向瀏覽器請求麥克風權限
   navigator.mediaDevices.getUserMedia({ audio: true })
     .then(() => {
       runRecognition(autoAdvance);
     })
     .catch((err) => {
-      updateSpeechStatus('⚠️ 麥克風權限被封鎖，請允許存取麥克風。');
-      showFeedback(false, '無法讀取麥克風', '請確認瀏覽器已給予權限，或直接強制通過', true);
+      updateSpeechStatus('⚠️ 麥克風未授權，請直接點擊「我確定唸對」。');
+      showFeedback(false, '無法存取麥克風', '請點擊下方按鈕強制通過', true);
     });
 }
 
@@ -657,9 +660,9 @@ function runRecognition(autoAdvance) {
     const speechBtn = document.getElementById('speechBtn');
     if (speechBtn) {
       speechBtn.classList.add('recording');
-      speechBtn.innerHTML = '🎙️ 錄音中...請清晰發音';
+      speechBtn.innerHTML = '🎙️ 錄音中...請發音';
     }
-    updateSpeechStatus('系統聆聽中，請靠近麥克風唸出日文...');
+    updateSpeechStatus('系統聆聽中，請唸出日文...');
 
     isRecording = true;
     recognition.start();
@@ -668,31 +671,28 @@ function runRecognition(autoAdvance) {
       stopListening();
 
       const resultText = event.results[0][0].transcript;
-      const confidence = event.results[0][0].confidence;
-      
       updateSpeechStatus(`辨識結果：${resultText}`);
 
       let isMatch = checkPronunciationMatch(resultText, currentCard.jp);
 
       if (isMatch) {
-        if (autoAdvance) {
-          showFeedback(true, '語音辨識成功！', '', false);
-        } else {
-          handleAnswer(true, currentCard.jp);
+        if (!isSecondAttempt) {
+          firstTryCorrectCount++;
         }
+        showFeedback(true, '語音辨識成功！', '', false);
       } else {
         isSecondAttempt = true;
         if (!cardQueue.some(c => c.id === currentCard.id)) {
           cardQueue.push(currentCard);
         }
-        showFeedback(false, `辨識為「${resultText}」，未達標準！`, `目標發音：${currentCard.jp}`, true);
+        showFeedback(false, `辨識為「${resultText}」，未達標準`, `目標發音：${currentCard.jp}`, true);
       }
     };
 
     recognition.onerror = (event) => {
       stopListening();
-      updateSpeechStatus(`收音錯誤：${event.error}`);
-      showFeedback(false, '未收錄到聲音或環境雜音過大', `目標發音：${currentCard.jp}`, true);
+      updateSpeechStatus(`收音超時或出錯`);
+      showFeedback(false, '未檢測到聲音', `目標發音：${currentCard.jp}`, true);
     };
 
     recognition.onend = () => {
@@ -700,7 +700,7 @@ function runRecognition(autoAdvance) {
     };
 
   } catch (e) {
-    updateSpeechStatus('語音引擎初始化失敗');
+    updateSpeechStatus('語音系統初始化失敗');
     showFeedback(false, '語音系統異常', '', true);
   }
 }
@@ -728,6 +728,7 @@ function checkPronunciationMatch(spoken, target) {
   return spoken === target || spoken.includes(target) || target.includes(spoken);
 }
 
+// 【修復的核心】：點擊「我確定唸對」時正確累加分數並把卡片算作通關
 function forcePassCard() {
   stopListening();
   cardQueue = cardQueue.filter(c => c.id !== currentCard.id);
@@ -737,7 +738,7 @@ function forcePassCard() {
   }
   
   playJpAudio(currentCard.jp);
-  showFeedback(true, '已強制通過！進入下一題/階', '', false);
+  showFeedback(true, '確認跟讀完成！點擊「繼續」進入下一題', '', false);
 }
 
 function handleAnswer(isCorrect, correctAnswer) {
@@ -791,6 +792,7 @@ function nextCard() {
   loadNextCardInStep();
 }
 
+// 自動晉級判定
 function checkStagePromotion() {
   let successRate = (firstTryCorrectCount / totalCardsCount) * 100;
   
@@ -800,20 +802,20 @@ function checkStagePromotion() {
 
     let maxStep = currentStage === 1 ? 4 : 5;
     if (currentStep < maxStep) {
-      alert(`🎉 太棒了！首答率 ${Math.round(successRate)}%！晉級進入 Step ${currentStep + 1}`);
+      alert(`🎉 太棒了！本 Step 完成度 ${Math.round(successRate)}%！自動晉級進入 Step ${currentStep + 1}`);
       currentStep++;
       initStage();
     } else {
       if (currentStage === 1) {
-        alert(`🏆 恭喜完成【階段一：認識字母】！即將解鎖進入【階段二：認識單字】`);
+        alert(`🏆 恭喜完成【階段一：認識字母】！即將進入【階段二：認識單字】`);
         currentStage = 2;
         initStage();
       } else {
-        alert(`🎉 恭喜通關本單元所有階段！已安排跨天複習時程！`);
+        alert(`🎉 恭喜通關本單元所有階段！間隔重複學習系統已自動為您紀錄。`);
       }
     }
   } else {
-    alert(`首答率為 ${Math.round(successRate)}%（未達80%標準）。重新進入本 step 練習！`);
+    alert(`完成度為 ${Math.round(successRate)}%（未達80%標準）。將為您重新排程本 Step 練習！`);
     initStage();
   }
 }
