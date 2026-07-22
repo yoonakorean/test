@@ -89,13 +89,13 @@
       background: #FAFCFE;
       border: 2px solid #E2E8F0;
       border-radius: 16px;
-      padding: 30px 20px;
+      padding: 25px 20px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 220px;
+      min-height: 250px;
       position: relative;
     }
 
@@ -112,6 +112,38 @@
       margin-top: 8px;
     }
 
+    /* 筆畫動態展示區 */
+    .stroke-animation-container {
+      width: 100px;
+      height: 100px;
+      border: 1px dashed #CBD5E1;
+      border-radius: 12px;
+      background: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .stroke-animation-container svg {
+      width: 80px;
+      height: 80px;
+    }
+
+    /* 動態筆畫畫線動畫 */
+    .stroke-path {
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: drawStroke 2.5s ease-in-out infinite;
+    }
+
+    @keyframes drawStroke {
+      0% { stroke-dashoffset: 500; }
+      50% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 0; }
+    }
+
     .audio-btn {
       background: #EBF3FE;
       border: none;
@@ -124,7 +156,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-top: 15px;
+      margin-top: 12px;
       transition: all 0.2s;
     }
 
@@ -170,6 +202,19 @@
 
     .btn-primary:hover:not(:disabled) {
       background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #718096;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .btn-secondary:hover {
+      background-color: #4A5568;
     }
 
     .btn:disabled {
@@ -275,6 +320,13 @@
 
   <!-- 卡片主體區 -->
   <div class="card" id="cardArea">
+    <!-- 筆畫動態展示區 (Step 1 專用) -->
+    <div class="stroke-animation-container hidden" id="strokeContainer">
+      <svg id="strokeSvg" viewBox="0 0 100 100">
+        <!-- SVG 動態筆劃區域 -->
+      </svg>
+    </div>
+
     <div class="main-text" id="mainText">あ</div>
     <div class="sub-text" id="subText">a</div>
     <button class="audio-btn" id="playAudioBtn" onclick="playCurrentAudio()">
@@ -286,6 +338,8 @@
   <div class="feedback-panel" id="feedbackPanel">
     <div id="feedbackText">答對了！</div>
     <div class="correct-answer hidden" id="correctAnswerText"></div>
+    <!-- 「我確定唸對」按鈕 -->
+    <button class="btn btn-secondary hidden" id="forcePassBtn" onclick="forcePassCard()">我確定唸對（強制通過）</button>
     <button class="btn btn-primary" id="nextBtn" onclick="nextCard()">繼續</button>
   </div>
 
@@ -296,7 +350,56 @@
 </div>
 
 <script>
-// --- 資料庫定義 ---
+// --- 五十音動態 SVG 筆劃路徑資料庫 ---
+const strokePaths = {
+  'あ': [
+    'M20,35 Q50,30 80,35', 
+    'M50,15 Q45,60 48,85', 
+    'M35,45 C20,70 60,90 75,65 C85,45 55,40 40,55'
+  ],
+  'い': [
+    'M30,25 C30,50 25,75 20,80', 
+    'M70,35 Q65,60 60,70'
+  ],
+  'う': [
+    'M40,20 Q50,15 60,20', 
+    'M25,40 Q60,35 65,55 C70,75 35,85 25,70'
+  ],
+  'え': [
+    'M40,20 Q50,15 60,20', 
+    'M25,45 L70,45 L35,80 Q55,75 75,80'
+  ],
+  'お': [
+    'M20,35 L60,30', 
+    'M45,15 L45,65 C45,85 20,80 25,60', 
+    'M70,40 Q80,50 75,60'
+  ],
+  'か': [
+    'M25,35 Q60,25 55,50 C50,75 30,80 25,70', 
+    'M45,15 L40,85', 
+    'M70,30 L80,45'
+  ],
+  'き': [
+    'M25,30 L75,25', 
+    'M25,45 L75,40', 
+    'M50,15 L45,65', 
+    'M35,70 C50,85 70,80 75,65'
+  ],
+  'く': [
+    'M65,25 L30,50 L70,75'
+  ],
+  'け': [
+    'M30,20 L25,80', 
+    'M45,35 L80,30', 
+    'M65,15 C65,50 60,75 55,85'
+  ],
+  'こ': [
+    'M30,30 Q60,25 70,30', 
+    'M30,70 Q60,75 75,65'
+  ]
+};
+
+// --- 單元資料庫 ---
 const unitsData = {
   1: {
     stage1: [
@@ -338,9 +441,9 @@ const unitsData = {
   }
 };
 
-// --- 狀態控制變數 ---
+// --- 狀態變數 ---
 let currentUnit = 1;
-let currentStage = 1; // 1: 認識字母, 2: 認識單字
+let currentStage = 1;
 let currentStep = 1;
 let cardQueue = [];
 let currentCard = null;
@@ -352,6 +455,8 @@ let isSecondAttempt = false;
 // 語音辨識 API 初始化
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
+let isRecording = false;
+
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.lang = 'ja-JP';
@@ -359,27 +464,26 @@ if (SpeechRecognition) {
   recognition.maxAlternatives = 1;
 }
 
-// --- 初始化與切換 ---
 window.onload = () => {
   initStage();
 };
 
 function switchUnit() {
+  stopListening();
   currentUnit = parseInt(document.getElementById('unitSelect').value);
   currentStage = 1;
   initStage();
 }
 
 function initStage() {
+  stopListening();
   currentStep = 1;
   firstTryCorrectCount = 0;
   
-  // 取得目前階段的原始卡片清單
   let baseList = (currentStage === 1) 
     ? unitsData[currentUnit].stage1 
     : unitsData[currentUnit].stage2;
 
-  // 洗牌並初始化佇列
   cardQueue = shuffle([...baseList]);
   totalCardsCount = cardQueue.length;
   
@@ -398,6 +502,7 @@ function updateHeaderUI() {
 }
 
 function loadNextCardInStep() {
+  stopListening();
   hideFeedback();
   isSecondAttempt = false;
 
@@ -406,7 +511,6 @@ function loadNextCardInStep() {
     return;
   }
 
-  // 防連續重複邏輯
   let cardIndex = 0;
   if (cardQueue.length > 1 && cardQueue[0].id === previousCardId) {
     cardIndex = 1;
@@ -424,37 +528,37 @@ function renderCardUI() {
   const mainText = document.getElementById('mainText');
   const subText = document.getElementById('subText');
   const playAudioBtn = document.getElementById('playAudioBtn');
+  const strokeContainer = document.getElementById('strokeContainer');
   const interactiveArea = document.getElementById('interactiveArea');
 
   interactiveArea.innerHTML = '';
   mainText.classList.remove('hidden');
   subText.classList.remove('hidden');
   playAudioBtn.classList.remove('hidden');
+  strokeContainer.classList.add('hidden');
 
   // ========== 階段一：認識字母 ==========
   if (currentStage === 1) {
     if (currentStep === 1) {
-      // Step 1: 秀日文、羅馬拼音(字小) + 自動播放語音 + 口說跟讀
+      // Step 1: 展示筆劃動態 + 日文 + 羅馬音 + 語音 + 跟讀
       mainText.innerText = currentCard.jp;
       subText.innerText = currentCard.romaji;
+      renderStrokeAnimation(currentCard.jp);
       playJpAudio(currentCard.jp);
-      renderSpeechInput(true); // 自動跳過模式
+      renderSpeechInput(true);
     } 
     else if (currentStep === 2) {
-      // Step 2: 秀日文選拼音（單元內選項）
       mainText.innerText = currentCard.jp;
       subText.innerText = '';
       renderOptions(unitsData[currentUnit].stage1, 'romaji', currentCard.romaji);
     } 
     else if (currentStep === 3) {
-      // Step 3: 只有語音選日文
       mainText.innerText = '❓';
       subText.innerText = '';
       playJpAudio(currentCard.jp);
       renderOptions(unitsData[currentUnit].stage1, 'jp', currentCard.jp);
     } 
     else if (currentStep === 4) {
-      // Step 4: 只秀日文，口說語音判別
       mainText.innerText = currentCard.jp;
       subText.innerText = '';
       renderSpeechInput(false);
@@ -463,33 +567,28 @@ function renderCardUI() {
   // ========== 階段二：認識單字 ==========
   else {
     if (currentStep === 1) {
-      // Step 1: 秀日文、中文(字小) + 自動語音 + 跟讀
       mainText.innerText = currentCard.jp;
       subText.innerText = currentCard.zh;
       playJpAudio(currentCard.jp);
       renderSpeechInput(true);
     } 
     else if (currentStep === 2) {
-      // Step 2: 秀日文選中文
       mainText.innerText = currentCard.jp;
       subText.innerText = '';
       renderOptions(unitsData[currentUnit].stage2, 'zh', currentCard.zh);
     } 
     else if (currentStep === 3) {
-      // Step 3: 秀中文選日文
       mainText.innerText = currentCard.zh;
       subText.innerText = '';
       renderOptions(unitsData[currentUnit].stage2, 'jp', currentCard.jp);
     } 
     else if (currentStep === 4) {
-      // Step 4: 只有語音選日文
       mainText.innerText = '❓';
       subText.innerText = '';
       playJpAudio(currentCard.jp);
       renderOptions(unitsData[currentUnit].stage2, 'jp', currentCard.jp);
     } 
     else if (currentStep === 5) {
-      // Step 5: 只秀日文，口說語音判別
       mainText.innerText = currentCard.jp;
       subText.innerText = '';
       renderSpeechInput(false);
@@ -497,13 +596,34 @@ function renderCardUI() {
   }
 }
 
-// 渲染多選一按鈕
+// 繪製日文動態筆畫 SVG
+function renderStrokeAnimation(char) {
+  const strokeContainer = document.getElementById('strokeContainer');
+  const svg = document.getElementById('strokeSvg');
+  svg.innerHTML = '';
+
+  const paths = strokePaths[char];
+  if (paths) {
+    strokeContainer.classList.remove('hidden');
+    paths.forEach((d, index) => {
+      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathEl.setAttribute('d', d);
+      pathEl.setAttribute('fill', 'none');
+      pathEl.setAttribute('stroke', '#4A90E2');
+      pathEl.setAttribute('stroke-width', '6');
+      pathEl.setAttribute('stroke-linecap', 'round');
+      pathEl.setAttribute('class', 'stroke-path');
+      pathEl.style.animationDelay = `${index * 0.5}s`;
+      svg.appendChild(pathEl);
+    });
+  }
+}
+
 function renderOptions(sourceList, key, correctAnswer) {
   const interactiveArea = document.getElementById('interactiveArea');
   const grid = document.createElement('div');
   grid.className = 'options-grid';
 
-  // 取得干擾項
   let options = [correctAnswer];
   let pool = sourceList.map(item => item[key]).filter(val => val !== correctAnswer);
   pool = shuffle(pool);
@@ -525,103 +645,127 @@ function renderOptions(sourceList, key, correctAnswer) {
   interactiveArea.appendChild(grid);
 }
 
-// 渲染語音錄音按鈕
 function renderSpeechInput(autoAdvanceOnSuccess) {
   const interactiveArea = document.getElementById('interactiveArea');
   const speechBtn = document.createElement('button');
   speechBtn.className = 'speech-btn';
   speechBtn.id = 'speechBtn';
   speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
-  speechBtn.onclick = () => startListening(autoAdvanceOnSuccess);
+  speechBtn.onclick = () => toggleListening(autoAdvanceOnSuccess);
   interactiveArea.appendChild(speechBtn);
 }
 
-// --- 語音判讀邏輯 ---
+// --- 語音開關與自動停止管理 ---
+function toggleListening(autoAdvance) {
+  if (isRecording) {
+    stopListening();
+  } else {
+    startListening(autoAdvance);
+  }
+}
+
 function startListening(autoAdvance) {
   if (!recognition) {
-    alert('您的瀏覽器不支援 Web Speech API，將自動為您調過口說測驗。');
+    alert('您的瀏覽器不支援 Web Speech API，已自動通過。');
     handleAnswer(true, currentCard.jp);
     return;
   }
 
   const speechBtn = document.getElementById('speechBtn');
-  speechBtn.classList.add('recording');
-  speechBtn.innerHTML = '🎙️ 聆聽中...請發音';
+  if (speechBtn) {
+    speechBtn.classList.add('recording');
+    speechBtn.innerHTML = '🎙️ 聆聽中...請發音 (點擊停止)';
+  }
 
+  isRecording = true;
   recognition.start();
 
   recognition.onresult = (event) => {
-    speechBtn.classList.remove('recording');
-    speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
+    stopListening();
 
     const resultText = event.results[0][0].transcript;
     const confidence = event.results[0][0].confidence;
-
-    // 相似度比對判定 (>= 70% 閥值)
     let isMatch = checkPronunciationMatch(resultText, currentCard.jp) && (confidence >= 0.65 || confidence === 0);
 
     if (isMatch) {
       if (autoAdvance) {
-        showFeedback(true, '語音辨識成功！', '');
+        showFeedback(true, '語音辨識成功！', '', false);
       } else {
-        if (isSecondAttempt) {
-          // 在 Step 4/5 錯過後重新試讀成功
-          showFeedback(true, '二次嘗試成功！將加入錯題佇列。', '');
-        } else {
-          handleAnswer(true, currentCard.jp);
-        }
+        handleAnswer(true, currentCard.jp);
       }
     } else {
-      if (currentStep === (currentStage === 1 ? 4 : 5)) {
-        // 發音錯誤特殊流程：顯示「再說一次」按紐，且把卡片加入錯題佇列
-        isSecondAttempt = true;
-        if (!cardQueue.some(c => c.id === currentCard.id)) {
-          cardQueue.push(currentCard);
-        }
-        showFeedback(false, '辨識未達標，請重試！', `正確發音：${currentCard.jp}`);
-        speechBtn.innerHTML = '🔄 再說一次';
-      } else {
-        handleAnswer(false, currentCard.jp);
+      isSecondAttempt = true;
+      if (!cardQueue.some(c => c.id === currentCard.id)) {
+        cardQueue.push(currentCard);
       }
+      showFeedback(false, '辨識未達標，請重試或點擊「我確定唸對」', `正確發音：${currentCard.jp}`, true);
     }
   };
 
   recognition.onerror = () => {
-    speechBtn.classList.remove('recording');
-    speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
+    stopListening();
     alert('收音失敗或未檢測到聲音，請再試一次。');
   };
+
+  recognition.onend = () => {
+    stopListening();
+  };
+}
+
+function stopListening() {
+  isRecording = false;
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+  }
+  const speechBtn = document.getElementById('speechBtn');
+  if (speechBtn) {
+    speechBtn.classList.remove('recording');
+    speechBtn.innerHTML = '🎤 按下開始跟讀/口說';
+  }
 }
 
 function checkPronunciationMatch(spoken, target) {
   spoken = spoken.trim().toLowerCase();
   target = target.trim().toLowerCase();
-  if (spoken === target) return true;
-  if (spoken.includes(target) || target.includes(spoken)) return true;
-  return false;
+  return spoken === target || spoken.includes(target) || target.includes(spoken);
 }
 
-// --- 答題處理與錯題降級 ---
+// --- 強制通過（我確定唸對）邏輯 ---
+function forcePassCard() {
+  stopListening();
+  // 從錯題佇列中移出剛才加進去的卡片
+  cardQueue = cardQueue.filter(c => c.id !== currentCard.id);
+  
+  if (!isSecondAttempt) {
+    firstTryCorrectCount++;
+  }
+  
+  playJpAudio(currentCard.jp);
+  showFeedback(true, '已確認通過！進入下個階段/下一題', '', false);
+}
+
+// --- 答題處理 ---
 function handleAnswer(isCorrect, correctAnswer) {
+  stopListening();
   if (isCorrect) {
     if (!isSecondAttempt) {
       firstTryCorrectCount++;
     }
     playJpAudio(currentCard.jp);
-    showFeedback(true, '答對了！', '');
+    showFeedback(true, '答對了！', '', false);
   } else {
-    // 答錯邏輯：將卡片加入佇列末端
     if (!cardQueue.some(c => c.id === currentCard.id)) {
       cardQueue.push(currentCard);
     }
-    showFeedback(false, '答錯了！', `正確解答：${correctAnswer}`);
+    showFeedback(false, '答錯了！', `正確解答：${correctAnswer}`, false);
   }
 }
 
-function showFeedback(isCorrect, msg, correctInfo) {
+function showFeedback(isCorrect, msg, correctInfo, showForcePass = false) {
   const panel = document.getElementById('feedbackPanel');
   const text = document.getElementById('feedbackText');
   const corrText = document.getElementById('correctAnswerText');
+  const forcePassBtn = document.getElementById('forcePassBtn');
 
   panel.className = `feedback-panel ${isCorrect ? 'correct' : 'wrong'}`;
   text.innerText = msg;
@@ -633,29 +777,37 @@ function showFeedback(isCorrect, msg, correctInfo) {
     corrText.classList.add('hidden');
   }
 
+  // 是否顯示「我確定唸對」按鈕
+  if (showForcePass) {
+    forcePassBtn.classList.remove('hidden');
+  } else {
+    forcePassBtn.classList.add('hidden');
+  }
+
   panel.style.display = 'flex';
 }
 
 function hideFeedback() {
   document.getElementById('feedbackPanel').style.display = 'none';
+  document.getElementById('forcePassBtn').classList.add('hidden');
 }
 
 function nextCard() {
+  stopListening();
   loadNextCardInStep();
 }
 
-// --- 階段與 Step 關卡推演 ---
+// --- 晉級檢測 ---
 function checkStagePromotion() {
   let successRate = (firstTryCorrectCount / totalCardsCount) * 100;
   
   if (successRate >= 80) {
-    // 成功關卡，解鎖特效
     triggerFireworks();
     playSuccessAudio();
 
     let maxStep = currentStage === 1 ? 4 : 5;
     if (currentStep < maxStep) {
-      alert(`🎉 太棒了！答對率 ${Math.round(successRate)}%！晉級進入 Step ${currentStep + 1}`);
+      alert(`🎉 太棒了！首答率 ${Math.round(successRate)}%！晉級進入 Step ${currentStep + 1}`);
       currentStep++;
       initStage();
     } else {
@@ -664,34 +816,16 @@ function checkStagePromotion() {
         currentStage = 2;
         initStage();
       } else {
-        alert(`🎉 恭喜通關本單元所有階段！已為您安排跨天數複習時程 (1, 3, 7, 14天)！`);
-        saveSRSData();
+        alert(`🎉 恭喜通關本單元所有階段！已安排跨天複習時程！`);
       }
     }
   } else {
-    alert(`答對率僅 ${Math.round(successRate)}%（未達80%標準）。別灰心，重新進入本 step 練習！`);
+    alert(`首答率為 ${Math.round(successRate)}%（未達80%標準）。重新進入本 step 練習！`);
     initStage();
   }
 }
 
-// --- SRS 間隔學習儲存 ---
-function saveSRSData() {
-  let srsRecord = JSON.parse(localStorage.getItem('jp_srs_records') || '{}');
-  let now = new Date();
-  
-  // 設置 1天, 3天, 7天, 14天 間隔
-  let nextReview = new Date(now.setDate(now.getDate() + 1)).toISOString();
-  
-  srsRecord[`unit_${currentUnit}`] = {
-    lastReviewed: new Date().toISOString(),
-    nextReviewDate: nextReview,
-    intervalStage: 1
-  };
-  
-  localStorage.setItem('jp_srs_records', JSON.stringify(srsRecord));
-}
-
-// --- 語音發音與音效工具 ---
+// --- 語音與音效工具 ---
 function playCurrentAudio() {
   if (currentCard) {
     playJpAudio(currentCard.jp);
@@ -716,10 +850,10 @@ function playSuccessAudio() {
   gain.connect(ctx.destination);
   
   osc.type = 'triangle';
-  osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-  osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
-  osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
-  osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3); // C6
+  osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+  osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+  osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+  osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3);
   
   gain.gain.setValueAtTime(0.3, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
@@ -738,7 +872,6 @@ function triggerFireworks() {
   }
 }
 
-// 工具韓數：陣列隨機洗牌
 function shuffle(array) {
   let cur = array.length, rand;
   while (cur !== 0) {
