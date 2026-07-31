@@ -1,749 +1,939 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日語五十音與單字卡間隔學習系統</title>
-  <!-- Canvas Confetti 煙火特效庫 -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Lab · Lesson 1 教學流程測試</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
     :root {
-      --primary: #4A90E2;
-      --primary-hover: #357ABD;
-      --success: #2ECC71;
-      --error: #E74C3C;
-      --warning: #F1C40F;
-      --bg-color: #F7F9FC;
-      --card-bg: #FFFFFF;
-      --text-main: #2C3E50;
-      --text-muted: #7F8C8D;
+        --duo-green: #58cc02;
+        --duo-green-shadow: #46a302;
+        --duo-blue: #1cb0f6;
+        --duo-blue-shadow: #1899d6;
+        --duo-gray: #e5e7eb;
+        --duo-red: #ff4b4b;
+        --duo-red-shadow: #ea2b2b;
+        --duo-gold: #f59e0b;
+        --duo-lightning: #a5b4fc;
+        --duo-fire-red: #ef4444;
+        --ink: #1f2937;
+        --ink-soft: #6b7280;
     }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{
+        font-family: 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background:#f9fafb;
+        color:var(--ink);
+        min-height:100vh;
+        -webkit-font-smoothing:antialiased;
+    }
+    .kr{font-family:'Noto Sans KR','Noto Sans TC',sans-serif;}
+    button{font-family:inherit;cursor:pointer;}
+    .hidden{display:none !important;}
+    button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--duo-blue-shadow);outline-offset:2px;}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    .btn-3d{
+        border:none;border-radius:16px;font-weight:800;font-size:0.95rem;
+        transition:transform .1s ease, box-shadow .1s ease;
     }
+    .btn-3d:active{transform:translateY(3px);}
+    .btn-3d-primary{background:var(--duo-green);color:#fff;box-shadow:0 4px 0 var(--duo-green-shadow);}
+    .btn-3d-primary:active{box-shadow:0 1px 0 var(--duo-green-shadow);}
+    .btn-3d-blue{background:var(--duo-blue);color:#fff;box-shadow:0 4px 0 var(--duo-blue-shadow);}
+    .btn-3d-blue:active{box-shadow:0 1px 0 var(--duo-blue-shadow);}
+    .btn-3d-secondary{background:#fff;color:#4b5563;border:2px solid var(--duo-gray);box-shadow:0 4px 0 var(--duo-gray);}
+    .btn-3d-secondary:active{box-shadow:0 1px 0 var(--duo-gray);}
+    .btn-3d-gold{background:var(--duo-gold);color:#fff;box-shadow:0 4px 0 #b45309;}
+    .btn-3d-gold:active{box-shadow:0 1px 0 #b45309;}
+    .btn-3d:disabled{opacity:0.5;cursor:not-allowed;}
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+    .lab-shell{max-width:720px;margin:0 auto;padding:22px 18px 70px;}
+    .lab-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .lab-eyebrow{font-size:0.7rem;letter-spacing:0.1em;font-weight:800;color:var(--duo-blue);text-transform:uppercase;}
+    .lab-badge{display:inline-flex;align-items:center;gap:6px;background:#eef6ff;color:var(--duo-blue-shadow);padding:6px 14px;border-radius:100px;font-size:0.76rem;font-weight:800;}
 
-    .app-container {
-      width: 100%;
-      max-width: 550px;
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: relative;
-    }
+    .section-tabs{display:flex;gap:8px;background:#f3f4f6;padding:6px;border-radius:16px;margin-bottom:20px;}
+    .section-tab{flex:1;padding:10px;border-radius:12px;border:none;background:none;font-weight:800;font-size:0.86rem;color:var(--ink-soft);}
+    .section-tab.active{background:var(--duo-blue);color:#fff;box-shadow:0 3px 0 var(--duo-blue-shadow);}
 
-    header {
-      text-align: center;
-      border-bottom: 2px solid #F0F3F7;
-      padding-bottom: 15px;
-    }
+    .view{display:none;}
+    .view.active{display:block;animation:fadeUp .3s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-    header h1 {
-      font-size: 1.4rem;
-      color: var(--text-main);
-      margin-bottom: 5px;
-    }
+    /* ===== 單字總覽 ===== */
+    .browse-title{font-weight:900;font-size:1.32rem;line-height:1.4;margin:0 0 6px 0;}
+    .browse-title .accent{color:var(--duo-blue);}
+    .browse-sub{color:var(--ink-soft);font-size:0.86rem;margin:0 0 14px;}
+    .progress-track{height:10px;background:var(--duo-gray);border-radius:100px;overflow:hidden;margin-bottom:18px;}
+    .progress-fill{height:100%;background:var(--duo-green);border-radius:100px;transition:width .5s ease;}
 
-    .progress-bar-container {
-      width: 100%;
-      height: 8px;
-      background-color: #E9ECEF;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
+    .start-btn{width:100%;padding:16px;border-radius:100px;font-size:1.02rem;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px;}
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background-color: var(--primary);
-      transition: width 0.3s ease;
-    }
+    .word-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .word-tile{position:relative;background:#fff;border:2px solid var(--duo-gray);border-radius:18px;padding:16px 12px 12px;text-align:left;min-height:100px;box-shadow:0 4px 0 #f3f4f6;display:flex;flex-direction:column;justify-content:space-between;}
+    .word-tile .kr-word{font-weight:900;font-size:1.4rem;color:var(--ink);}
+    .word-tile .meta-row{display:flex;justify-content:flex-end;align-items:baseline;gap:6px;margin-top:8px;}
+    .word-tile .pos{font-size:0.64rem;color:var(--duo-blue-shadow);background:#eef6ff;padding:2px 7px;border-radius:100px;font-weight:800;}
+    .word-tile .zh{font-size:0.76rem;color:var(--ink-soft);font-weight:600;}
+    .word-tile.state-seen{border-color:var(--duo-gold);}
+    .word-tile.state-seen::after{content:"";position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--duo-gold);}
+    .word-tile.state-review{border-color:var(--duo-fire-red);}
+    .word-tile.state-review::after{content:"↻";position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--duo-fire-red);color:#fff;font-size:0.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;}
+    .word-tile.state-learned{border-color:var(--duo-green);background:#f3fdf0;}
+    .word-tile.state-learned::after{content:"✓";position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--duo-green);color:#fff;font-size:0.72rem;font-weight:900;display:flex;align-items:center;justify-content:center;}
 
-    .nav-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
+    /* ===== Overlay 共用 ===== */
+    .overlay{position:fixed;inset:0;background:rgba(31,41,55,0.55);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+    .overlay.active{display:flex;animation:fadeIn .18s ease both;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+    @media (min-width:600px){.overlay{align-items:center;}}
+    .sheet{background:#fff;width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:22px 20px 26px;box-shadow:0 -8px 30px rgba(0,0,0,0.15);max-height:94vh;overflow-y:auto;animation:slideUp .25s cubic-bezier(.2,.8,.2,1) both;position:relative;}
+    @media (min-width:600px){.sheet{border-radius:24px;box-shadow:0 20px 45px rgba(0,0,0,0.25);}}
+    @keyframes slideUp{from{transform:translateY(36px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
-    .card {
-      background: #FAFCFE;
-      border: 2px solid #E2E8F0;
-      border-radius: 16px;
-      padding: 25px 20px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 250px;
-      position: relative;
-    }
+    .sheet-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .link-btn{border:none;background:none;color:var(--ink-soft);font-size:0.82rem;font-weight:800;display:flex;align-items:center;gap:5px;}
+    .link-btn:hover{color:var(--duo-blue-shadow);}
 
-    .card .main-text {
-      font-size: 3.8rem;
-      font-weight: 700;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
+    /* ===== 翻卡（單字互動卡片） ===== */
+    .flip-scene{perspective:1200px;height:250px;margin-bottom:16px;}
+    .flip-card{position:relative;width:100%;height:100%;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;cursor:pointer;}
+    .flip-card.flipped{transform:rotateY(180deg);}
+    .flip-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:20px;padding:20px;display:flex;flex-direction:column;}
+    .flip-front{background:linear-gradient(160deg,#eef6ff,#fff);border:2px solid var(--duo-blue);align-items:center;justify-content:center;text-align:center;gap:8px;}
+    .flip-back{background:#fff;border:2px solid var(--duo-green);transform:rotateY(180deg);overflow-y:auto;}
 
-    .card .sub-text {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
+    .face-pos-tag{position:absolute;top:12px;left:12px;font-size:0.66rem;font-weight:800;color:var(--duo-blue-shadow);background:#fff;padding:3px 10px;border-radius:100px;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+    .face-play-icon{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;color:var(--duo-blue);font-size:1rem;border:none;}
+    .face-play-icon:hover{background:var(--duo-blue);color:#fff;}
 
-    .stroke-animation-container {
-      width: 100px;
-      height: 100px;
-      border: 1px dashed #CBD5E1;
-      border-radius: 12px;
-      background: #FFFFFF;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 10px;
-      position: relative;
-    }
+    .front-word{font-weight:900;font-size:2.3rem;color:var(--ink);}
+    .front-pron{font-size:0.86rem;color:#b6c3d6;font-weight:600;letter-spacing:0.02em;}
+    .flip-hint{font-size:0.72rem;color:var(--ink-soft);}
 
-    .stroke-animation-container svg {
-      width: 80px;
-      height: 80px;
-    }
+    .back-zh{font-size:1.5rem;font-weight:900;color:var(--duo-green-shadow);margin:14px 0 2px;}
+    .back-pos{font-size:0.72rem;color:var(--duo-blue-shadow);background:#eef6ff;display:inline-block;padding:2px 9px;border-radius:100px;font-weight:800;margin-bottom:12px;}
+    .back-example-box{background:#f9fafb;border-radius:14px;padding:12px 14px;margin-top:6px;}
+    .back-example-kr{font-weight:700;font-size:1rem;color:var(--ink);display:flex;align-items:center;gap:8px;}
+    .back-example-zh{font-size:0.82rem;color:var(--ink-soft);margin-top:4px;}
+    .mini-play{width:26px;height:26px;border-radius:50%;background:var(--duo-blue);color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:0.72rem;flex-shrink:0;}
 
-    .stroke-path {
-      stroke-dasharray: 500;
-      stroke-dashoffset: 500;
-      animation: drawStroke 2.5s ease-in-out infinite;
-    }
+    .flip-controls{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .nav-arrow{width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--duo-gray);display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0;}
+    .nav-arrow:disabled{opacity:0.35;}
+    .mark-row{flex:1;display:flex;gap:8px;}
+    .mark-btn{flex:1;padding:11px 6px;border-radius:12px;border:2px solid var(--duo-gray);background:#fff;font-weight:800;font-size:0.78rem;color:var(--ink-soft);}
+    .mark-btn.learned.active{background:#f3fdf0;border-color:var(--duo-green);color:var(--duo-green-shadow);}
+    .mark-btn.review.active{background:#fef2f2;border-color:var(--duo-fire-red);color:var(--duo-fire-red);}
 
-    @keyframes drawStroke {
-      0% { stroke-dashoffset: 500; }
-      50% { stroke-dashoffset: 0; }
-      100% { stroke-dashoffset: 0; }
-    }
+    .deck-counter{text-align:center;font-size:0.78rem;font-weight:800;color:var(--ink-soft);margin-bottom:10px;}
 
-    .audio-btn {
-      background: #EBF3FE;
-      border: none;
-      color: var(--primary);
-      padding: 10px 18px;
-      border-radius: 50px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      transition: all 0.2s;
-    }
+    /* ===== 跟讀判定 / XP ===== */
+    .xp-stage{text-align:center;padding:10px 4px;}
+    .xp-word{font-weight:900;font-size:2rem;margin:14px 0 4px;}
+    .mic-big{width:92px;height:92px;border-radius:50%;margin:18px auto 8px;background:var(--duo-red);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 0 var(--duo-red-shadow);border:none;color:#fff;font-size:1.6rem;}
+    .mic-big.recording{animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 6px 0 var(--duo-red-shadow), 0 0 0 0 rgba(255,75,75,0.5);}50%{box-shadow:0 6px 0 var(--duo-red-shadow), 0 0 0 12px rgba(255,75,75,0);}}
+    .replay-row{display:none;justify-content:center;margin:14px 0;}
+    .replay-row.show{display:flex;}
+    .replay-row audio{width:100%;max-width:280px;height:36px;}
 
-    .audio-btn:hover {
-      background: #D8E7FD;
-    }
+    .xp-burst{position:relative;display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:1.5rem;color:var(--duo-gold);opacity:0;transform:scale(0.5);}
+    .xp-burst.show{animation:xpPop .7s cubic-bezier(.34,1.56,.64,1) forwards;}
+    @keyframes xpPop{0%{opacity:0;transform:scale(.4);}60%{opacity:1;transform:scale(1.2);}100%{opacity:1;transform:scale(1);}}
 
-    .interactive-area {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* ===== 開口記單字 / 挑戰共用元件 ===== */
+    .challenge-progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .challenge-count{font-size:0.8rem;font-weight:800;color:var(--ink-soft);}
+    .prompt-zh{text-align:center;font-size:1.5rem;font-weight:900;color:var(--ink);margin:8px 0 2px;}
+    .prompt-hint{text-align:center;font-size:0.78rem;color:var(--ink-soft);margin-bottom:16px;}
+    .feedback-box{text-align:center;margin-top:14px;padding:12px;border-radius:14px;font-weight:800;font-size:0.9rem;display:none;}
+    .feedback-box.show{display:block;animation:fadeUp .2s ease both;}
+    .feedback-box.correct{background:#f3fdf0;color:var(--duo-green-shadow);}
+    .feedback-box.wrong{background:#fef2f2;color:var(--duo-red-shadow);}
+    .feedback-answer{font-size:1.3rem;font-weight:900;margin-top:4px;}
 
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    /* ===== 句型講解 ===== */
+    .grammar-card{background:#fff;border:2px solid var(--duo-gray);border-radius:20px;padding:20px;box-shadow:0 4px 0 #f3f4f6;margin-bottom:16px;}
+    .grammar-title{font-weight:900;font-size:1.5rem;color:var(--duo-blue-shadow);margin:0 0 10px;}
+    .grammar-rule-text{font-size:0.92rem;line-height:1.75;color:var(--ink);margin-bottom:14px;}
+    .grammar-example{background:#f9fafb;border-radius:12px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+    .grammar-example .ex-kr{font-weight:700;flex:1;}
+    .grammar-example .ex-zh{font-size:0.8rem;color:var(--ink-soft);}
 
-    .btn {
-      background-color: #FFFFFF;
-      border: 2px solid #E2E8F0;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+    /* ===== 語境填空挑戰 ===== */
+    .cloze-sentence{text-align:center;font-weight:800;font-size:1.35rem;margin:10px 0 20px;line-height:1.6;}
+    .cloze-blank{display:inline-block;min-width:64px;border-bottom:3px solid var(--duo-blue);color:var(--duo-blue);}
+    .cloze-options{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+    .cloze-opt{padding:12px 20px;border-radius:14px;border:2px solid var(--duo-gray);background:#fff;font-weight:800;font-size:1rem;box-shadow:0 4px 0 var(--duo-gray);}
+    .cloze-opt.correct{background:var(--duo-green);border-color:var(--duo-green-shadow);color:#fff;box-shadow:0 4px 0 var(--duo-green-shadow);}
+    .cloze-opt.wrong{background:var(--duo-red);border-color:var(--duo-red-shadow);color:#fff;box-shadow:0 4px 0 var(--duo-red-shadow);}
+    .cloze-opt:disabled{cursor:default;}
 
-    .btn:hover:not(:disabled) {
-      border-color: var(--primary);
-      background-color: #F4F8FF;
-    }
+    .cloze-card{border-radius:18px;background:#fff;border:2px solid var(--duo-gray);padding:4px;}
+    .cloze-back{padding:16px;}
+    .cloze-back-sentence{font-weight:900;font-size:1.3rem;text-align:center;margin-bottom:10px;}
+    .cloze-back-rule{background:#fff7ed;color:#b45309;font-weight:900;font-size:1.05rem;text-align:center;padding:10px;border-radius:12px;margin-bottom:12px;}
+    .cloze-back-explain{font-size:0.88rem;color:var(--ink);line-height:1.7;margin-bottom:10px;}
+    .cloze-back-zh{font-size:0.78rem;color:#9ca3af;text-align:center;}
 
-    .btn-primary {
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      width: 100%;
-    }
-
-    .btn-remember {
-      background-color: #2ECC71;
-      color: white;
-      border: none;
-      flex: 1;
-      padding: 16px;
-      font-size: 1.1rem;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-review {
-      background-color: #E74C3C;
-      color: white;
-      border: none;
-      flex: 1;
-      padding: 16px;
-      font-size: 1.1rem;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .self-eval-container {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .feedback-panel {
-      padding: 15px;
-      border-radius: 12px;
-      text-align: center;
-      font-weight: 600;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .feedback-panel.correct {
-      background-color: #E8F8F0;
-      color: #27AE60;
-      border: 1px solid #A3E4D7;
-      display: flex;
-    }
-
-    .feedback-panel.wrong {
-      background-color: #FDEDEC;
-      color: #C0392B;
-      border: 1px solid #F9E79F;
-      display: flex;
-    }
-
-    .unit-selector {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .unit-selector select {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #CBD5E1;
-      font-size: 0.95rem;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-  </style>
+    .encourage-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:100px;font-size:0.86rem;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,0.3);z-index:80;opacity:0;pointer-events:none;transition:transform .32s ease, opacity .32s ease;display:flex;align-items:center;gap:8px;}
+    .encourage-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+</style>
 </head>
 <body>
 
-<div class="app-container">
-  <header>
-    <div class="unit-selector">
-      <select id="unitSelect" onchange="switchUnit()">
-        <option value="1">單元一 (あ行字母 & 單字)</option>
-        <option value="2">單元二 (か行字母 & 單字)</option>
-      </select>
-    </div>
-    <h1 id="stageTitle">階段一：認識字母</h1>
-    <div class="nav-controls">
-      <span id="stepIndicator">解鎖題型: Step 1</span>
-      <span id="queueIndicator">待複習卡片: 0</span>
-    </div>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-  </header>
-
-  <!-- 卡片主體區 -->
-  <div class="card" id="cardArea">
-    <div class="stroke-animation-container hidden" id="strokeContainer">
-      <svg id="strokeSvg" viewBox="0 0 100 100"></svg>
+<div class="lab-shell">
+    <div class="lab-topbar">
+        <span class="lab-eyebrow">Learning Lab · Lesson 1</span>
+        <span class="lab-badge"><i class="fa-solid fa-flask"></i> 教學流程測試環境</span>
     </div>
 
-    <div class="main-text" id="mainText">あ</div>
-    <div class="sub-text" id="subText">a</div>
-    <button class="audio-btn" id="playAudioBtn" onclick="playCurrentAudio()">
-      🔊 播放發音
-    </button>
-  </div>
+    <div class="section-tabs">
+        <button class="section-tab active" id="tab-section-vocab">① 單字學習</button>
+        <button class="section-tab" id="tab-section-grammar">② 句型練習</button>
+    </div>
 
-  <!-- 反饋提示區 -->
-  <div class="feedback-panel" id="feedbackPanel">
-    <div id="feedbackText">正解提示</div>
-    <div class="correct-answer" id="correctAnswerText"></div>
-    <button class="btn btn-primary" id="nextBtn" onclick="nextCard()">繼續</button>
-  </div>
+    <!-- ============ 單元一：單字總覽 ============ -->
+    <section class="view active" id="view-browse">
+        <h1 class="browse-title">今日解鎖：<span class="accent" id="lbl-word-count">8</span> 個【<span id="lbl-unit-name">자기소개</span>】必備單字</h1>
+        <p class="browse-sub">點任一單字卡先看一眼；準備好了就按下面開始。</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <button class="start-btn btn-3d btn-3d-primary" id="btn-open-flipcards">
+            <i class="fa-solid fa-layer-group"></i> 開始學單字卡
+        </button>
+        <div class="word-grid" id="word-grid"></div>
+    </section>
 
-  <!-- 互動輸入區 -->
-  <div class="interactive-area" id="interactiveArea"></div>
+    <!-- ============ 單元二：句型講解 ============ -->
+    <section class="view" id="view-grammar">
+        <h1 class="browse-title">句型講解：<span class="accent" id="lbl-grammar-title">N + 이에요/예요</span></h1>
+        <p class="browse-sub">先看規則和例句，準備好了再挑戰看看。</p>
+
+        <div class="grammar-card">
+            <h2 class="grammar-title kr" id="grammar-pattern">N + 이에요 / 예요</h2>
+            <div class="grammar-rule-text" id="grammar-explanation">
+                名詞後面要接「이에요」還是「예요」，要看名詞最後一個字有沒有收尾音（子音）：<br>
+                有收尾音（子音結尾）→ 加 <b>이에요</b>；沒有收尾音（母音結尾）→ 加 <b>예요</b>。
+            </div>
+            <div id="grammar-examples"></div>
+        </div>
+
+        <button class="start-btn btn-3d btn-3d-blue" id="btn-open-cloze">
+            <i class="fa-solid fa-puzzle-piece"></i> 小試身手
+        </button>
+    </section>
 </div>
 
+<!-- ============ Overlay：單字翻卡 ============ -->
+<div class="overlay" id="overlay-flip">
+    <div class="sheet">
+        <div class="sheet-topbar">
+            <button class="link-btn" id="btn-flip-return"><i class="fa-solid fa-arrow-left"></i> 返回單字列表</button>
+            <button class="link-btn" id="btn-flip-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="deck-counter" id="flip-counter">1 / 8</div>
+
+        <div class="flip-scene">
+            <div class="flip-card" id="flip-card">
+                <div class="flip-face flip-front">
+                    <span class="face-pos-tag" id="front-pos">名詞</span>
+                    <button class="face-play-icon" id="btn-front-play" aria-label="播放發音"><i class="fa-solid fa-volume-high"></i></button>
+                    <div class="front-word kr" id="front-word">학생</div>
+                    <div class="front-pron" id="front-pron">hak-saeng</div>
+                    <div class="flip-hint">點卡片看中文與例句</div>
+                </div>
+                <div class="flip-face flip-back">
+                    <button class="face-play-icon" id="btn-back-play" aria-label="播放例句發音"><i class="fa-solid fa-volume-high"></i></button>
+                    <div class="back-zh" id="back-zh">學生</div>
+                    <span class="back-pos" id="back-pos">名詞</span>
+                    <div class="back-example-box">
+                        <div class="back-example-kr kr">
+                            <span id="back-example-kr">저는 학생이에요.</span>
+                            <button class="mini-play" id="btn-example-play"><i class="fa-solid fa-play"></i></button>
+                        </div>
+                        <div class="back-example-zh" id="back-example-zh">我是學生。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flip-controls">
+            <button class="nav-arrow" id="btn-flip-prev" aria-label="上一個"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="mark-row">
+                <button class="mark-btn learned" id="btn-mark-learned"><i class="fa-solid fa-check"></i> 已學會</button>
+                <button class="mark-btn review" id="btn-mark-review"><i class="fa-solid fa-rotate-left"></i> 需複習</button>
+            </div>
+            <button class="nav-arrow" id="btn-flip-next" aria-label="下一個"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <button class="start-btn btn-3d btn-3d-gold" id="btn-finish-flip" style="margin-top:14px;">
+            <i class="fa-solid fa-microphone"></i> 完成單字學習，進行跟讀
+        </button>
+    </div>
+</div>
+
+<!-- ============ Overlay：跟讀判定 + XP ============ -->
+<div class="overlay" id="overlay-shadowcheck">
+    <div class="sheet">
+        <div class="sheet-topbar">
+            <span style="font-weight:800;font-size:0.9rem;"><i class="fa-solid fa-microphone-lines" style="color:var(--duo-red);"></i> 跟讀判定</span>
+            <button class="link-btn" id="btn-shadowcheck-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="xp-stage">
+            <p class="prompt-hint" style="margin-bottom:0;">聽發音，跟著唸一次：</p>
+            <div class="xp-word kr" id="shadow-target-word">학생</div>
+
+            <button class="mic-big" id="btn-shadow-record" aria-label="開始錄音"><i class="fa-solid fa-microphone"></i></button>
+            <p class="prompt-hint" id="shadow-mic-label">按下開始錄音</p>
+
+            <div class="replay-row" id="shadow-replay-row"><audio id="shadow-audio" controls></audio></div>
+
+            <div id="xp-reward-zone" style="min-height:40px;margin:10px 0;">
+                <span class="xp-burst" id="xp-burst"><i class="fa-solid fa-bolt"></i> +10 XP</span>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+                <button class="btn-3d btn-3d-secondary" id="btn-shadow-rerecord" style="flex:1;padding:13px;display:none;">重新錄音</button>
+                <button class="btn-3d btn-3d-primary" id="btn-shadow-confirm" style="flex:1;padding:13px;" disabled>我唸出來了，確認通過</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ Overlay：開口記單字 ============ -->
+<div class="overlay" id="overlay-challenge">
+    <div class="sheet">
+        <div class="challenge-progress">
+            <span class="challenge-count" id="challenge-count">第 1 / 8 輪</span>
+            <button class="link-btn" id="btn-challenge-close">結束本輪 <i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="xp-stage">
+            <span class="back-pos">看中文說韓文</span>
+            <div class="prompt-zh" id="challenge-zh-big">學生</div>
+            <p class="prompt-hint">看到中文意思，直接說出韓文</p>
+            <button class="mic-big" id="btn-challenge-mic" aria-label="按下開始說話"><i class="fa-solid fa-microphone"></i></button>
+            <p class="prompt-hint" id="challenge-mic-label">按住麥克風開始說</p>
+            <div class="feedback-box" id="challenge-feedback">
+                <div id="feedback-text">再試一次！</div>
+                <div class="feedback-answer kr" id="feedback-answer" style="display:none;"></div>
+            </div>
+            <div style="margin-top:14px;display:none;" id="challenge-next-row">
+                <button class="btn-3d btn-3d-primary" id="btn-challenge-next" style="width:100%;padding:13px;">下一個字</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ Overlay：語境填空挑戰 ============ -->
+<div class="overlay" id="overlay-cloze">
+    <div class="sheet">
+        <div class="challenge-progress">
+            <span class="challenge-count" id="cloze-count">第 1 / 3 題</span>
+            <button class="link-btn" id="btn-cloze-close">結束 <i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="cloze-card" id="cloze-flip-outer">
+            <div id="cloze-front">
+                <p class="cloze-sentence kr" id="cloze-sentence"></p>
+                <div class="cloze-options" id="cloze-options"></div>
+                <div class="feedback-box" id="cloze-feedback">
+                    <div id="cloze-feedback-text"></div>
+                </div>
+            </div>
+            <div id="cloze-back" class="cloze-back hidden">
+                <button class="face-play-icon" id="btn-cloze-back-play" style="position:static;margin:0 auto 10px;display:flex;"><i class="fa-solid fa-volume-high"></i></button>
+                <div class="cloze-back-sentence kr" id="cloze-back-sentence"></div>
+                <div class="cloze-back-rule kr" id="cloze-back-rule"></div>
+                <div class="cloze-back-explain" id="cloze-back-explain"></div>
+                <div class="cloze-back-zh" id="cloze-back-zh"></div>
+            </div>
+        </div>
+
+        <div style="margin-top:14px;display:none;" id="cloze-next-row">
+            <button class="btn-3d btn-3d-primary" id="btn-cloze-next" style="width:100%;padding:13px;">下一題</button>
+        </div>
+    </div>
+</div>
+
+<div class="encourage-toast" id="encourage-toast"></div>
+<div class="sr-only" aria-live="polite" id="sr-live"></div>
+
 <script>
-const strokePaths = {
-  'あ': ['M20,35 Q50,30 80,35', 'M50,15 Q45,60 48,85', 'M35,45 C20,70 60,90 75,65 C85,45 55,40 40,55'],
-  'い': ['M30,25 C30,50 25,75 20,80', 'M70,35 Q65,60 60,70'],
-  'う': ['M40,20 Q50,15 60,20', 'M25,40 Q60,35 65,55 C70,75 35,85 25,70'],
-  'え': ['M40,20 Q50,15 60,20', 'M25,45 L70,45 L35,80 Q55,75 75,80'],
-  'お': ['M20,35 L60,30', 'M45,15 L45,65 C45,85 20,80 25,60', 'M70,40 Q80,50 75,60'],
-  'か': ['M25,35 Q60,25 55,50 C50,75 30,80 25,70', 'M45,15 L40,85', 'M70,30 L80,45'],
-  'き': ['M25,30 L75,25', 'M25,45 L75,40', 'M50,15 L45,65', 'M35,70 C50,85 70,80 75,65'],
-  'く': ['M65,25 L30,50 L70,75'],
-  'け': ['M30,20 L25,80', 'M45,35 L80,30', 'M65,15 C65,50 60,75 55,85'],
-  'こ': ['M30,30 Q60,25 70,30', 'M30,70 Q60,75 75,65']
-};
+(function(){
+    "use strict";
 
-const unitsData = {
-  1: {
-    stage1: [
-      { id: 'u1_a', jp: 'あ', romaji: 'a' },
-      { id: 'u1_i', jp: 'い', romaji: 'i' },
-      { id: 'u1_u', jp: 'う', romaji: 'u' },
-      { id: 'u1_e', jp: 'え', romaji: 'e' },
-      { id: 'u1_o', jp: 'お', romaji: 'o' }
-    ],
-    stage2: [
-      { id: 'u1_w1', jp: 'あい', zh: '愛', romaji: 'ai' },
-      { id: 'u1_w2', jp: 'あお', zh: '藍色／青色', romaji: 'ao' },
-      { id: 'u1_w3', jp: 'あう', zh: '見面', romaji: 'au' },
-      { id: 'u1_w4', jp: 'いう', zh: '說', romaji: 'iu' },
-      { id: 'u1_w5', jp: 'うえ', zh: '上面', romaji: 'ue' },
-      { id: 'u1_w6', jp: 'おう', zh: '追', romaji: 'ou1' },
-      { id: 'u1_w7', jp: 'おう', zh: '國王', romaji: 'ou2' }
-    ]
-  },
-  2: {
-    stage1: [
-      { id: 'u2_ka', jp: 'か', romaji: 'ka' },
-      { id: 'u2_ki', jp: 'き', romaji: 'ki' },
-      { id: 'u2_ku', jp: 'く', romaji: 'ku' },
-      { id: 'u2_ke', jp: 'け', romaji: 'ke' },
-      { id: 'u2_ko', jp: 'こ', romaji: 'ko' }
-    ],
-    stage2: [
-      { id: 'u2_w1', jp: 'あか', zh: '紅色', romaji: 'aka' },
-      { id: 'u2_w2', jp: 'あき', zh: '秋天', romaji: 'aki' },
-      { id: 'u2_w3', jp: 'あく', zh: '打開', romaji: 'aku' },
-      { id: 'u2_w4', jp: 'いえ', zh: '家', romaji: 'ie' },
-      { id: 'u2_w5', jp: 'いく', zh: '去', romaji: 'iku' },
-      { id: 'u2_w6', jp: 'いか', zh: '魷魚／烏賊', romaji: 'ika' },
-      { id: 'u2_w7', jp: 'いけ', zh: '池塘', romaji: 'ike' },
-      { id: 'u2_w8', jp: 'えき', zh: '車站', romaji: 'eki' },
-      { id: 'u2_w9', jp: 'おか', zh: '山丘', romaji: 'oka' }
-    ]
-  }
-};
+    /* =========================================================
+     * 資料來源設定（Google Sheets CSV，留空則用內建示範資料）
+     * ========================================================= */
+    const VOCAB_SHEET_CSV_URL = "";   // 單字表：id,kr,zh,pos,pron,example_kr,example_zh
+    const GRAMMAR_SHEET_CSV_URL = ""; // 句型表：見文末說明
 
-let currentUnit = 1;
-let currentStage = 1; // 1: 認識字母, 2: 認識單字
-let unlockedMaxStep = 1; // 當前解鎖的最大 Step (1~4 或 1~5)
+    const FALLBACK_VOCAB = [
+        { id:"v1", kr:"학생", zh:"學生", pos:"名詞", pron:"hak-saeng", example_kr:"저는 학생이에요.", example_zh:"我是學生。" },
+        { id:"v2", kr:"선생님", zh:"老師", pos:"名詞", pron:"seon-saeng-nim", example_kr:"이분은 선생님이에요.", example_zh:"這位是老師。" },
+        { id:"v3", kr:"이름", zh:"名字", pos:"名詞", pron:"i-reum", example_kr:"제 이름은 유나예요.", example_zh:"我的名字是有娜。" },
+        { id:"v4", kr:"친구", zh:"朋友", pos:"名詞", pron:"chin-gu", example_kr:"이 사람은 제 친구예요.", example_zh:"這個人是我朋友。" },
+        { id:"v5", kr:"회사원", zh:"上班族", pos:"名詞", pron:"hoe-sa-won", example_kr:"저는 회사원이에요.", example_zh:"我是上班族。" },
+        { id:"v6", kr:"의사", zh:"醫生", pos:"名詞", pron:"ui-sa", example_kr:"제 친구는 의사예요.", example_zh:"我朋友是醫生。" },
+        { id:"v7", kr:"만나다", zh:"見面", pos:"動詞", pron:"man-na-da", example_kr:"만나서 반가워요.", example_zh:"很高興見到你。" },
+        { id:"v8", kr:"대만 사람", zh:"台灣人", pos:"名詞", pron:"dae-man sa-ram", example_kr:"저는 대만 사람이에요.", example_zh:"我是台灣人。" }
+    ];
 
-let activePool = []; // 混搭卡片佇列
-let currentTask = null; // 當前正在作答的項目 { item, step }
-let previousCardId = null;
+    const FALLBACK_GRAMMAR = {
+        pattern: "N + 이에요 / 예요",
+        title: "N + 이에요/예요",
+        explanation: "名詞後面要接「이에요」還是「예요」，要看名詞最後一個字有沒有收尾音（子音）：<br>有收尾音（子音結尾）→ 加 <b>이에요</b>；沒有收尾音（母音結尾）→ 加 <b>예요</b>。",
+        examples: [
+            { kr:"저는 학생이에요.", zh:"我是學生。" },
+            { kr:"저는 의사예요.", zh:"我是醫生。" }
+        ],
+        cloze: [
+            { id:"c1", template:"저는 대만 사람 [?]", options:["이에요","예요"], correct:"이에요",
+              full_kr:"저는 대만 사람이에요.", full_zh:"我是台灣人。",
+              rule:"收尾音（子音）+ 이에요", explain:"「사람」最後一個字是「람」，有收尾音（子音 ㅁ），所以要加「이에요」。" },
+            { id:"c2", template:"저는 의사 [?]", options:["이에요","예요"], correct:"예요",
+              full_kr:"저는 의사예요.", full_zh:"我是醫生。",
+              rule:"沒有收尾音（母音）+ 예요", explain:"「의사」最後一個字是「사」，沒有收尾音，所以要加「예요」。" },
+            { id:"c3", template:"이름이 뭐예요? 제 이름은 유나 [?]", options:["이에요","예요"], correct:"예요",
+              full_kr:"제 이름은 유나예요.", full_zh:"我的名字是有娜。",
+              rule:"沒有收尾音（母音）+ 예요", explain:"「유나」最後一個字是「나」，沒有收尾音，所以要加「예요」。" }
+        ]
+    };
 
-let totalTaskCount = 0;
-let correctTaskCount = 0;
+    const ENCOURAGE = {
+        unlock: ["解鎖！這個字是你的了","記住了，太棒了","又學會一個囉","漂亮，穩穩拿下"],
+        streakRecall: ["太厲害了，記得很牢！","這幾個都難不倒你耶！","腦袋在發光✨","你是不是偷偷複習過了？"],
+        shadowDone: ["你做到了！","越來越自然了喔","這句已經是你的了","聽起來很順耶，繼續保持"],
+        sectionDone: ["這階段完成啦，休息一下吧","你剛剛完成了不少東西喔","進度又往前一步了"],
+        clozeCorrect: ["答對了，句子感覺抓到了！","這個規則你抓到囉","太棒了，繼續保持"]
+    };
 
-window.onload = () => {
-  initStage();
-};
+    /* =========================================================
+     * 狀態
+     * ========================================================= */
+    let vocab = FALLBACK_VOCAB;
+    let grammar = FALLBACK_GRAMMAR;
+    const wordState = {}; // 'new' | 'seen' | 'learned' | 'review'
 
-function switchUnit() {
-  currentUnit = parseInt(document.getElementById('unitSelect').value);
-  currentStage = 1;
-  initStage();
-}
+    let deckIds = [];
+    let deckIndex = 0;
+    let flipped = false;
 
-function initStage() {
-  unlockedMaxStep = 1;
-  totalTaskCount = 0;
-  correctTaskCount = 0;
+    let recentCorrectStreak = 0;
 
-  // 根據階段載入原始資料
-  let baseList = (currentStage === 1) 
-    ? unitsData[currentUnit].stage1 
-    : unitsData[currentUnit].stage2;
+    let mediaStream = null, recorder = null, chunks = [];
+    let isRecording = false;
 
-  // 初始化混搭池，放第一個解鎖 Step 的任務
-  activePool = generateTasksForStep(baseList, 1);
-  totalTaskCount = activePool.length;
+    let challengeQueue = [], challengeTotal = 0;
+    let recognizer = null, isListening = false;
 
-  updateHeaderUI();
-  loadNextCard();
-}
+    let clozeQueue = [], clozeIndex = 0, clozeTotal = 0, clozeAnswered = false;
 
-// 根據指定的 Step 生成任務卡
-function generateTasksForStep(itemList, step) {
-  return itemList.map(item => ({ item, step }));
-}
+    /* =========================================================
+     * 工具
+     * ========================================================= */
+    function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(arr){ const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-function updateHeaderUI() {
-  const maxStep = (currentStage === 1) ? 4 : 5;
-  document.getElementById('stageTitle').innerText = 
-    `階段${currentStage === 1 ? '一：認識字母' : '二：認識單字'}`;
-  document.getElementById('stepIndicator').innerText = `已解鎖題型: Step 1 ~ ${unlockedMaxStep}`;
-  document.getElementById('queueIndicator').innerText = `待練習卡片: ${activePool.length}`;
-  
-  let progress = totalTaskCount > 0 ? (correctTaskCount / totalTaskCount) * 100 : 0;
-  document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
-}
-
-// 載入下一張題目
-function loadNextCard() {
-  hideFeedback();
-
-  // 檢查是否需要混搭下一個 Step (當前題庫正確率 >= 60%)
-  checkAndUnlockNextStep();
-
-  if (activePool.length === 0) {
-    completeStage();
-    return;
-  }
-
-  // 隨機抽選卡片（防連續出現）
-  activePool = shuffle(activePool);
-  let cardIndex = 0;
-  if (activePool.length > 1 && activePool[0].item.id === previousCardId) {
-    cardIndex = 1;
-  }
-
-  currentTask = activePool.splice(cardIndex, 1)[0];
-  previousCardId = currentTask.item.id;
-
-  updateHeaderUI();
-  renderCardUI();
-}
-
-// 判斷是否達標 60% 並解鎖下一個 Step 混搭
-function checkAndUnlockNextStep() {
-  const maxStep = (currentStage === 1) ? 4 : 5;
-  
-  if (unlockedMaxStep < maxStep) {
-    let currentRate = totalTaskCount > 0 ? (correctTaskCount / totalTaskCount) * 100 : 0;
-    
-    // 正確率達到 60% 且目前佇列數量偏少，解鎖下一個 Step 的題型進來混搭
-    if (currentRate >= 60 || activePool.length <= 2) {
-      unlockedMaxStep++;
-      let baseList = (currentStage === 1) ? unitsData[currentUnit].stage1 : unitsData[currentUnit].stage2;
-      let newTasks = generateTasksForStep(baseList, unlockedMaxStep);
-      
-      activePool.push(...newTasks);
-      totalTaskCount += newTasks.length;
-      
-      // 觸發解鎖動畫與提示
-      triggerFireworks();
-      updateHeaderUI();
+    function showEncourage(msg){
+        const toast = document.getElementById('encourage-toast');
+        toast.innerHTML = `<span>✨</span><span>${escapeHtml(msg)}</span>`;
+        toast.classList.add('show');
+        document.getElementById('sr-live').innerText = msg;
+        clearTimeout(showEncourage._t);
+        showEncourage._t = setTimeout(() => toast.classList.remove('show'), 2200);
     }
-  }
-}
 
-// 渲染卡片核心介面
-function renderCardUI() {
-  const mainText = document.getElementById('mainText');
-  const subText = document.getElementById('subText');
-  const playAudioBtn = document.getElementById('playAudioBtn');
-  const strokeContainer = document.getElementById('strokeContainer');
-  const interactiveArea = document.getElementById('interactiveArea');
-
-  interactiveArea.innerHTML = '';
-  mainText.classList.remove('hidden');
-  subText.classList.remove('hidden');
-  playAudioBtn.classList.remove('hidden');
-  strokeContainer.classList.add('hidden');
-
-  const { item, step } = currentTask;
-
-  // ========== 階段一 (認識字母) 混搭題型 ==========
-  if (currentStage === 1) {
-    if (step === 1) {
-      // Step 1: 秀日文+羅馬音+筆劃動畫，用「我記得/再複習一次」自評
-      mainText.innerText = item.jp;
-      subText.innerText = item.romaji;
-      renderStrokeAnimation(item.jp);
-      playJpAudio(item.jp);
-      renderSelfEvalButtons();
-    } 
-    else if (step === 2) {
-      // Step 2: 秀日文選拼音
-      mainText.innerText = item.jp;
-      subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage1, 'romaji', item.romaji);
-    } 
-    else if (step === 3) {
-      // Step 3: 聽語音選日文
-      mainText.innerText = '❓';
-      subText.innerText = '';
-      playJpAudio(item.jp);
-      renderOptions(unitsData[currentUnit].stage1, 'jp', item.jp);
-    } 
-    else if (step === 4) {
-      // Step 4: 只秀日文，自評發音與記憶
-      mainText.innerText = item.jp;
-      subText.innerText = '';
-      renderSelfEvalButtons();
+    /* =========================================================
+     * 資料載入
+     * ========================================================= */
+    function parseCsv(text){
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+        return lines.slice(1).filter(Boolean).map(line => {
+            const cells = line.split(",").map(c => c.trim());
+            const row = {};
+            headers.forEach((h,i) => row[h] = cells[i] || "");
+            return row;
+        });
     }
-  } 
-  // ========== 階段二 (認識單字) 混搭題型 ==========
-  else {
-    if (step === 1) {
-      // Step 1: 秀日文+中文，自評記憶
-      mainText.innerText = item.jp;
-      subText.innerText = item.zh;
-      playJpAudio(item.jp);
-      renderSelfEvalButtons();
-    } 
-    else if (step === 2) {
-      // Step 2: 秀日文選中文
-      mainText.innerText = item.jp;
-      subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage2, 'zh', item.zh);
-    } 
-    else if (step === 3) {
-      // Step 3: 秀中文選日文
-      mainText.innerText = item.zh;
-      subText.innerText = '';
-      renderOptions(unitsData[currentUnit].stage2, 'jp', item.jp);
-    } 
-    else if (step === 4) {
-      // Step 4: 聽語音選日文
-      mainText.innerText = '❓';
-      subText.innerText = '';
-      playJpAudio(item.jp);
-      renderOptions(unitsData[currentUnit].stage2, 'jp', item.jp);
-    } 
-    else if (step === 5) {
-      // Step 5: 只秀日文，自評記憶
-      mainText.innerText = item.jp;
-      subText.innerText = '';
-      renderSelfEvalButtons();
+
+    async function loadVocab(){
+        if (!VOCAB_SHEET_CSV_URL){ vocab = FALLBACK_VOCAB; return; }
+        try{
+            const res = await fetch(VOCAB_SHEET_CSV_URL);
+            if (!res.ok) throw new Error('讀取失敗');
+            const rows = parseCsv(await res.text());
+            const parsed = rows.filter(r => r.kr && r.zh).map((r,idx) => ({
+                id:r.id || ('v'+(idx+1)), kr:r.kr, zh:r.zh, pos:r.pos || '名詞',
+                pron:r.pron || '', example_kr:r.example_kr || '', example_zh:r.example_zh || ''
+            }));
+            vocab = parsed.length ? parsed : FALLBACK_VOCAB;
+        }catch(err){
+            console.warn('無法讀取單字 Sheet，改用內建示範資料：', err.message);
+            vocab = FALLBACK_VOCAB;
+        }
     }
-  }
-}
 
-// 筆畫動畫
-function renderStrokeAnimation(char) {
-  const strokeContainer = document.getElementById('strokeContainer');
-  const svg = document.getElementById('strokeSvg');
-  svg.innerHTML = '';
+    async function loadGrammar(){
+        if (!GRAMMAR_SHEET_CSV_URL){ grammar = FALLBACK_GRAMMAR; return; }
+        try{
+            const res = await fetch(GRAMMAR_SHEET_CSV_URL);
+            if (!res.ok) throw new Error('讀取失敗');
+            const rows = parseCsv(await res.text());
+            if (!rows.length) throw new Error('無資料');
+            const g = rows[0];
+            const examples = [];
+            if (g.example1_kr) examples.push({kr:g.example1_kr, zh:g.example1_zh||''});
+            if (g.example2_kr) examples.push({kr:g.example2_kr, zh:g.example2_zh||''});
+            const cloze = rows.filter(r => r.cloze_id).map(r => ({
+                id:r.cloze_id, template:r.template,
+                options:[r.option_a, r.option_b].filter(Boolean),
+                correct:r.correct_option, full_kr:r.full_sentence_kr, full_zh:r.full_sentence_zh,
+                rule:r.rule_highlight, explain:r.explanation
+            }));
+            grammar = {
+                pattern:g.title || FALLBACK_GRAMMAR.pattern, title:g.title || FALLBACK_GRAMMAR.title,
+                explanation:g.rule_summary || FALLBACK_GRAMMAR.explanation,
+                examples: examples.length ? examples : FALLBACK_GRAMMAR.examples,
+                cloze: cloze.length ? cloze : FALLBACK_GRAMMAR.cloze
+            };
+        }catch(err){
+            console.warn('無法讀取句型 Sheet，改用內建示範資料：', err.message);
+            grammar = FALLBACK_GRAMMAR;
+        }
+    }
 
-  const paths = strokePaths[char];
-  if (paths) {
-    strokeContainer.classList.remove('hidden');
-    paths.forEach((d, index) => {
-      const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathEl.setAttribute('d', d);
-      pathEl.setAttribute('fill', 'none');
-      pathEl.setAttribute('stroke', '#4A90E2');
-      pathEl.setAttribute('stroke-width', '6');
-      pathEl.setAttribute('stroke-linecap', 'round');
-      pathEl.setAttribute('class', 'stroke-path');
-      pathEl.style.animationDelay = `${index * 0.5}s`;
-      svg.appendChild(pathEl);
+    /* =========================================================
+     * 語音（女聲優先）
+     * ========================================================= */
+    let cachedFemaleVoice = null;
+    function pickFemaleKoreanVoice(){
+        if (cachedFemaleVoice) return cachedFemaleVoice;
+        const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+        const krVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ko'));
+        const femaleGuess = krVoices.find(v => /female|여성|yuna|여자/i.test(v.name));
+        cachedFemaleVoice = femaleGuess || krVoices[0] || null;
+        return cachedFemaleVoice;
+    }
+    function speakKorean(text){
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        utter.rate = 0.92;
+        utter.pitch = 1.05; // 稍微提高音高，模擬女聲音色（瀏覽器語音清單不一定標註性別，此為最佳嘗試）
+        const v = pickFemaleKoreanVoice();
+        if (v) utter.voice = v;
+        window.speechSynthesis.speak(utter);
+    }
+    if ('speechSynthesis' in window){
+        window.speechSynthesis.onvoiceschanged = () => { cachedFemaleVoice = null; };
+    }
+
+    /* =========================================================
+     * Section Tabs
+     * ========================================================= */
+    document.getElementById('tab-section-vocab').addEventListener('click', () => switchSection('vocab'));
+    document.getElementById('tab-section-grammar').addEventListener('click', () => switchSection('grammar'));
+    function switchSection(name){
+        document.getElementById('tab-section-vocab').classList.toggle('active', name === 'vocab');
+        document.getElementById('tab-section-grammar').classList.toggle('active', name === 'grammar');
+        document.getElementById('view-browse').classList.toggle('active', name === 'vocab');
+        document.getElementById('view-grammar').classList.toggle('active', name === 'grammar');
+    }
+
+    /* =========================================================
+     * 單字總覽渲染
+     * ========================================================= */
+    function initState(){ vocab.forEach(w => { if (!wordState[w.id]) wordState[w.id] = 'new'; }); }
+
+    function renderGrid(){
+        const grid = document.getElementById('word-grid');
+        grid.innerHTML = vocab.map(w => `
+            <button class="word-tile state-${wordState[w.id]}" data-id="${w.id}">
+                <span class="kr-word kr">${escapeHtml(w.kr)}</span>
+                <span class="meta-row">
+                    <span class="pos">${escapeHtml(w.pos)}</span>
+                    <span class="zh">${escapeHtml(w.zh)}</span>
+                </span>
+            </button>
+        `).join('');
+        grid.querySelectorAll('.word-tile').forEach(tile => {
+            tile.addEventListener('click', () => openFlipDeck(tile.getAttribute('data-id')));
+        });
+        document.getElementById('lbl-word-count').innerText = vocab.length;
+        updateProgress();
+    }
+
+    function updateProgress(){
+        const learned = vocab.filter(w => wordState[w.id] === 'learned').length;
+        const pct = vocab.length ? Math.round((learned / vocab.length) * 100) : 0;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        if (learned === vocab.length && vocab.length > 0) showEncourage(pick(ENCOURAGE.sectionDone));
+    }
+
+    document.getElementById('btn-open-flipcards').addEventListener('click', () => openFlipDeck(vocab[0] && vocab[0].id));
+
+    /* =========================================================
+     * 單字翻卡（可跳點、可上一頁/下一頁、已學會/需複習）
+     * ========================================================= */
+    function openFlipDeck(startId){
+        deckIds = vocab.map(w => w.id);
+        deckIndex = Math.max(0, deckIds.indexOf(startId));
+        document.getElementById('overlay-flip').classList.add('active');
+        renderFlipCard();
+    }
+    function closeFlipDeck(){
+        document.getElementById('overlay-flip').classList.remove('active');
+        stopMediaStream();
+    }
+    document.getElementById('btn-flip-return').addEventListener('click', closeFlipDeck);
+    document.getElementById('btn-flip-close').addEventListener('click', closeFlipDeck);
+
+    function renderFlipCard(){
+        const w = vocab[deckIndex];
+        if (!w) return;
+        flipped = false;
+        document.getElementById('flip-card').classList.remove('flipped');
+        document.getElementById('front-pos').innerText = w.pos;
+        document.getElementById('front-word').innerText = w.kr;
+        document.getElementById('front-pron').innerText = w.pron || '';
+        document.getElementById('back-zh').innerText = w.zh;
+        document.getElementById('back-pos').innerText = w.pos;
+        document.getElementById('back-example-kr').innerText = w.example_kr || w.kr;
+        document.getElementById('back-example-zh').innerText = w.example_zh || w.zh;
+        document.getElementById('flip-counter').innerText = `${deckIndex + 1} / ${vocab.length}`;
+        document.getElementById('btn-flip-prev').disabled = deckIndex === 0;
+        document.getElementById('btn-flip-next').disabled = deckIndex === vocab.length - 1;
+        document.getElementById('btn-mark-learned').classList.toggle('active', wordState[w.id] === 'learned');
+        document.getElementById('btn-mark-review').classList.toggle('active', wordState[w.id] === 'review');
+
+        if (wordState[w.id] === 'new'){ wordState[w.id] = 'seen'; renderGrid(); }
+        speakKorean(w.kr);
+    }
+
+    document.getElementById('flip-card').addEventListener('click', () => {
+        flipped = !flipped;
+        document.getElementById('flip-card').classList.toggle('flipped', flipped);
     });
-  }
-}
-
-// 渲染自評按鈕 (替代語音辨識)
-function renderSelfEvalButtons() {
-  const interactiveArea = document.getElementById('interactiveArea');
-  const container = document.createElement('div');
-  container.className = 'self-eval-container';
-
-  const reviewBtn = document.createElement('button');
-  reviewBtn.className = 'btn-review';
-  reviewBtn.innerText = '🔴 再複習一次';
-  reviewBtn.onclick = () => handleSelfEval(false);
-
-  const rememberBtn = document.createElement('button');
-  rememberBtn.className = 'btn-remember';
-  rememberBtn.innerText = '🟢 我記得';
-  rememberBtn.onclick = () => handleSelfEval(true);
-
-  container.appendChild(reviewBtn);
-  container.appendChild(rememberBtn);
-  interactiveArea.appendChild(container);
-}
-
-// 渲染選擇題
-function renderOptions(sourceList, key, correctAnswer) {
-  const interactiveArea = document.getElementById('interactiveArea');
-  const grid = document.createElement('div');
-  grid.className = 'options-grid';
-
-  let options = [correctAnswer];
-  let pool = sourceList.map(item => item[key]).filter(val => val !== correctAnswer);
-  pool = shuffle(pool);
-  
-  while (options.length < Math.min(4, sourceList.length)) {
-    let pick = pool.pop();
-    if (pick && !options.includes(pick)) options.push(pick);
-  }
-  options = shuffle(options);
-
-  options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.innerText = opt;
-    btn.onclick = () => handleOptionAnswer(opt === correctAnswer, correctAnswer);
-    grid.appendChild(btn);
-  });
-
-  interactiveArea.appendChild(grid);
-}
-
-// 自評處理 (升級 / 降級)
-function handleSelfEval(remembered) {
-  if (remembered) {
-    correctTaskCount++;
-    playJpAudio(currentTask.item.jp);
-    loadNextCard();
-  } else {
-    // 降級：放回題庫佇列，隨機重新複習
-    activePool.push(currentTask);
-    showFeedback(false, '已加入錯題複習佇列', `正確解答：${currentTask.item.jp} (${currentTask.item.romaji || currentTask.item.zh})`);
-  }
-}
-
-// 選擇題回答處理
-function handleOptionAnswer(isCorrect, correctAnswer) {
-  if (isCorrect) {
-    correctTaskCount++;
-    playJpAudio(currentTask.item.jp);
-    loadNextCard();
-  } else {
-    // 降級：放回佇列
-    activePool.push(currentTask);
-    showFeedback(false, '答錯了，進入錯題佇列！', `正解：${correctAnswer}`);
-  }
-}
-
-function showFeedback(isCorrect, msg, correctInfo) {
-  const panel = document.getElementById('feedbackPanel');
-  const text = document.getElementById('feedbackText');
-  const corrText = document.getElementById('correctAnswerText');
-
-  panel.className = `feedback-panel ${isCorrect ? 'correct' : 'wrong'}`;
-  text.innerText = msg;
-  corrText.innerText = correctInfo;
-  
-  panel.style.display = 'flex';
-}
-
-function hideFeedback() {
-  document.getElementById('feedbackPanel').style.display = 'none';
-}
-
-function nextCard() {
-  loadNextCard();
-}
-
-// 通關切換
-function completeStage() {
-  triggerFireworks();
-  playSuccessAudio();
-
-  if (currentStage === 1) {
-    alert(`🏆 恭喜完成【階段一：認識字母】！點擊確定解鎖進入【階段二：認識單字】`);
-    currentStage = 2;
-    initStage();
-  } else {
-    alert(`🎉 恭喜通關本單元所有單字！系統已將複習進度記錄於間隔重複學習（SRS）系統中！`);
-  }
-}
-
-// 語音發音與音效
-function playCurrentAudio() {
-  if (currentTask && currentTask.item) {
-    playJpAudio(currentTask.item.jp);
-  }
-}
-
-function playJpAudio(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ja-JP';
-    utterance.rate = 0.8;
-    window.speechSynthesis.speak(utterance);
-  }
-}
-
-function playSuccessAudio() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  
-  osc.type = 'triangle';
-  osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-  osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-  osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
-  osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3);
-  
-  gain.gain.setValueAtTime(0.3, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-  
-  osc.start();
-  osc.stop(ctx.currentTime + 0.6);
-}
-
-function triggerFireworks() {
-  if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
+    document.getElementById('btn-front-play').addEventListener('click', (e) => {
+        e.stopPropagation(); speakKorean(vocab[deckIndex].kr);
     });
-  }
-}
+    document.getElementById('btn-back-play').addEventListener('click', (e) => {
+        e.stopPropagation(); speakKorean(vocab[deckIndex].kr);
+    });
+    document.getElementById('btn-example-play').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const w = vocab[deckIndex];
+        speakKorean(w.example_kr || w.kr);
+    });
 
-function shuffle(array) {
-  let cur = array.length, rand;
-  while (cur !== 0) {
-    rand = Math.floor(Math.random() * cur);
-    cur--;
-    [array[cur], array[rand]] = [array[rand], array[cur]];
-  }
-  return array;
-}
+    document.getElementById('btn-flip-prev').addEventListener('click', () => { if (deckIndex > 0){ deckIndex--; renderFlipCard(); } });
+    document.getElementById('btn-flip-next').addEventListener('click', () => { if (deckIndex < vocab.length - 1){ deckIndex++; renderFlipCard(); } });
+
+    document.getElementById('btn-mark-learned').addEventListener('click', () => {
+        const w = vocab[deckIndex];
+        wordState[w.id] = wordState[w.id] === 'learned' ? 'seen' : 'learned';
+        renderFlipCard(); renderGrid();
+    });
+    document.getElementById('btn-mark-review').addEventListener('click', () => {
+        const w = vocab[deckIndex];
+        wordState[w.id] = wordState[w.id] === 'review' ? 'seen' : 'review';
+        renderFlipCard(); renderGrid();
+    });
+
+    /* =========================================================
+     * 完成單字學習 → 跟讀判定 → +XP（純畫面回饋，不寫入任何資料）→ 平滑進入下一階段
+     * ========================================================= */
+    document.getElementById('btn-finish-flip').addEventListener('click', () => {
+        closeFlipDeck();
+        openShadowCheck();
+    });
+
+    function openShadowCheck(){
+        const target = vocab.find(w => wordState[w.id] === 'review') || vocab[Math.floor(Math.random()*vocab.length)];
+        document.getElementById('shadow-target-word').innerText = target.kr;
+        document.getElementById('shadow-target-word').dataset.wordId = target.id;
+        document.getElementById('shadow-replay-row').classList.remove('show');
+        document.getElementById('btn-shadow-rerecord').style.display = 'none';
+        document.getElementById('btn-shadow-confirm').disabled = true;
+        document.getElementById('xp-burst').classList.remove('show');
+        resetRecordButton('shadow-mic-label', '按下開始錄音');
+        document.getElementById('overlay-shadowcheck').classList.add('active');
+        speakKorean(target.kr);
+    }
+    document.getElementById('btn-shadowcheck-close').addEventListener('click', () => {
+        document.getElementById('overlay-shadowcheck').classList.remove('active');
+        stopMediaStream();
+    });
+
+    function resetRecordButton(labelId, text){
+        isRecording = false;
+        document.getElementById('btn-shadow-record').classList.remove('recording');
+        document.getElementById(labelId).innerText = text;
+    }
+    function stopMediaStream(){
+        if (mediaStream){ mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    }
+
+    document.getElementById('btn-shadow-record').addEventListener('click', async () => {
+        if (isRecording){ recorder && recorder.state === 'recording' && recorder.stop(); return; }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+            alert('此瀏覽器不支援錄音功能，請改用 Chrome 測試。'); return;
+        }
+        try{
+            mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            chunks = [];
+            recorder = new MediaRecorder(mediaStream);
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type:'audio/webm' });
+                document.getElementById('shadow-audio').src = URL.createObjectURL(blob);
+                document.getElementById('shadow-replay-row').classList.add('show');
+                document.getElementById('btn-shadow-rerecord').style.display = 'block';
+                document.getElementById('btn-shadow-confirm').disabled = false;
+                resetRecordButton('shadow-mic-label', '錄好了！可以重聽或送出');
+                stopMediaStream();
+                showEncourage(pick(ENCOURAGE.shadowDone));
+            };
+            recorder.start();
+            isRecording = true;
+            document.getElementById('btn-shadow-record').classList.add('recording');
+            document.getElementById('shadow-mic-label').innerText = '錄音中... 再按一次結束';
+        }catch(err){
+            alert('無法取得麥克風權限，請確認瀏覽器權限設定。');
+        }
+    });
+    document.getElementById('btn-shadow-rerecord').addEventListener('click', () => {
+        document.getElementById('shadow-replay-row').classList.remove('show');
+        document.getElementById('btn-shadow-rerecord').style.display = 'none';
+        document.getElementById('btn-shadow-confirm').disabled = true;
+    });
+
+    document.getElementById('btn-shadow-confirm').addEventListener('click', () => {
+        const wordId = document.getElementById('shadow-target-word').dataset.wordId;
+        if (wordId && wordState[wordId] !== 'learned'){ wordState[wordId] = 'learned'; renderGrid(); }
+        document.getElementById('xp-burst').classList.add('show');
+        // 此為輕量畫面回饋，尚未接正式 XP／能量系統（依先前討論，該系統留待日後獨立設計）
+        setTimeout(() => {
+            document.getElementById('overlay-shadowcheck').classList.remove('active');
+            openChallenge(); // 平滑進入下一階段：開口記單字
+        }, 900);
+    });
+
+    /* =========================================================
+     * 開口記單字（隨機挑戰）
+     * ========================================================= */
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function openChallenge(){
+        challengeQueue = shuffle(vocab.map(w => w.id));
+        challengeTotal = challengeQueue.length;
+        recentCorrectStreak = 0;
+        document.getElementById('overlay-challenge').classList.add('active');
+        showChallengeCard();
+    }
+    function closeChallenge(){
+        document.getElementById('overlay-challenge').classList.remove('active');
+        if (recognizer){ try{ recognizer.stop(); }catch(e){} }
+    }
+    document.getElementById('btn-challenge-close').addEventListener('click', closeChallenge);
+
+    function showChallengeCard(){
+        if (challengeQueue.length === 0){ closeChallenge(); showEncourage(pick(ENCOURAGE.sectionDone)); return; }
+        const w = vocab.find(v => v.id === challengeQueue[0]);
+        document.getElementById('challenge-zh-big').innerText = w.zh;
+        document.getElementById('challenge-count').innerText = `第 ${challengeTotal - challengeQueue.length + 1} / ${challengeTotal} 輪`;
+        document.getElementById('challenge-feedback').classList.remove('show','correct','wrong');
+        document.getElementById('feedback-answer').style.display = 'none';
+        document.getElementById('challenge-next-row').style.display = 'none';
+        document.getElementById('btn-challenge-mic').style.display = 'flex';
+        document.getElementById('challenge-mic-label').innerText = '按住麥克風開始說';
+    }
+
+    function normalizeKr(s){ return String(s||'').replace(/\s+/g,'').replace(/[.,!?~]/g,''); }
+    function judgeAnswer(spoken, target){
+        const s = normalizeKr(spoken), t = normalizeKr(target);
+        if (!s) return false;
+        return s === t || s.includes(t) || t.includes(s);
+    }
+
+    document.getElementById('btn-challenge-mic').addEventListener('click', () => {
+        if (isListening) return;
+        const w = vocab.find(v => v.id === challengeQueue[0]);
+        if (!w) return;
+
+        if (!SpeechRecognitionCtor){
+            speakKorean(w.kr);
+            const ok = confirm(`（此瀏覽器不支援自動語音辨識）\n請跟著說一次「${w.kr}」，說出來了嗎？`);
+            handleChallengeResult(ok, w);
+            return;
+        }
+        recognizer = new SpeechRecognitionCtor();
+        recognizer.lang = 'ko-KR'; recognizer.interimResults = false; recognizer.maxAlternatives = 3;
+        isListening = true;
+        document.getElementById('btn-challenge-mic').classList.add('recording');
+        document.getElementById('challenge-mic-label').innerText = '聽你說...';
+        recognizer.onresult = (event) => {
+            const alts = Array.from(event.results[0]).map(r => r.transcript);
+            handleChallengeResult(alts.some(a => judgeAnswer(a, w.kr)), w);
+        };
+        recognizer.onerror = () => {
+            isListening = false;
+            document.getElementById('btn-challenge-mic').classList.remove('recording');
+            document.getElementById('challenge-mic-label').innerText = '沒聽清楚，再按一次試試';
+        };
+        recognizer.onend = () => { isListening = false; document.getElementById('btn-challenge-mic').classList.remove('recording'); };
+        recognizer.start();
+    });
+
+    function handleChallengeResult(correct, w){
+        const box = document.getElementById('challenge-feedback');
+        document.getElementById('btn-challenge-mic').style.display = 'none';
+        if (correct){
+            wordState[w.id] = 'learned'; renderGrid();
+            challengeQueue.shift();
+            box.classList.add('show','correct');
+            document.getElementById('feedback-text').innerText = '答對了！';
+            document.getElementById('feedback-answer').style.display = 'none';
+            recentCorrectStreak++;
+            showEncourage(recentCorrectStreak >= 3 ? (recentCorrectStreak=0, pick(ENCOURAGE.streakRecall)) : pick(ENCOURAGE.unlock));
+        } else {
+            box.classList.add('show','wrong');
+            document.getElementById('feedback-text').innerText = '再聽一次、跟著唸一遍：';
+            document.getElementById('feedback-answer').style.display = 'block';
+            document.getElementById('feedback-answer').innerText = w.kr;
+            speakKorean(w.kr);
+            challengeQueue.shift();
+            const reinsertAt = Math.min(challengeQueue.length, 1 + Math.floor(Math.random()*(challengeQueue.length+1)));
+            challengeQueue.splice(reinsertAt, 0, w.id);
+            challengeTotal = Math.max(challengeTotal, challengeQueue.length + 1);
+        }
+        document.getElementById('challenge-next-row').style.display = 'block';
+    }
+    document.getElementById('btn-challenge-next').addEventListener('click', showChallengeCard);
+
+    /* =========================================================
+     * 句型講解頁
+     * ========================================================= */
+    function renderGrammarView(){
+        document.getElementById('lbl-grammar-title').innerText = grammar.title;
+        document.getElementById('grammar-pattern').innerText = grammar.pattern;
+        document.getElementById('grammar-explanation').innerHTML = grammar.explanation;
+        document.getElementById('grammar-examples').innerHTML = grammar.examples.map(ex => `
+            <div class="grammar-example">
+                <span class="ex-kr kr">${escapeHtml(ex.kr)}</span>
+                <span class="ex-zh">${escapeHtml(ex.zh)}</span>
+            </div>
+        `).join('');
+    }
+    document.getElementById('btn-open-cloze').addEventListener('click', openCloze);
+
+    /* =========================================================
+     * 語境填空挑戰（正面選擇 → 反面文法解析）
+     * ========================================================= */
+    function openCloze(){
+        clozeQueue = shuffle(grammar.cloze.map(c => c.id));
+        clozeTotal = clozeQueue.length;
+        clozeIndex = 0;
+        document.getElementById('overlay-cloze').classList.add('active');
+        renderClozeQuestion();
+    }
+    document.getElementById('btn-cloze-close').addEventListener('click', () => {
+        document.getElementById('overlay-cloze').classList.remove('active');
+    });
+
+    function renderClozeQuestion(){
+        clozeAnswered = false;
+        document.getElementById('cloze-count').innerText = `第 ${clozeIndex + 1} / ${clozeTotal} 題`;
+        document.getElementById('cloze-front').classList.remove('hidden');
+        document.getElementById('cloze-back').classList.add('hidden');
+        document.getElementById('cloze-feedback').classList.remove('show','correct','wrong');
+        document.getElementById('cloze-next-row').style.display = 'none';
+
+        const q = grammar.cloze.find(c => c.id === clozeQueue[clozeIndex]);
+        const sentenceHtml = escapeHtml(q.template).replace('[?]', '<span class="cloze-blank">___</span>');
+        document.getElementById('cloze-sentence').innerHTML = sentenceHtml;
+        document.getElementById('cloze-options').innerHTML = q.options.map(opt => `
+            <button class="cloze-opt kr" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>
+        `).join('');
+        document.getElementById('cloze-options').querySelectorAll('.cloze-opt').forEach(btn => {
+            btn.addEventListener('click', () => handleClozeAnswer(btn, q));
+        });
+
+        document.getElementById('cloze-back-sentence').innerText = q.full_kr;
+        document.getElementById('cloze-back-rule').innerText = q.rule;
+        document.getElementById('cloze-back-explain').innerText = q.explain;
+        document.getElementById('cloze-back-zh').innerText = q.full_zh;
+    }
+
+    function handleClozeAnswer(btn, q){
+        if (clozeAnswered) return;
+        clozeAnswered = true;
+        const chosen = btn.getAttribute('data-opt');
+        const isCorrect = chosen === q.correct;
+        document.getElementById('cloze-options').querySelectorAll('.cloze-opt').forEach(b => {
+            b.disabled = true;
+            if (b.getAttribute('data-opt') === q.correct) b.classList.add('correct');
+            else if (b === btn) b.classList.add('wrong');
+        });
+
+        const box = document.getElementById('cloze-feedback');
+        box.classList.add('show', isCorrect ? 'correct' : 'wrong');
+        document.getElementById('cloze-feedback-text').innerText = isCorrect
+            ? '🎉 答對了！點擊卡片看文法解析'
+            : '❌ 答錯了，請翻面查看收音判斷解析！';
+
+        if (isCorrect) showEncourage(pick(ENCOURAGE.clozeCorrect));
+
+        // 點答對的按鈕可播放整句語音
+        if (isCorrect){
+            btn.addEventListener('click', () => speakKorean(q.full_kr), { once:false });
+        }
+
+        document.getElementById('cloze-flip-outer').onclick = (e) => {
+            if (e.target.closest('.cloze-opt')) return;
+            document.getElementById('cloze-front').classList.add('hidden');
+            document.getElementById('cloze-back').classList.remove('hidden');
+        };
+
+        document.getElementById('cloze-next-row').style.display = 'block';
+    }
+    document.getElementById('btn-cloze-back-play').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const q = grammar.cloze.find(c => c.id === clozeQueue[clozeIndex]);
+        speakKorean(q.full_kr);
+    });
+
+    document.getElementById('btn-cloze-next').addEventListener('click', () => {
+        clozeIndex++;
+        if (clozeIndex >= clozeQueue.length){
+            document.getElementById('overlay-cloze').classList.remove('active');
+            showEncourage(pick(ENCOURAGE.sectionDone));
+            return;
+        }
+        renderClozeQuestion();
+    });
+
+    /* =========================================================
+     * 啟動
+     * ========================================================= */
+    async function boot(){
+        await Promise.all([loadVocab(), loadGrammar()]);
+        initState();
+        renderGrid();
+        renderGrammarView();
+    }
+    boot();
+})();
 </script>
 </body>
 </html>
