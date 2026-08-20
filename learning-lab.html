@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Lab · Lesson 1 教學流程測試</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    :root {
+        --duo-green:#58cc02; --duo-blue:#1cb0f6; --duo-gray:#e9eaee;
+        --duo-red:#ff6b6b; --duo-gold:#f2a93b;
+        --ink:#2d3339; --ink-soft:#8b93a1; --ink-faint:#c3c9d2;
+        --muted-ctrl:#c9cfd8; --pos-bg:#eaf3ff; --pos-fg:#2f6fb0;
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;height:100%;}
+    body{font-family:'Noto Sans TC',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-weight:400;background:#fbfbfa;color:var(--ink);-webkit-font-smoothing:antialiased;height:100%;overflow:hidden;}
+    .kr{font-family:'Noto Sans KR','Noto Sans TC',sans-serif;}
+    button{font-family:inherit;cursor:pointer;background:none;border:none;font-weight:500;}
+    input{font-family:inherit;}
+    .hidden{display:none !important;}
+    button:focus-visible,[tabindex]:focus-visible,input:focus-visible{outline:2px solid var(--duo-blue);outline-offset:2px;}
+
+    .btn-soft{border-radius:100px;font-weight:600;font-size:0.9rem;padding:12px 20px;transition:opacity .15s ease, transform .1s ease;}
+    .btn-soft:active{transform:scale(0.98);}
+    .btn-soft-primary{background:var(--duo-green);color:#fff;}
+    .btn-soft-blue{background:var(--duo-blue);color:#fff;}
+    .btn-soft-outline{background:#fff;color:var(--ink-soft);border:1px solid var(--duo-gray);}
+    .btn-soft-gold{background:var(--duo-gold);color:#fff;}
+    .btn-soft:disabled{opacity:0.4;cursor:not-allowed;}
+
+    .home-shell{max-width:680px;margin:0 auto;padding:26px 20px 70px;height:100%;overflow-y:auto;}
+    .lab-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+    .lab-eyebrow{font-size:0.68rem;letter-spacing:0.1em;font-weight:600;color:var(--ink-faint);text-transform:uppercase;}
+    .lab-badge{display:inline-flex;align-items:center;gap:6px;color:var(--ink-faint);font-size:0.72rem;font-weight:500;}
+    .section-tabs{display:flex;gap:6px;background:#f4f4f2;padding:5px;border-radius:14px;margin-bottom:24px;}
+    .section-tab{flex:1;padding:9px;border-radius:10px;font-weight:600;font-size:0.84rem;color:var(--ink-soft);}
+    .section-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+    .view{display:none;}
+    .view.active{display:block;animation:fadeUp .3s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+    .browse-title{font-weight:600;font-size:1.24rem;line-height:1.5;margin:0 0 6px;color:var(--ink);}
+    .browse-title .accent{color:var(--duo-blue);font-weight:700;}
+    .browse-sub{color:var(--ink-soft);font-size:0.84rem;margin:0 0 16px;font-weight:400;}
+    .progress-track{height:6px;background:var(--duo-gray);border-radius:100px;overflow:hidden;margin-bottom:20px;}
+    .progress-fill{height:100%;background:var(--duo-green);border-radius:100px;transition:width .5s ease;}
+
+    .action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;}
+    .action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 6px;border-radius:16px;background:#fff;border:1px solid var(--duo-gray);}
+    .action-btn i{font-size:1.05rem;}
+    .action-btn span{font-size:0.76rem;font-weight:600;}
+    .action-btn.primary-action{background:var(--duo-green);border-color:var(--duo-green);}
+    .action-btn.primary-action i,.action-btn.primary-action span{color:#fff;}
+    .action-btn.a2 i,.action-btn.a2 span{color:var(--duo-blue);}
+    .action-btn.a3 i,.action-btn.a3 span{color:var(--duo-gold);}
+    .action-btn:disabled{opacity:0.4;}
+
+    .pack-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;}
+    .pack-pill{flex-shrink:0;padding:8px 15px;border-radius:100px;border:1px solid var(--duo-gray);background:#fff;font-weight:500;font-size:0.78rem;color:var(--ink-soft);white-space:nowrap;}
+    .pack-pill.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+    .pack-pill .pack-core-tag{font-size:0.6rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:100px;margin-left:5px;}
+
+    .word-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .word-tile{position:relative;background:#fff;border:1px solid var(--duo-gray);border-radius:16px;padding:15px 12px 11px;text-align:left;min-height:88px;}
+    .word-tile-main{width:100%;text-align:left;}
+    .word-tile .kr-word{font-weight:600;font-size:1.25rem;color:var(--ink);}
+    .word-tile .meta-row{display:flex;justify-content:flex-end;align-items:baseline;gap:6px;margin-top:8px;}
+    .word-tile .pos{font-size:0.6rem;color:var(--pos-fg);background:var(--pos-bg);padding:2px 7px;border-radius:100px;font-weight:600;}
+    .word-tile .zh{font-size:0.72rem;color:var(--ink-soft);font-weight:400;}
+    .word-tile.state-seen::after,.word-tile.state-learned::after{content:"";position:absolute;top:9px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--duo-gold);}
+    .word-tile.state-learned::after{background:var(--duo-green);}
+    .tile-play-btn{position:absolute;bottom:10px;right:10px;width:26px;height:26px;border-radius:50%;background:#f5f5f4;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;font-size:0.68rem;}
+    .tile-play-btn:active{transform:scale(0.9);}
+
+    .grammar-card{background:#fff;border:1px solid var(--duo-gray);border-radius:18px;padding:22px;margin-bottom:18px;}
+    .grammar-title{font-weight:600;font-size:1.35rem;color:var(--ink);margin:0 0 12px;}
+    .grammar-rule-text{font-size:0.88rem;line-height:1.85;color:var(--ink-soft);font-weight:400;margin-bottom:16px;}
+    .grammar-rule-text b{color:var(--ink);font-weight:600;}
+    .grammar-example{border-top:1px solid #f3f3f1;padding:12px 2px;display:flex;align-items:center;gap:10px;}
+    .grammar-example:first-child{border-top:none;}
+    .grammar-example .ex-kr{font-weight:500;flex:1;font-size:0.95rem;}
+    .grammar-example .ex-zh{font-size:0.78rem;color:var(--ink-faint);}
+
+    .help-fab{position:fixed;right:16px;bottom:16px;width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid var(--duo-gray);color:var(--ink-faint);display:flex;align-items:center;justify-content:center;z-index:40;font-size:0.78rem;}
+
+    .fullscreen-stage{position:fixed;inset:0;background:#fff;z-index:60;display:none;flex-direction:column;}
+    .fullscreen-stage.active{display:flex;animation:fadeIn .2s ease both;}
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+    .stage-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px;flex-shrink:0;}
+    .stage-return{display:flex;align-items:center;gap:4px;color:var(--muted-ctrl);font-size:0.74rem;font-weight:500;}
+    .stage-counter{font-size:0.7rem;font-weight:500;color:var(--ink-faint);}
+
+    .stage-card-zone{flex:1;display:flex;align-items:center;justify-content:center;padding:6px 24px;min-height:0;perspective:1400px;touch-action:pan-y;}
+    .stage-card{position:relative;width:100%;max-width:440px;height:100%;max-height:600px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;cursor:pointer;}
+    .stage-card.flipped{transform:rotateY(180deg);}
+    .stage-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:24px;display:flex;flex-direction:column;}
+    .stage-front{background:#fefefe;border:1px solid #f0f1f0;align-items:center;justify-content:center;text-align:center;padding:30px;}
+    .stage-back{background:#fefefe;border:1px solid #f0f1f0;transform:rotateY(180deg);padding:30px 26px;overflow-y:auto;}
+
+    .face-pos-tag{position:absolute;top:18px;left:20px;font-size:0.72rem;font-weight:700;color:var(--pos-fg);background:var(--pos-bg);padding:4px 12px;border-radius:100px;}
+    .pron-toggle{position:absolute;top:16px;right:16px;display:flex;background:#f5f5f4;border-radius:100px;padding:2px;font-size:0.6rem;font-weight:600;}
+    .pron-toggle button{padding:4px 8px;border-radius:100px;color:var(--ink-faint);}
+    .pron-toggle button.active{background:#fff;color:var(--ink-soft);}
+    .face-play-icon{position:absolute;top:52px;right:22px;width:30px;height:30px;border-radius:50%;background:#f5f5f4;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:0.76rem;}
+    .face-play-icon:active{transform:scale(0.92);}
+
+    .front-word{font-weight:600;font-size:clamp(2.4rem,9.5vw,3.4rem);color:var(--ink);line-height:1.2;}
+    .front-pron{margin-top:16px;font-size:0.94rem;color:var(--ink-faint);font-weight:400;letter-spacing:0.02em;}
+
+    .note-word-head{display:flex;align-items:center;gap:10px;margin-bottom:22px;padding-top:30px;}
+    .note-word-kr{font-weight:600;font-size:1.2rem;}
+    .note-note{font-size:0.94rem;color:var(--ink);line-height:1.9;font-weight:400;margin-bottom:26px;}
+    .note-expr{padding:14px 0;border-top:1px solid #f3f3f1;}
+    .note-expr-kr{font-weight:500;font-size:0.92rem;display:flex;align-items:center;gap:8px;color:var(--ink);}
+    .note-expr-zh{font-size:0.78rem;color:var(--ink-faint);margin-top:5px;font-weight:400;}
+    .mini-play{width:20px;height:20px;border-radius:50%;background:#f5f5f4;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;font-size:0.6rem;flex-shrink:0;}
+    .note-pending{font-size:0.78rem;color:var(--ink-faint);font-style:italic;}
+
+    .stage-controlbar{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:26px;padding:8px 16px 20px;}
+    .ctrl-btn{width:32px;height:32px;border-radius:50%;background:none;display:flex;align-items:center;justify-content:center;color:var(--muted-ctrl);font-size:0.76rem;}
+    .ctrl-btn.primary-ctrl{width:38px;height:38px;background:#f5f5f4;color:var(--ink-soft);}
+
+    .tutorial-overlay{position:fixed;inset:0;background:rgba(45,51,57,0.7);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;touch-action:pan-y;}
+    .tutorial-overlay.active{display:flex;}
+    .tutorial-card{background:#fff;border-radius:20px;padding:28px 24px;max-width:320px;width:100%;text-align:center;}
+    .tutorial-step-icon{width:48px;height:48px;border-radius:50%;background:#f0f6ff;color:var(--duo-blue);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin:0 auto 14px;}
+    .tutorial-title{font-weight:600;font-size:1rem;margin-bottom:8px;}
+    .tutorial-desc{font-size:0.82rem;color:var(--ink-soft);margin-bottom:16px;line-height:1.6;font-weight:400;}
+    .tutorial-hint{font-size:0.7rem;color:var(--ink-faint);margin-bottom:14px;}
+    .tutorial-dots{display:flex;gap:5px;justify-content:center;margin-bottom:16px;}
+    .tutorial-dot{width:6px;height:6px;border-radius:50%;background:var(--duo-gray);}
+    .tutorial-dot.active{background:var(--duo-blue);}
+
+    .overlay{position:fixed;inset:0;background:rgba(45,51,57,0.5);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;z-index:70;}
+    .overlay.active{display:flex;}
+    @media (min-width:600px){.overlay{align-items:center;}}
+    .sheet{background:#fff;width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:24px 22px 26px;max-height:94vh;overflow-y:auto;}
+    @media (min-width:600px){.sheet{border-radius:22px;box-shadow:0 16px 40px rgba(0,0,0,0.18);}}
+    .sheet-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .link-btn{color:var(--muted-ctrl);font-size:0.74rem;font-weight:500;display:flex;align-items:center;gap:4px;}
+    .step-tag{font-size:0.68rem;font-weight:700;color:var(--duo-blue);background:#eef6ff;padding:3px 10px;border-radius:100px;}
+
+    .xp-stage{text-align:center;padding:4px 4px;}
+    .xp-word{font-weight:600;font-size:1.7rem;margin:10px 0 4px;}
+    .xp-zh{font-size:0.9rem;color:var(--ink-soft);margin-bottom:4px;}
+    .mic-big{width:76px;height:76px;border-radius:50%;margin:16px auto 8px;background:var(--duo-red);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;}
+    .mic-big.recording{animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.4);}50%{box-shadow:0 0 0 10px rgba(255,107,107,0);}}
+    .replay-row{display:none;justify-content:center;margin:12px 0;}
+    .replay-row.show{display:flex;}
+    .replay-row audio{width:100%;max-width:260px;height:34px;}
+
+    .result-badge{display:none;flex-direction:column;align-items:center;gap:6px;padding:14px 0 4px;}
+    .result-badge.show{display:flex;animation:fadeUp .3s ease both;}
+    .result-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;}
+    .result-icon.excellent{background:var(--duo-gold);}
+    .result-icon.good{background:var(--duo-green);}
+    .result-icon.tryagain{background:#b0b6bf;}
+    .result-label{font-weight:600;font-size:1.02rem;}
+    .result-sub{font-size:0.78rem;color:var(--ink-soft);font-weight:400;}
+    .result-zh-chip{font-size:0.8rem;color:var(--ink);background:#f5f5f4;padding:4px 12px;border-radius:100px;margin-top:2px;}
+
+    .rescue-box{background:#fdf6ec;border-radius:14px;padding:16px;margin-top:14px;text-align:center;}
+    .rescue-box .rescue-title{font-size:0.82rem;font-weight:600;color:#a9721f;margin-bottom:10px;}
+
+    .challenge-progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .challenge-count{font-size:0.76rem;font-weight:500;color:var(--ink-faint);}
+    .prompt-zh{text-align:center;font-size:1.4rem;font-weight:600;margin:8px 0 2px;}
+    .prompt-hint{text-align:center;font-size:0.76rem;color:var(--ink-soft);margin-bottom:14px;font-weight:400;}
+    .feedback-box{text-align:center;margin-top:12px;padding:11px;border-radius:12px;font-weight:600;font-size:0.86rem;display:none;}
+    .feedback-box.show{display:block;}
+    .feedback-box.correct{background:#f2fbee;color:#3f8a02;}
+    .feedback-box.wrong{background:#fdf0f0;color:#c94747;}
+
+    /* Practice：4選1 */
+    .practice-q-word{text-align:center;font-weight:600;font-size:2rem;margin:14px 0 6px;}
+    .practice-choices{display:flex;flex-direction:column;gap:9px;margin-top:16px;}
+    .practice-choice{padding:13px 16px;border-radius:12px;border:1px solid var(--duo-gray);background:#fff;font-weight:500;font-size:0.96rem;text-align:left;color:var(--ink);}
+    .practice-choice.correct{background:#f2fbee;border-color:var(--duo-green);color:#3f8a02;}
+    .practice-choice.wrong{background:#fdf0f0;border-color:var(--duo-red);color:#c94747;}
+    .practice-choice:disabled{cursor:default;}
+    .practice-group-label{text-align:center;font-size:0.74rem;color:var(--ink-faint);margin-bottom:4px;}
+
+    /* 聽打 */
+    .typing-input{width:100%;padding:14px 16px;border-radius:14px;border:1.5px solid var(--duo-gray);font-size:1.15rem;text-align:center;margin-top:18px;font-family:'Noto Sans KR',sans-serif;}
+    .typing-input:focus{border-color:var(--duo-blue);}
+    .typing-hint-note{font-size:0.7rem;color:var(--ink-faint);text-align:center;margin-top:6px;}
+    .typing-result{margin-top:16px;text-align:center;}
+    .typing-result-label{font-weight:700;font-size:1rem;margin-bottom:8px;}
+    .typing-result-label.perfect{color:var(--duo-gold);}
+    .typing-result-label.space{color:var(--duo-green);}
+    .typing-result-label.close{color:var(--duo-blue);}
+    .typing-result-label.far{color:var(--ink-soft);}
+    .typing-answer-box{background:#f8f8f7;border-radius:12px;padding:14px;font-size:1.3rem;font-weight:600;letter-spacing:0.02em;}
+
+    .stage-finish-row{padding:0 20px 18px;flex-shrink:0;}
+    .cloze-sentence{text-align:center;font-weight:600;font-size:clamp(1.25rem,5.8vw,1.6rem);margin:0 0 24px;line-height:1.6;}
+    .cloze-dialogue-line{text-align:left;font-weight:600;font-size:clamp(1.1rem,5vw,1.4rem);margin:0 0 10px;line-height:1.6;display:flex;gap:8px;}
+    .cloze-dialogue-tag{color:var(--ink-faint);font-weight:700;font-size:0.9em;flex-shrink:0;}
+    .cloze-blank{display:inline-block;min-width:56px;border-bottom:2px solid var(--duo-blue);color:var(--duo-blue);}
+    .cloze-options{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:8px;}
+    .cloze-opt{padding:11px 20px;border-radius:12px;border:1px solid var(--duo-gray);background:#fff;font-weight:600;font-size:0.98rem;color:var(--ink-soft);}
+    .cloze-opt.selected{background:var(--ink);border-color:var(--ink);color:#fff;}
+    .cloze-immediate-feedback{margin-top:16px;font-size:0.86rem;font-weight:600;text-align:center;min-height:20px;}
+    .cloze-immediate-feedback.correct{color:#3f8a02;}
+    .cloze-immediate-feedback.wrong{color:#c94747;}
+
+    .cloze-back-rule{background:#fdf6ec;color:#a9721f;font-weight:600;font-size:1rem;text-align:center;padding:10px;border-radius:12px;margin-bottom:12px;}
+    .cloze-back-sentence{font-weight:600;font-size:1.25rem;text-align:center;margin-bottom:10px;}
+    .cloze-back-explain{font-size:0.84rem;color:var(--ink-soft);line-height:1.75;margin-bottom:10px;font-weight:400;}
+    .cloze-back-zh{font-size:0.76rem;color:var(--ink-faint);text-align:center;}
+
+    .encourage-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:100px;font-size:0.82rem;font-weight:600;z-index:95;opacity:0;pointer-events:none;transition:transform .32s ease,opacity .32s ease;display:flex;align-items:center;gap:7px;}
+    .encourage-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+</style>
+</head>
+<body>
+
+<div class="home-shell">
+    <div class="lab-topbar">
+        <span class="lab-eyebrow">Learning Lab · Lesson 1</span>
+        <span class="lab-badge"><i class="fa-solid fa-flask"></i> 測試環境</span>
+    </div>
+
+    <div class="section-tabs">
+        <button class="section-tab active" id="tab-section-vocab">① 單字學習</button>
+        <button class="section-tab" id="tab-section-grammar">② 句型練習</button>
+    </div>
+
+    <section class="view active" id="view-browse">
+        <h1 class="browse-title">今日解鎖：<span class="accent" id="lbl-word-count">8</span> 個【<span id="lbl-unit-name">자기소개</span>】必備單字</h1>
+        <p class="browse-sub">選一個情境包，先跟讀練習，再挑戰練習與聽打。</p>
+        <div class="pack-row" id="pack-row"></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+        <div class="action-row">
+            <button class="action-btn primary-action" id="btn-open-shadow"><i class="fa-solid fa-microphone"></i><span>跟讀練習</span></button>
+            <button class="action-btn a2" id="btn-open-practice"><i class="fa-solid fa-shuffle"></i><span>練習</span></button>
+            <button class="action-btn a3" id="btn-open-typing"><i class="fa-solid fa-keyboard"></i><span>聽打</span></button>
+        </div>
+
+        <div class="word-grid" id="word-grid"></div>
+    </section>
+
+    <section class="view" id="view-grammar">
+        <h1 class="browse-title">句型講解：<span class="accent" id="lbl-grammar-title">N + 이에요/예요</span></h1>
+        <p class="browse-sub">先看規則和例句，準備好了再挑戰看看。</p>
+        <div class="grammar-card">
+            <h2 class="grammar-title kr" id="grammar-pattern">N + 이에요 / 예요</h2>
+            <div class="grammar-rule-text" id="grammar-explanation"></div>
+            <div id="grammar-examples"></div>
+        </div>
+        <button class="btn-soft btn-soft-blue" id="btn-open-cloze" style="width:100%;">
+            <i class="fa-solid fa-puzzle-piece"></i> 小試身手
+        </button>
+    </section>
+</div>
+
+<button class="help-fab" id="btn-replay-tutorial" aria-label="重新觀看操作導覽" title="重新觀看操作導覽">
+    <i class="fa-regular fa-circle-question"></i>
+</button>
+
+<!-- ============ 全螢幕：單字詳解（隨機瀏覽） ============ -->
+<div class="fullscreen-stage" id="stage-vocab">
+    <div class="stage-topbar">
+        <button class="stage-return" id="btn-flip-return"><i class="fa-solid fa-chevron-left"></i> 返回</button>
+        <span class="stage-counter" id="flip-counter">已瀏覽 1 / 8</span>
+    </div>
+    <div class="stage-card-zone" id="flip-card-zone">
+        <div class="stage-card" id="flip-card">
+            <div class="stage-face stage-front">
+                <span class="face-pos-tag" id="front-pos">名詞</span>
+                <div class="pron-toggle" id="pron-toggle">
+                    <button class="active" data-mode="kr">한글</button>
+                    <button data-mode="roman">Roman</button>
+                </div>
+                <button class="face-play-icon" id="btn-front-play" aria-label="播放發音"><i class="fa-solid fa-volume-high"></i></button>
+                <div class="front-word kr" id="front-word">학생</div>
+                <div class="front-pron" id="front-pron">[학생]</div>
+            </div>
+            <div class="stage-face stage-back">
+                <div class="note-word-head">
+                    <span class="face-pos-tag" style="position:static;" id="note-pos">名詞</span>
+                    <span class="note-word-kr kr" id="note-word-kr">학생</span>
+                </div>
+                <div class="note-note" id="note-note">在學校讀書、學習的人。</div>
+                <div id="note-expr-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="stage-controlbar">
+        <button class="ctrl-btn" id="btn-flip-prev" aria-label="上一個（隨機）"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="ctrl-btn primary-ctrl" id="btn-flip-toggle" aria-label="翻面"><i class="fa-solid fa-rotate"></i></button>
+        <button class="ctrl-btn" id="btn-flip-next" aria-label="下一個（隨機）"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+</div>
+
+<!-- ============ 全螢幕：句型填空 ============ -->
+<div class="fullscreen-stage" id="stage-cloze">
+    <div class="stage-topbar">
+        <button class="stage-return" id="btn-cloze-return"><i class="fa-solid fa-chevron-left"></i> 返回</button>
+        <span class="stage-counter" id="cloze-counter">1 / 3</span>
+    </div>
+    <div class="stage-card-zone" id="cloze-card-zone">
+        <div class="stage-card" id="cloze-card">
+            <div class="stage-face stage-front" id="cloze-front-face"></div>
+            <div class="stage-face stage-back">
+                <button class="face-play-icon" id="btn-cloze-back-play" style="position:static;margin:0 auto 12px;display:flex;"><i class="fa-solid fa-volume-high"></i></button>
+                <div class="cloze-back-rule kr" id="cloze-back-rule"></div>
+                <div class="cloze-back-sentence kr" id="cloze-back-sentence"></div>
+                <div class="cloze-back-explain" id="cloze-back-explain"></div>
+                <div class="cloze-back-zh" id="cloze-back-zh"></div>
+            </div>
+        </div>
+    </div>
+    <div class="stage-finish-row">
+        <button class="btn-soft btn-soft-primary" id="btn-cloze-next" style="width:100%;display:none;">下一題</button>
+    </div>
+</div>
+
+<!-- ============ 導覽 ============ -->
+<div class="tutorial-overlay" id="tutorial-overlay">
+    <div class="tutorial-card" id="tutorial-card">
+        <div class="tutorial-step-icon" id="tutorial-icon"><i class="fa-solid fa-hand-pointer"></i></div>
+        <div class="tutorial-title" id="tutorial-title">點一下卡片可翻面</div>
+        <div class="tutorial-desc" id="tutorial-desc">正面是單字或題目，輕點卡片就能看到說明或解析。</div>
+        <div class="tutorial-hint">← 左右滑動切換 →</div>
+        <div class="tutorial-dots">
+            <span class="tutorial-dot active" data-i="0"></span><span class="tutorial-dot" data-i="1"></span>
+            <span class="tutorial-dot" data-i="2"></span><span class="tutorial-dot" data-i="3"></span>
+        </div>
+        <button class="btn-soft btn-soft-primary" id="btn-tutorial-done" style="width:100%;">開始學習</button>
+    </div>
+</div>
+
+<!-- ============ 跟讀練習（Step1 跟讀 → Step2 看中文說韓文，合併同一輪） ============ -->
+<div class="overlay" id="overlay-shadowcheck">
+    <div class="sheet">
+        <div class="sheet-topbar">
+            <span class="step-tag" id="shadow-step-tag">Step 1 · 跟讀</span>
+            <button class="link-btn" id="btn-shadowcheck-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="challenge-count" id="shadow-progress" style="text-align:center;margin-bottom:6px;">第 1 / 8 個</div>
+
+        <!-- Step 1: 跟讀 -->
+        <div class="xp-stage" id="shadow-step1-zone">
+            <p class="prompt-hint" style="margin-bottom:0;">先聽發音，再跟著唸一次：</p>
+            <div class="xp-word kr" id="shadow-target-word">학생</div>
+            <button class="btn-soft btn-soft-outline" id="btn-shadow-play" style="padding:8px 18px;margin-top:6px;font-size:0.82rem;"><i class="fa-solid fa-volume-high"></i> 播放發音</button>
+            <button class="mic-big" id="btn-shadow-record" aria-label="開始錄音" style="margin-top:16px;"><i class="fa-solid fa-microphone"></i></button>
+            <p class="prompt-hint" id="shadow-mic-label">點一下開始錄音（會同時判斷發音）</p>
+            <div class="replay-row" id="shadow-replay-row"><audio id="shadow-audio" controls></audio></div>
+            <div style="margin-top:6px;"><button class="btn-soft btn-soft-primary" id="btn-shadow-confirm" style="width:100%;padding:12px;" disabled>下一步</button></div>
+        </div>
+
+        <!-- Step 2: 看中文說韓文 -->
+        <div class="xp-stage hidden" id="shadow-step2-zone">
+            <span style="font-size:0.72rem;color:var(--ink-faint);font-weight:500;">看中文說韓文</span>
+            <div class="prompt-zh" id="challenge-zh-big">學生</div>
+            <p class="prompt-hint">看到中文意思，直接說出韓文</p>
+            <button class="mic-big" id="btn-challenge-mic" aria-label="按下開始說話"><i class="fa-solid fa-microphone"></i></button>
+            <p class="prompt-hint" id="challenge-mic-label">點一下開始說</p>
+            <div class="feedback-box" id="challenge-feedback">
+                <div id="feedback-text">再試一次！</div>
+            </div>
+
+            <div class="rescue-box hidden" id="rescue-box">
+                <div class="rescue-title">先聽一次、跟著唸一遍：</div>
+                <div class="xp-word kr" id="rescue-word" style="font-size:1.4rem;margin:4px 0 10px;"></div>
+                <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                    <button class="btn-soft btn-soft-outline" id="btn-rescue-play" style="padding:8px 16px;font-size:0.8rem;"><i class="fa-solid fa-volume-high"></i> 播放</button>
+                    <button class="btn-soft btn-soft-outline" id="btn-rescue-record" style="padding:8px 16px;font-size:0.8rem;"><i class="fa-solid fa-microphone"></i> 跟讀回放</button>
+                    <button class="btn-soft btn-soft-outline" id="btn-rescue-skip" style="padding:8px 16px;font-size:0.8rem;">跳過，先練下一個</button>
+                </div>
+                <div class="replay-row" id="rescue-replay-row" style="margin-top:8px;"><audio id="rescue-audio" controls></audio></div>
+            </div>
+        </div>
+
+        <!-- 結果 -->
+        <div class="result-badge" id="shadow-result-zone">
+            <div class="result-icon" id="result-icon"><i class="fa-solid fa-star"></i></div>
+            <div class="result-label" id="result-label">Good</div>
+            <div class="result-sub" id="result-sub">已經抓到感覺了，繼續保持！</div>
+            <div class="result-zh-chip" id="result-zh-chip">學生</div>
+            <button class="btn-soft btn-soft-primary" id="btn-shadow-continue" style="width:100%;padding:12px;margin-top:8px;">繼續</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ 練習：4選1（雙向） ============ -->
+<div class="overlay" id="overlay-practice">
+    <div class="sheet">
+        <div class="sheet-topbar">
+            <span class="step-tag" id="practice-phase-tag">聽音選中文</span>
+            <button class="link-btn" id="btn-practice-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="practice-group-label" id="practice-group-label">第 1 組 · 第 1 / 4 題</div>
+        <div class="xp-stage">
+            <div id="practice-q-audio-zone">
+                <button class="mic-big" id="btn-practice-play" style="background:var(--duo-blue);"><i class="fa-solid fa-volume-high"></i></button>
+                <p class="prompt-hint" style="margin-top:8px;">聽發音，選出正確的中文意思</p>
+            </div>
+            <div class="practice-q-word kr hidden" id="practice-q-zh"></div>
+            <div class="practice-choices" id="practice-choices"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ 聽打 ============ -->
+<div class="overlay" id="overlay-typing">
+    <div class="sheet">
+        <div class="sheet-topbar">
+            <span class="challenge-count" id="typing-progress">第 1 / 8 個</span>
+            <button class="link-btn" id="btn-typing-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="xp-stage">
+            <button class="mic-big" id="btn-typing-play" style="background:var(--duo-gold);"><i class="fa-solid fa-volume-high"></i></button>
+            <p class="prompt-hint" style="margin-top:8px;">聽發音，打出你聽到的韓文</p>
+            <input class="typing-input kr" id="typing-input" placeholder="請輸入韓文" autocomplete="off">
+            <p class="typing-hint-note">請確認輸入法已切換為韓文</p>
+            <button class="btn-soft btn-soft-primary" id="btn-typing-submit" style="width:100%;margin-top:14px;">送出</button>
+
+            <div class="typing-result hidden" id="typing-result-zone">
+                <div class="typing-result-label" id="typing-result-label">太棒了！</div>
+                <div class="typing-answer-box kr" id="typing-answer-box"></div>
+                <button class="btn-soft btn-soft-primary" id="btn-typing-next" style="width:100%;margin-top:14px;">下一個</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="encourage-toast" id="encourage-toast"></div>
+<div class="sr-only" aria-live="polite" id="sr-live"></div>
+
+<script>
+(function(){
+    "use strict";
+
+    /* =========================================================
+     * 資料來源設定
+     * ========================================================= */
+    const VOCAB_SHEET_CSV_URL = "";
+    const GRAMMAR_POINTS_CSV_URL = "";
+    const GRAMMAR_EXAMPLES_CSV_URL = "";
+    const GRAMMAR_CLOZE_CSV_URL = "";
+
+    function hasBatchim(word){
+        const ch = String(word || '').trim().slice(-1);
+        const code = ch.charCodeAt(0) - 0xAC00;
+        if (code < 0 || code > 11171) return false;
+        return (code % 28) !== 0;
+    }
+    const TEMPLATES = { 'occupation-intro': { pattern:"저는 {word}{이에요|예요}", zhPattern:"我是{meaning}。" } };
+    function applyTemplate(templateId, word, meaning){
+        const t = TEMPLATES[templateId];
+        if (!t) return null;
+        const suffix = t.pattern.includes('{이에요|예요}') ? (hasBatchim(word) ? '이에요' : '예요') : '';
+        return { kr: t.pattern.replace('{word}', word).replace('{이에요|예요}', suffix), zh: t.zhPattern.replace('{meaning}', meaning) };
+    }
+    function getExamplesForWord(w){
+        if (w.commonExpressions && w.commonExpressions.length) return w.commonExpressions;
+        if (w.templateId){ const gen = applyTemplate(w.templateId, w.kr, w.meaning); if (gen) return [gen]; }
+        return null;
+    }
+
+    const FALLBACK_VOCAB = [
+        { id:"v1", kr:"학생", pos:"名詞", romanization:"haksaeng", meaning:"學生", note:"在學校讀書、學習的人。", templateId:"occupation-intro", vocabularyPack:"Core" },
+        { id:"v2", kr:"선생님", pos:"名詞", romanization:"seonsaengnim", meaning:"老師", note:"對老師、長輩的尊稱用法。", templateId:"occupation-intro", vocabularyPack:"Core" },
+        { id:"v3", kr:"이름", pos:"名詞", romanization:"ireum", meaning:"名字", note:"詢問或介紹姓名時使用。", commonExpressions:[{ kr:"제 이름은 유나예요.", zh:"我的名字是有娜。" }], vocabularyPack:"Core" },
+        { id:"v4", kr:"친구", pos:"名詞", romanization:"chingu", meaning:"朋友", note:"年紀相仿、關係親近的人。", commonExpressions:[{ kr:"이 사람은 제 친구예요.", zh:"這個人是我朋友。" }], vocabularyPack:"Core" },
+        { id:"v5", kr:"회사원", pos:"名詞", romanization:"hoesawon", meaning:"上班族", note:"在公司工作的職員。", templateId:"occupation-intro", vocabularyPack:"Core" },
+        { id:"v6", kr:"의사", pos:"名詞", romanization:"uisa", meaning:"醫生", note:"在醫院看診、治療病人的人。", templateId:"occupation-intro", vocabularyPack:"Core" },
+        { id:"v7", kr:"만나다", pos:"動詞", romanization:"mannada", meaning:"見面", note:"與人碰面、相見。", commonExpressions:[{ kr:"만나서 반가워요.", zh:"很高興見到你。" }], vocabularyPack:"Core" },
+        { id:"v8", kr:"대만 사람", pos:"名詞", romanization:"daeman saram", meaning:"台灣人", note:"來自台灣的人。", templateId:"occupation-intro", vocabularyPack:"Core" },
+        { id:"v1-biz", replacesId:"v1", kr:"회계사", pos:"名詞", romanization:"hoegyesa", meaning:"會計師", note:"負責處理公司財務、帳務的專業人員。", templateId:"occupation-intro", vocabularyPack:"Business" },
+        { id:"v2-biz", replacesId:"v2", kr:"변호사", pos:"名詞", romanization:"byeonhosa", meaning:"律師", note:"提供法律諮詢、處理訴訟案件的專業人員。", templateId:"occupation-intro", vocabularyPack:"Business" },
+        { id:"v5-biz", replacesId:"v5", kr:"마케터", pos:"名詞", romanization:"maketeo", meaning:"行銷人員", note:"負責產品推廣與市場策略的人員。", templateId:"occupation-intro", vocabularyPack:"Business" },
+        { id:"v6-biz", replacesId:"v6", kr:"팀장", pos:"名詞", romanization:"timjang", meaning:"組長", note:"帶領一個團隊、負責部門業務的主管。", templateId:"occupation-intro", vocabularyPack:"Business" },
+        { id:"v1-travel", replacesId:"v1", kr:"관광객", pos:"名詞", romanization:"gwangwanggaek", meaning:"觀光客", note:"到當地旅遊、參觀景點的人。", templateId:"occupation-intro", vocabularyPack:"Travel" },
+        { id:"v2-travel", replacesId:"v2", kr:"가이드", pos:"名詞", romanization:"gaideu", meaning:"導遊", note:"帶領旅客觀光、介紹景點的人。", templateId:"occupation-intro", vocabularyPack:"Travel" },
+        { id:"v5-travel", replacesId:"v5", kr:"승무원", pos:"名詞", romanization:"seungmuwon", meaning:"空服員", note:"在飛機上服務乘客的工作人員。", templateId:"occupation-intro", vocabularyPack:"Travel" },
+        { id:"v6-travel", replacesId:"v6", kr:"호텔 직원", pos:"名詞", romanization:"hotel jigwon", meaning:"飯店人員", note:"在飯店櫃檯或服務旅客的工作人員。", templateId:"occupation-intro", vocabularyPack:"Travel" }
+    ];
+
+    const FALLBACK_GRAMMAR = {
+        pattern:"N + 이에요 / 예요", title:"N + 이에요/예요",
+        explanation:"名詞後面要接「이에요」還是「예요」，要看名詞最後一個字有沒有收尾音（子音）：<br>有收尾音（子音結尾）→ 加 <b>이에요</b>；沒有收尾音（母音結尾）→ 加 <b>예요</b>。",
+        examples:[{ kr:"저는 학생이에요.", zh:"我是學生。" }, { kr:"저는 의사예요.", zh:"我是醫生。" }],
+        cloze:[
+            { id:"c1", format:"single", template:"저는 대만 사람 [?]", options:["이에요","예요"], correct:"이에요",
+              full_kr:"저는 대만 사람이에요.", full_zh:"我是台灣人。", rule:"收尾音（子音）+ 이에요", explain:"「사람」最後一個字是「람」，有收尾音，所以要加「이에요」。" },
+            { id:"c2", format:"single", template:"저는 의사 [?]", options:["이에요","예요"], correct:"예요",
+              full_kr:"저는 의사예요.", full_zh:"我是醫生。", rule:"沒有收尾音（母音）+ 예요", explain:"「의사」最後一個字是「사」，沒有收尾音，所以要加「예요」。" },
+            { id:"c3", format:"dialogue", line_a:"이름이 뭐예요?", line_b:"제 이름은 유나 [?]", options:["이에요","예요"], correct:"예요",
+              full_kr:"제 이름은 유나예요.", full_zh:"我的名字是有娜。", rule:"沒有收尾音（母音）+ 예요", explain:"「유나」最後一個字是「나」，沒有收尾音，所以要加「예요」。" }
+        ]
+    };
+    const SECTION_DONE_MSG = ["這階段完成啦，休息一下吧","你剛剛完成了不少東西喔","進度又往前一步了"];
+    const PACK_LABELS = { Core:"Core", Life:"Life 生活", Business:"Business 商務", Travel:"Travel 旅遊", TOPIK:"TOPIK 考試", "K-POP":"K-POP 追星" };
+
+    /* =========================================================
+     * 狀態
+     * ========================================================= */
+    let rawVocab = FALLBACK_VOCAB, grammar = FALLBACK_GRAMMAR;
+    let currentPack = "Core", vocab = [];
+    const wordState = {};          // 'new' | 'seen' | 'learned'
+    const browsedIds = new Set();  // 已瀏覽（詳解頁看過）的字，用於「已瀏覽 X/8」
+
+    let detailWordId = null, pronMode = 'kr';
+    let mediaStream = null, recorder = null, chunks = [], isRecording = false;
+    let recognizedTranscript = "";
+    let audioCtx = null, analyser = null, volumeSamples = [], volumeRafId = null;
+    let recognizer = null, isListening = false, listenTimeoutId = null;
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    // 跟讀練習（合併流程）
+    let shadowQueue = [], shadowTotalOriginal = 0, shadowCurrentWord = null;
+
+    let clozeQueue = [], clozeIndex = 0, clozeTotal = 0, clozeSelected = null;
+
+    // 練習模式
+    let practiceGroups = [], practiceGroupIdx = 0, practicePhase = 'kr-zh', practiceQueue = [], practiceCurrentWord = null;
+
+    // 聽打
+    let typingQueue = [], typingTotal = 0, typingCurrentWord = null;
+
+    /* =========================================================
+     * 工具
+     * ========================================================= */
+    function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+    function showEncourage(msg){
+        const toast = document.getElementById('encourage-toast');
+        toast.innerHTML = `<span>✨</span><span>${escapeHtml(msg)}</span>`;
+        toast.classList.add('show');
+        document.getElementById('sr-live').innerText = msg;
+        clearTimeout(showEncourage._t);
+        showEncourage._t = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+    function getKnownPool(){ return vocab.filter(w => wordState[w.id] && wordState[w.id] !== 'new'); }
+
+    /* =========================================================
+     * 字元級 LCS diff（聽打用）
+     * ========================================================= */
+    function computeLcsLength(a, b){
+        const n=a.length, m=b.length;
+        const dp = Array.from({length:n+1}, () => new Array(m+1).fill(0));
+        for (let i=1;i<=n;i++) for (let j=1;j<=m;j++) dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+        return dp[n][m];
+    }
+    function diffHighlightHtml(correct, input){
+        const a = Array.from(correct), b = Array.from(input);
+        const n=a.length, m=b.length;
+        const dp = Array.from({length:n+1}, () => new Array(m+1).fill(0));
+        for (let i=1;i<=n;i++) for (let j=1;j<=m;j++) dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+        let i=n, j=m; const matched = new Set();
+        while (i>0 && j>0){
+            if (a[i-1]===b[j-1]){ matched.add(i-1); i--; j--; }
+            else if (dp[i-1][j] >= dp[i][j-1]) i--; else j--;
+        }
+        return a.map((ch, idx) => matched.has(idx) ? escapeHtml(ch) : `<span style="color:var(--duo-red);">${escapeHtml(ch)}</span>`).join('');
+    }
+    function judgeTyping(input, correct){
+        const ti = input.trim(), tc = correct.trim();
+        if (ti === tc) return { level:'perfect' };
+        const ni = ti.replace(/\s+/g,''), nc = tc.replace(/\s+/g,'');
+        if (ni === nc) return { level:'space' };
+        const diffCount = nc.length - computeLcsLength(nc, ni);
+        // 門檻需相對於答案長度換算，否則短單字（韓文常只有 2~3 字）只要整個打錯，
+        // diffCount 也會落在絕對值 <=2 內，誤判成「很接近」。改用比例＋絕對值雙重門檻。
+        const ratio = nc.length ? diffCount / nc.length : 1;
+        const level = (diffCount <= 3 && ratio <= 0.5) ? 'close' : 'far';
+        return { level, diffHtml: diffHighlightHtml(tc, ti) };
+    }
+
+    /* =========================================================
+     * 資料載入
+     * ========================================================= */
+    function parseCsv(text){
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines[0].split(",").map(h => h.trim());
+        return lines.slice(1).filter(Boolean).map(line => {
+            const cells = line.split(",").map(c => c.trim());
+            const row = {}; headers.forEach((h,i) => row[h] = cells[i] || ""); return row;
+        });
+    }
+    function rowsToVocabModel(rows){
+        return rows.filter(r => r.kr).map(r => {
+            const expr = [];
+            if (r.commonExpressions){ r.commonExpressions.split("|").forEach(pair => { const [kr, zh] = pair.split("::"); if (kr) expr.push({ kr:kr.trim(), zh:(zh||'').trim() }); }); }
+            else if (r.example){ expr.push({ kr:r.example, zh:r.exampleTranslation || '' }); }
+            return { id:r.id, replacesId:r.replacesId || null, kr:r.kr, pos:r.pos || '名詞', romanization:r.romanization || '',
+                meaning:r.meaning || r.zh || '', note:r.note || '', commonExpressions:expr.length ? expr : null,
+                templateId:r.templateId || null, vocabularyPack:r.vocabularyPack || 'Core' };
+        });
+    }
+    async function loadVocab(){
+        if (!VOCAB_SHEET_CSV_URL){ rawVocab = FALLBACK_VOCAB; return; }
+        try{
+            const res = await fetch(VOCAB_SHEET_CSV_URL); if (!res.ok) throw new Error('讀取失敗');
+            const parsed = rowsToVocabModel(parseCsv(await res.text()));
+            rawVocab = parsed.length ? parsed : FALLBACK_VOCAB;
+        }catch(err){ console.warn('無法讀取單字 Sheet，改用內建示範資料：', err.message); rawVocab = FALLBACK_VOCAB; }
+    }
+    // 句型：三分頁（GrammarPoints / GrammarExamples / GrammarCloze），依 patternId 對應
+    async function loadGrammar(){
+        if (!GRAMMAR_POINTS_CSV_URL){ grammar = FALLBACK_GRAMMAR; return; }
+        try{
+            const [ptRes, exRes, clRes] = await Promise.all([
+                fetch(GRAMMAR_POINTS_CSV_URL),
+                GRAMMAR_EXAMPLES_CSV_URL ? fetch(GRAMMAR_EXAMPLES_CSV_URL) : Promise.resolve(null),
+                GRAMMAR_CLOZE_CSV_URL ? fetch(GRAMMAR_CLOZE_CSV_URL) : Promise.resolve(null)
+            ]);
+            const points = parseCsv(await ptRes.text());
+            if (!points.length) throw new Error('無句型資料');
+            const g = points[0]; // Lesson 1 目前僅單一句型，取第一筆
+            const examples = exRes ? parseCsv(await exRes.text()).filter(r => r.patternId === g.patternId).map(r => ({ kr:r.kr, zh:r.zh })) : [];
+            const clozeRows = clRes ? parseCsv(await clRes.text()).filter(r => r.patternId === g.patternId) : [];
+            const cloze = clozeRows.map(r => ({
+                id:r.cloze_id, format:r.format || 'single', template:r.template, line_a:r.line_a, line_b:r.line_b,
+                options:[r.option_a, r.option_b].filter(Boolean), correct:r.correct_option,
+                full_kr:r.full_sentence_kr, full_zh:r.full_sentence_zh, rule:r.rule_highlight, explain:r.explanation
+            }));
+            grammar = { pattern:g.title, title:g.title, explanation:g.rule_summary,
+                examples: examples.length ? examples : FALLBACK_GRAMMAR.examples,
+                cloze: cloze.length ? cloze : FALLBACK_GRAMMAR.cloze };
+        }catch(err){ console.warn('無法讀取句型 Sheet，改用內建示範資料：', err.message); grammar = FALLBACK_GRAMMAR; }
+    }
+
+    function availablePacks(){ const set = new Set(rawVocab.map(r => r.vocabularyPack)); set.add('Core'); return ['Core', ...Array.from(set).filter(p => p !== 'Core')]; }
+    function buildVocabForPack(packName){
+        const coreList = rawVocab.filter(r => r.vocabularyPack === 'Core');
+        if (packName === 'Core') return coreList.map(w => ({ ...w }));
+        const overrides = rawVocab.filter(r => r.vocabularyPack === packName);
+        const overrideMap = {}; overrides.forEach(o => { if (o.replacesId) overrideMap[o.replacesId] = o; });
+        return coreList.map(w => overrideMap[w.id] ? { ...overrideMap[w.id] } : { ...w });
+    }
+    function renderPackRow(){
+        document.getElementById('pack-row').innerHTML = availablePacks().map(p => `
+            <button class="pack-pill ${p === currentPack ? 'active' : ''}" data-pack="${p}">${escapeHtml(PACK_LABELS[p] || p)}${p === 'Core' ? '<span class="pack-core-tag">Assessment</span>' : ''}</button>
+        `).join('');
+        document.querySelectorAll('.pack-pill').forEach(btn => btn.addEventListener('click', () => switchPack(btn.getAttribute('data-pack'))));
+    }
+    function switchPack(packName){
+        currentPack = packName;
+        vocab = buildVocabForPack(packName);
+        vocab.forEach(w => { if (!wordState[w.id]) wordState[w.id] = 'new'; });
+        renderPackRow(); renderGrid();
+    }
+
+    document.getElementById('tab-section-vocab').addEventListener('click', () => switchSection('vocab'));
+    document.getElementById('tab-section-grammar').addEventListener('click', () => switchSection('grammar'));
+    function switchSection(name){
+        document.getElementById('tab-section-vocab').classList.toggle('active', name === 'vocab');
+        document.getElementById('tab-section-grammar').classList.toggle('active', name === 'grammar');
+        document.getElementById('view-browse').classList.toggle('active', name === 'vocab');
+        document.getElementById('view-grammar').classList.toggle('active', name === 'grammar');
+    }
+
+    /* =========================================================
+     * 單字列表
+     * ========================================================= */
+    function renderGrid(){
+        const grid = document.getElementById('word-grid');
+        grid.innerHTML = vocab.map(w => `
+            <div class="word-tile state-${wordState[w.id] || 'new'}">
+                <button class="word-tile-main" data-id="${w.id}">
+                    <span class="kr-word kr">${escapeHtml(w.kr)}</span>
+                    <span class="meta-row"><span class="pos">${escapeHtml(w.pos)}</span><span class="zh">${escapeHtml(w.meaning)}</span></span>
+                </button>
+                <button class="tile-play-btn" data-speak="${escapeHtml(w.kr)}" aria-label="播放發音"><i class="fa-solid fa-volume-high"></i></button>
+            </div>
+        `).join('');
+        grid.querySelectorAll('.word-tile-main').forEach(btn => btn.addEventListener('click', () => openFlipDetail(btn.getAttribute('data-id'))));
+        grid.querySelectorAll('.tile-play-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); speakKorean(btn.getAttribute('data-speak')); }));
+        document.getElementById('lbl-word-count').innerText = vocab.length;
+        updateProgress();
+        updateActionButtonsAvailability();
+    }
+    function updateProgress(){
+        const seen = vocab.filter(w => wordState[w.id] && wordState[w.id] !== 'new').length;
+        document.getElementById('progress-fill').style.width = (vocab.length ? Math.round((seen/vocab.length)*100) : 0) + '%';
+    }
+    function updateActionButtonsAvailability(){
+        const known = getKnownPool().length;
+        document.getElementById('btn-open-practice').disabled = known < 2;
+        document.getElementById('btn-open-typing').disabled = known < 1;
+    }
+
+    /* =========================================================
+     * 語音（女聲優先）
+     * ========================================================= */
+    let cachedFemaleVoice = null;
+    function pickFemaleKoreanVoice(){
+        if (cachedFemaleVoice) return cachedFemaleVoice;
+        const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+        const krVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ko'));
+        cachedFemaleVoice = krVoices.find(v => /female|여성|yuna|여자/i.test(v.name)) || krVoices[0] || null;
+        return cachedFemaleVoice;
+    }
+    function speakKorean(text){
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR'; utter.rate = 0.92; utter.pitch = 1.05;
+        const v = pickFemaleKoreanVoice(); if (v) utter.voice = v;
+        window.speechSynthesis.speak(utter);
+    }
+    if ('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged = () => { cachedFemaleVoice = null; }; }
+
+    /* =========================================================
+     * 單字詳解（隨機瀏覽，已瀏覽計數）
+     * ========================================================= */
+    function openFlipDetail(startId){
+        detailWordId = startId; pronMode = 'kr';
+        document.getElementById('stage-vocab').classList.add('active');
+        renderFlipCard();
+        maybeShowTutorial();
+    }
+    document.getElementById('btn-flip-return').addEventListener('click', () => { document.getElementById('stage-vocab').classList.remove('active'); stopMediaStream(); });
+
+    function renderFlipCard(){
+        const w = vocab.find(x => x.id === detailWordId);
+        if (!w) return;
+        document.getElementById('flip-card').classList.remove('flipped');
+        document.getElementById('front-pos').innerText = w.pos;
+        document.getElementById('front-word').innerText = w.kr;
+        document.getElementById('front-pron').innerText = pronMode === 'kr' ? `[${w.kr}]` : `[${w.romanization || '—'}]`;
+        document.getElementById('note-word-kr').innerText = w.kr;
+        document.getElementById('note-pos').innerText = w.pos;
+        document.getElementById('note-note').innerText = w.note || '';
+
+        const examples = getExamplesForWord(w);
+        const exprList = document.getElementById('note-expr-list');
+        exprList.innerHTML = examples ? examples.map(ex => `
+            <div class="note-expr"><div class="note-expr-kr kr"><span>${escapeHtml(ex.kr)}</span>
+                <button class="mini-play" data-speak="${escapeHtml(ex.kr)}"><i class="fa-solid fa-play"></i></button></div>
+                <div class="note-expr-zh">${escapeHtml(ex.zh)}</div></div>
+        `).join('') : `<div class="note-expr note-pending">教材補充中，稍後將自動由 AI 補齊例句。</div>`;
+        exprList.querySelectorAll('[data-speak]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); speakKorean(btn.getAttribute('data-speak')); }));
+
+        browsedIds.add(w.id);
+        document.getElementById('flip-counter').innerText = `已瀏覽 ${browsedIds.size} / ${vocab.length}`;
+        if (!wordState[w.id] || wordState[w.id] === 'new'){ wordState[w.id] = 'seen'; renderGrid(); }
+        speakKorean(w.kr);
+    }
+    document.getElementById('flip-card').addEventListener('click', () => document.getElementById('flip-card').classList.toggle('flipped'));
+    document.getElementById('btn-flip-toggle').addEventListener('click', () => document.getElementById('flip-card').classList.toggle('flipped'));
+    document.getElementById('btn-front-play').addEventListener('click', (e) => { e.stopPropagation(); speakKorean(vocab.find(x=>x.id===detailWordId).kr); });
+    document.getElementById('pron-toggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const btn = e.target.closest('button[data-mode]'); if (!btn) return;
+        pronMode = btn.getAttribute('data-mode');
+        document.querySelectorAll('#pron-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+        const w = vocab.find(x => x.id === detailWordId);
+        document.getElementById('front-pron').innerText = pronMode === 'kr' ? `[${w.kr}]` : `[${w.romanization || '—'}]`;
+    });
+    function jumpRandomOther(){
+        if (vocab.length < 2) return;
+        let next; do { next = pick(vocab).id; } while (next === detailWordId);
+        detailWordId = next; renderFlipCard();
+    }
+    document.getElementById('btn-flip-prev').addEventListener('click', jumpRandomOther);
+    document.getElementById('btn-flip-next').addEventListener('click', jumpRandomOther);
+    function attachSwipe(zoneEl, onPrev, onNext){
+        let startX=0, startY=0, tracking=false;
+        zoneEl.addEventListener('touchstart', (e) => { const t=e.touches[0]; startX=t.clientX; startY=t.clientY; tracking=true; }, { passive:true });
+        zoneEl.addEventListener('touchend', (e) => {
+            if (!tracking) return; tracking=false;
+            const t=e.changedTouches[0]; const dx=t.clientX-startX, dy=t.clientY-startY;
+            if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)*1.4){ if (dx>0) onPrev(); else onNext(); }
+        }, { passive:true });
+    }
+    attachSwipe(document.getElementById('flip-card-zone'), jumpRandomOther, jumpRandomOther);
+
+    /* =========================================================
+     * 錄音基礎設施（音量偵測、mimeType 偵測）—— 供跟讀 / 救援跟讀共用
+     * ========================================================= */
+    function stopMediaStream(){
+        if (mediaStream){ mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+        if (recognizer){ try{ recognizer.stop(); }catch(e){} }
+        stopVolumeMonitor();
+    }
+    function startVolumeMonitor(stream){
+        try{
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioCtx.createMediaStreamSource(stream);
+            analyser = audioCtx.createAnalyser(); analyser.fftSize = 512; source.connect(analyser);
+            volumeSamples = [];
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            const sample = () => {
+                analyser.getByteTimeDomainData(data);
+                let peak = 0; for (let i=0;i<data.length;i++){ const v=Math.abs(data[i]-128); if (v>peak) peak=v; }
+                volumeSamples.push(peak);
+                volumeRafId = requestAnimationFrame(sample);
+            };
+            sample();
+        }catch(err){ console.warn('音量偵測無法啟動（不影響錄音本身）：', err.message); }
+    }
+    function stopVolumeMonitor(){
+        if (volumeRafId) cancelAnimationFrame(volumeRafId);
+        volumeRafId = null;
+        if (audioCtx){ try{ audioCtx.close(); }catch(e){} audioCtx = null; }
+        analyser = null;
+    }
+    function pickMimeType(){
+        return MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+            : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+            : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+    }
+    // 通用「開始/停止錄音」流程：完成後透過 onDone(blobUrlOrNull) 回呼；錄音只用來「回放給自己聽」，不用於任何關卡判分
+    async function startGenericRecording(btnEl, labelEl, audioEl, onDone){
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ alert('此瀏覽器不支援錄音功能，請改用 Chrome 測試。'); onDone(null); return; }
+        try{
+            mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+            const chunksLocal = [];
+            const mimeType = pickMimeType();
+            const rec = mimeType ? new MediaRecorder(mediaStream, { mimeType }) : new MediaRecorder(mediaStream);
+            rec.ondataavailable = e => { if (e.data.size > 0) chunksLocal.push(e.data); };
+            rec.onerror = () => { alert('錄音發生問題，已自動略過，不影響學習進度。'); stopMediaStream(); onDone(null); };
+            rec.onstop = () => {
+                try{
+                    const blob = new Blob(chunksLocal, { type: rec.mimeType || 'audio/webm' });
+                    const url = URL.createObjectURL(blob);
+                    audioEl.src = url; audioEl.load();
+                    audioEl.onerror = () => { console.warn('錄音回放失敗，僅影響回放功能，不影響判定。'); };
+                    onDone(url);
+                }catch(err){ onDone(null); }
+                stopMediaStream();
+            };
+            rec.start();
+            btnEl.classList.add('recording');
+            if (labelEl) labelEl.innerText = '錄音中，再按一次結束';
+            btnEl.onclick = () => { rec.state === 'recording' && rec.stop(); btnEl.classList.remove('recording'); };
+        }catch(err){ alert('無法取得麥克風權限，請確認瀏覽器權限設定。'); onDone(null); }
+    }
+
+    /* =========================================================
+     * 跟讀練習：Step1 跟讀（不依賴錄音判分，用語音辨識/寬鬆判定）→ Step2 看中文說韓文
+     * ========================================================= */
+    document.getElementById('btn-open-shadow').addEventListener('click', startShadowFlow);
+
+    function startShadowFlow(){
+        shadowQueue = shuffle(vocab.map(w => w.id));
+        shadowTotalOriginal = shadowQueue.length;
+        document.getElementById('overlay-shadowcheck').classList.add('active');
+        nextShadowWord();
+    }
+    document.getElementById('btn-shadowcheck-close').addEventListener('click', () => { document.getElementById('overlay-shadowcheck').classList.remove('active'); stopMediaStream(); });
+
+    function nextShadowWord(){
+        if (shadowQueue.length === 0){
+            document.getElementById('overlay-shadowcheck').classList.remove('active');
+            showEncourage(pick(SECTION_DONE_MSG));
+            return;
+        }
+        shadowCurrentWord = vocab.find(w => w.id === shadowQueue[0]);
+        document.getElementById('shadow-progress').innerText = `第 ${shadowTotalOriginal - shadowQueue.length + 1} / ${shadowTotalOriginal} 個`;
+        openShadowStep1(shadowCurrentWord);
+    }
+
+    function openShadowStep1(w){
+        document.getElementById('shadow-step-tag').innerText = 'Step 1 · 跟讀';
+        document.getElementById('shadow-step1-zone').classList.remove('hidden');
+        document.getElementById('shadow-step2-zone').classList.add('hidden');
+        document.getElementById('shadow-result-zone').classList.remove('show');
+        document.getElementById('shadow-target-word').innerText = w.kr;
+        document.getElementById('shadow-replay-row').classList.remove('show');
+        document.getElementById('btn-shadow-confirm').disabled = true;
+        document.getElementById('shadow-audio').removeAttribute('src');
+        resetShadowRecordBtn();
+        speakKorean(w.kr);
+    }
+    function resetShadowRecordBtn(){
+        isRecording = false;
+        const btn = document.getElementById('btn-shadow-record');
+        btn.classList.remove('recording'); btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        document.getElementById('shadow-mic-label').innerText = '點一下開始錄音（會同時判斷發音）';
+        btn.onclick = handleShadowRecordClick;
+    }
+    document.getElementById('btn-shadow-play').addEventListener('click', () => speakKorean(document.getElementById('shadow-target-word').innerText));
+
+    async function handleShadowRecordClick(){
+        if (isRecording) return;
+        isRecording = true;
+        const btn = document.getElementById('btn-shadow-record');
+        const label = document.getElementById('shadow-mic-label');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ alert('此瀏覽器不支援錄音功能，請改用 Chrome 測試。'); isRecording=false; return; }
+        try{
+            mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+            chunks = []; recognizedTranscript = "";
+            const mimeType = pickMimeType();
+            recorder = mimeType ? new MediaRecorder(mediaStream, { mimeType }) : new MediaRecorder(mediaStream);
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            recorder.onerror = () => { alert('錄音發生問題，改用發音回放繼續練習即可。'); resetShadowRecordBtn(); stopMediaStream(); };
+            recorder.onstop = () => {
+                try{
+                    const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+                    const audioEl = document.getElementById('shadow-audio');
+                    audioEl.src = URL.createObjectURL(blob); audioEl.load();
+                    document.getElementById('shadow-replay-row').classList.add('show');
+                }catch(e){ /* 回放非必要，不影響下一步 */ }
+                document.getElementById('btn-shadow-confirm').disabled = false;
+                resetShadowRecordBtn();
+                stopMediaStream();
+            };
+            recorder.start();
+            btn.classList.add('recording'); btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+            label.innerText = '錄音中，再按一次結束';
+            startVolumeMonitor(mediaStream);
+            if (SpeechRecognitionCtor){
+                try{
+                    recognizer = new SpeechRecognitionCtor();
+                    recognizer.lang = 'ko-KR'; recognizer.interimResults = false; recognizer.maxAlternatives = 3;
+                    recognizer.onresult = (event) => { recognizedTranscript = Array.from(event.results[0]).map(r => r.transcript).join(' '); };
+                    recognizer.onerror = () => {};
+                    recognizer.start();
+                }catch(e){}
+            }
+            btn.onclick = () => { recorder && recorder.state === 'recording' && recorder.stop(); if (recognizer){ try{ recognizer.stop(); }catch(e){} } isRecording = false; };
+        }catch(err){ alert('無法取得麥克風權限，請確認瀏覽器權限設定。'); isRecording = false; }
+    }
+    document.getElementById('btn-shadow-record').onclick = handleShadowRecordClick;
+
+    document.getElementById('btn-shadow-confirm').addEventListener('click', () => { openShadowStep2(shadowCurrentWord); });
+
+    function openShadowStep2(w){
+        document.getElementById('shadow-step-tag').innerText = 'Step 2 · 看中文說韓文';
+        document.getElementById('shadow-step1-zone').classList.add('hidden');
+        document.getElementById('shadow-step2-zone').classList.remove('hidden');
+        document.getElementById('challenge-zh-big').innerText = w.meaning;
+        document.getElementById('challenge-feedback').classList.remove('show','correct','wrong');
+        document.getElementById('rescue-box').classList.add('hidden');
+        document.getElementById('btn-challenge-mic').style.display = 'flex';
+        document.getElementById('btn-challenge-mic').classList.remove('recording');
+        document.getElementById('challenge-mic-label').innerText = '點一下開始說';
+    }
+    function normalizeKr(s){ return String(s||'').replace(/\s+/g,'').replace(/[.,!?~]/g,''); }
+    function judgeAnswer(spoken, target){ const s=normalizeKr(spoken), t=normalizeKr(target); if (!s) return false; return s===t || s.includes(t) || t.includes(s); }
+
+    document.getElementById('btn-challenge-mic').addEventListener('click', () => {
+        if (isListening) return;
+        const w = shadowCurrentWord;
+        if (!SpeechRecognitionCtor){
+            speakKorean(w.kr);
+            const ok = confirm(`（此瀏覽器不支援自動語音辨識）\n請跟著說一次「${w.kr}」，說出來了嗎？`);
+            handleStep2Result(ok, w);
+            return;
+        }
+        try{ recognizer = new SpeechRecognitionCtor(); }catch(e){ alert('語音辨識初始化失敗，請重新整理頁面再試一次。'); return; }
+        recognizer.lang = 'ko-KR'; recognizer.interimResults = false; recognizer.maxAlternatives = 3;
+        isListening = true;
+        document.getElementById('btn-challenge-mic').classList.add('recording');
+        document.getElementById('challenge-mic-label').innerText = '聽你說...';
+        const finish = (correct) => { clearTimeout(listenTimeoutId); isListening=false; document.getElementById('btn-challenge-mic').classList.remove('recording'); handleStep2Result(correct, w); };
+        listenTimeoutId = setTimeout(() => {
+            if (!isListening) return;
+            try{ recognizer.stop(); }catch(e){}
+            isListening = false;
+            document.getElementById('btn-challenge-mic').classList.remove('recording');
+            document.getElementById('challenge-mic-label').innerText = '沒聽清楚，再按一次試試';
+        }, 6000);
+        recognizer.onresult = (event) => { const alts = Array.from(event.results[0]).map(r => r.transcript); finish(alts.some(a => judgeAnswer(a, w.kr))); };
+        recognizer.onerror = () => { clearTimeout(listenTimeoutId); isListening=false; document.getElementById('btn-challenge-mic').classList.remove('recording'); document.getElementById('challenge-mic-label').innerText = '沒聽清楚，再按一次試試'; };
+        recognizer.onend = () => { isListening = false; document.getElementById('btn-challenge-mic').classList.remove('recording'); };
+        try{ recognizer.start(); }catch(e){ finish(false); }
+    });
+
+    function handleStep2Result(correct, w){
+        document.getElementById('btn-challenge-mic').style.display = 'none';
+        const box = document.getElementById('challenge-feedback');
+        if (correct){
+            wordState[w.id] = 'learned'; renderGrid();
+            box.classList.add('show','correct'); document.getElementById('feedback-text').innerText = '答對了！';
+            shadowQueue.shift();
+            showShadowResult('excellent', w);
+        } else {
+            box.classList.add('show','wrong'); document.getElementById('feedback-text').innerText = '沒關係，先聽一次跟讀，等等再挑戰一次：';
+            document.getElementById('rescue-box').classList.remove('hidden');
+            document.getElementById('rescue-word').innerText = w.kr;
+            document.getElementById('rescue-replay-row').classList.remove('show');
+        }
+    }
+    document.getElementById('btn-rescue-play').addEventListener('click', () => speakKorean(document.getElementById('rescue-word').innerText));
+    document.getElementById('btn-rescue-record').addEventListener('click', () => {
+        const btn = document.getElementById('btn-rescue-record');
+        const audioEl = document.getElementById('rescue-audio');
+        startGenericRecording(btn, null, audioEl, (url) => {
+            btn.innerHTML = '<i class="fa-solid fa-microphone"></i> 跟讀回放';
+            if (url) document.getElementById('rescue-replay-row').classList.add('show');
+        });
+    });
+    document.getElementById('btn-rescue-skip').addEventListener('click', () => {
+        // 救援跟讀完成／跳過：此字仍需再次答對「看中文說韓文」才算過關（不直接放行）
+        stopMediaStream();
+        const w = shadowCurrentWord;
+        shadowQueue.shift();
+        const reinsertAt = Math.min(shadowQueue.length, 1 + Math.floor(Math.random()*(shadowQueue.length+1)));
+        shadowQueue.splice(reinsertAt, 0, w.id);
+        nextShadowWord();
+    });
+
+    function showShadowResult(result, w){
+        document.getElementById('shadow-step1-zone').classList.add('hidden');
+        document.getElementById('shadow-step2-zone').classList.add('hidden');
+        const icon = document.getElementById('result-icon'), label = document.getElementById('result-label'), sub = document.getElementById('result-sub');
+        icon.className = 'result-icon ' + (result === 'excellent' ? 'excellent' : result === 'good' ? 'good' : 'tryagain');
+        icon.innerHTML = result === 'excellent' ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-thumbs-up"></i>';
+        label.innerText = result === 'excellent' ? 'Excellent' : 'Good';
+        sub.innerText = result === 'excellent' ? '發音非常清楚，太棒了！' : '已經抓到感覺了，繼續保持！';
+        document.getElementById('result-zh-chip').innerText = w.meaning; // 反饋新增中文意思
+        document.getElementById('shadow-result-zone').classList.add('show');
+        document.getElementById('btn-shadow-continue').onclick = () => { document.getElementById('shadow-result-zone').classList.remove('show'); nextShadowWord(); };
+    }
+
+    /* =========================================================
+     * 練習：4選1（雙向，同一輪內先後出現）
+     * ========================================================= */
+    document.getElementById('btn-open-practice').addEventListener('click', startPractice);
+    function chunkArray(arr, size){ const out=[]; for (let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size)); return out; }
+
+    function startPractice(){
+        const pool = getKnownPool();
+        if (pool.length < 2){ alert('請先跟讀練習過至少 2 個單字，再來挑戰練習模式。'); return; }
+        practiceGroups = chunkArray(shuffle(pool), 4);
+        practiceGroupIdx = 0;
+        document.getElementById('overlay-practice').classList.add('active');
+        startPracticeGroup();
+    }
+    document.getElementById('btn-practice-close').addEventListener('click', () => document.getElementById('overlay-practice').classList.remove('active'));
+
+    function startPracticeGroup(){
+        if (practiceGroupIdx >= practiceGroups.length){
+            document.getElementById('overlay-practice').classList.remove('active');
+            showEncourage(pick(SECTION_DONE_MSG));
+            return;
+        }
+        practicePhase = 'kr-zh';
+        practiceQueue = shuffle(practiceGroups[practiceGroupIdx].map(w => w.id));
+        showPracticeQuestion();
+    }
+    function buildChoices(correctValue, pool, keyFn){
+        const others = shuffle(pool.filter(w => keyFn(w) !== correctValue).map(keyFn).filter((v,i,arr) => arr.indexOf(v) === i));
+        const n = Math.min(3, others.length);
+        const choices = shuffle([correctValue, ...others.slice(0, n)]);
+        return choices;
+    }
+    function showPracticeQuestion(){
+        if (practiceQueue.length === 0){
+            if (practicePhase === 'kr-zh'){ practicePhase = 'zh-kr'; practiceQueue = shuffle(practiceGroups[practiceGroupIdx].map(w => w.id)); }
+            else { practiceGroupIdx++; startPracticeGroup(); return; }
+        }
+        const w = vocab.find(v => v.id === practiceQueue[0]);
+        practiceCurrentWord = w;
+        const pool = getKnownPool();
+        document.getElementById('practice-group-label').innerText = `第 ${practiceGroupIdx+1} 組 · 第 ${practiceGroups[practiceGroupIdx].length - practiceQueue.length + 1} / ${practiceGroups[practiceGroupIdx].length} 題`;
+
+        if (practicePhase === 'kr-zh'){
+            document.getElementById('practice-phase-tag').innerText = '聽音選中文';
+            document.getElementById('practice-q-audio-zone').classList.remove('hidden');
+            document.getElementById('practice-q-zh').classList.add('hidden');
+            const choices = buildChoices(w.meaning, pool, x => x.meaning);
+            renderPracticeChoices(choices, w.meaning, () => speakKorean(w.kr));
+            speakKorean(w.kr);
+        } else {
+            document.getElementById('practice-phase-tag').innerText = '看中文選韓文';
+            document.getElementById('practice-q-audio-zone').classList.add('hidden');
+            document.getElementById('practice-q-zh').classList.remove('hidden');
+            document.getElementById('practice-q-zh').innerText = w.meaning;
+            const choices = buildChoices(w.kr, pool, x => x.kr);
+            renderPracticeChoices(choices, w.kr, null);
+        }
+    }
+    document.getElementById('btn-practice-play').addEventListener('click', () => { if (practiceCurrentWord) speakKorean(practiceCurrentWord.kr); });
+
+    function renderPracticeChoices(choices, correctValue, onCorrectExtra){
+        const box = document.getElementById('practice-choices');
+        box.innerHTML = choices.map(c => `<button class="practice-choice kr" data-v="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');
+        box.querySelectorAll('.practice-choice').forEach(btn => {
+            btn.addEventListener('click', () => {
+                box.querySelectorAll('.practice-choice').forEach(b => b.disabled = true);
+                const isCorrect = btn.getAttribute('data-v') === correctValue;
+                if (isCorrect){ btn.classList.add('correct'); if (onCorrectExtra) onCorrectExtra(); }
+                else { btn.classList.add('wrong'); box.querySelectorAll('.practice-choice').forEach(b => { if (b.getAttribute('data-v') === correctValue) b.classList.add('correct'); }); }
+                setTimeout(() => {
+                    if (isCorrect) practiceQueue.shift();
+                    else { const id = practiceQueue.shift(); const at = Math.min(practiceQueue.length, 1+Math.floor(Math.random()*(practiceQueue.length+1))); practiceQueue.splice(at, 0, id); }
+                    showPracticeQuestion();
+                }, 750);
+            });
+        });
+    }
+
+    /* =========================================================
+     * 聽打
+     * ========================================================= */
+    document.getElementById('btn-open-typing').addEventListener('click', startTyping);
+    function startTyping(){
+        const pool = getKnownPool();
+        if (!pool.length){ alert('請先跟讀練習過至少 1 個單字，再來挑戰聽打。'); return; }
+        typingQueue = shuffle(pool.map(w => w.id));
+        typingTotal = typingQueue.length;
+        document.getElementById('overlay-typing').classList.add('active');
+        nextTypingWord();
+    }
+    document.getElementById('btn-typing-close').addEventListener('click', () => document.getElementById('overlay-typing').classList.remove('active'));
+    function nextTypingWord(){
+        if (typingQueue.length === 0){ document.getElementById('overlay-typing').classList.remove('active'); showEncourage(pick(SECTION_DONE_MSG)); return; }
+        typingCurrentWord = vocab.find(v => v.id === typingQueue[0]);
+        document.getElementById('typing-progress').innerText = `第 ${typingTotal - typingQueue.length + 1} / ${typingTotal} 個`;
+        document.getElementById('typing-input').value = '';
+        document.getElementById('typing-input').disabled = false;
+        document.getElementById('typing-result-zone').classList.add('hidden');
+        document.getElementById('btn-typing-submit').classList.remove('hidden');
+        speakKorean(typingCurrentWord.kr);
+        document.getElementById('typing-input').focus();
+    }
+    document.getElementById('btn-typing-play').addEventListener('click', () => { if (typingCurrentWord) speakKorean(typingCurrentWord.kr); });
+    document.getElementById('btn-typing-submit').addEventListener('click', submitTyping);
+    document.getElementById('typing-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') submitTyping(); });
+
+    function submitTyping(){
+        const val = document.getElementById('typing-input').value;
+        if (!val.trim()) return;
+        const result = judgeTyping(val, typingCurrentWord.kr);
+        document.getElementById('typing-input').disabled = true;
+        document.getElementById('btn-typing-submit').classList.add('hidden');
+        const zone = document.getElementById('typing-result-zone'); zone.classList.remove('hidden');
+        const labelEl = document.getElementById('typing-result-label');
+        const answerBox = document.getElementById('typing-answer-box');
+        labelEl.className = 'typing-result-label ' + result.level;
+        if (result.level === 'perfect'){ labelEl.innerText = '完美！一字不差 🎉'; answerBox.innerText = typingCurrentWord.kr; }
+        else if (result.level === 'space'){ labelEl.innerText = '太棒了！詞完全正確，只是空格位置不太一樣'; answerBox.innerText = typingCurrentWord.kr; }
+        else if (result.level === 'close'){ labelEl.innerText = '很接近了！只差一點點'; answerBox.innerHTML = result.diffHtml; }
+        else { labelEl.innerText = '再聽一次，抓抓看聲音的感覺'; answerBox.innerHTML = result.diffHtml; }
+        wordState[typingCurrentWord.id] = wordState[typingCurrentWord.id] === 'new' ? 'seen' : wordState[typingCurrentWord.id];
+    }
+    document.getElementById('btn-typing-next').addEventListener('click', () => { typingQueue.shift(); nextTypingWord(); });
+
+    /* =========================================================
+     * 句型講解 + 全螢幕句型填空（含對話式排版）
+     * ========================================================= */
+    function renderGrammarView(){
+        document.getElementById('lbl-grammar-title').innerText = grammar.title;
+        document.getElementById('grammar-pattern').innerText = grammar.pattern;
+        document.getElementById('grammar-explanation').innerHTML = grammar.explanation;
+        document.getElementById('grammar-examples').innerHTML = grammar.examples.map(ex => `
+            <div class="grammar-example"><span class="ex-kr kr">${escapeHtml(ex.kr)}</span><span class="ex-zh">${escapeHtml(ex.zh)}</span></div>
+        `).join('');
+    }
+    document.getElementById('btn-open-cloze').addEventListener('click', openCloze);
+
+    function openCloze(){
+        clozeQueue = shuffle(grammar.cloze.map(c => c.id));
+        clozeTotal = clozeQueue.length; clozeIndex = 0;
+        document.getElementById('stage-cloze').classList.add('active');
+        renderClozeQuestion();
+        maybeShowTutorial();
+    }
+    document.getElementById('btn-cloze-return').addEventListener('click', () => document.getElementById('stage-cloze').classList.remove('active'));
+
+    function renderClozeQuestion(){
+        clozeSelected = null;
+        document.getElementById('cloze-card').classList.remove('flipped');
+        document.getElementById('cloze-counter').innerText = `${clozeIndex + 1} / ${clozeTotal}`;
+        document.getElementById('btn-cloze-next').style.display = 'none';
+
+        const q = grammar.cloze.find(c => c.id === clozeQueue[clozeIndex]);
+        const front = document.getElementById('cloze-front-face');
+        let sentenceHtml;
+        if (q.format === 'dialogue'){
+            sentenceHtml = `
+                <div class="cloze-dialogue-line kr"><span class="cloze-dialogue-tag">A:</span><span>${escapeHtml(q.line_a)}</span></div>
+                <div class="cloze-dialogue-line kr"><span class="cloze-dialogue-tag">B:</span><span>${escapeHtml(q.line_b).replace('[?]', '<span class="cloze-blank">___</span>')}</span></div>
+            `;
+        } else {
+            sentenceHtml = `<p class="cloze-sentence kr">${escapeHtml(q.template).replace('[?]', '<span class="cloze-blank">___</span>')}</p>`;
+        }
+        front.innerHTML = `
+            ${sentenceHtml}
+            <div class="cloze-options" id="cloze-options"></div>
+            <div class="cloze-immediate-feedback" id="cloze-immediate-feedback"></div>
+        `;
+        document.getElementById('cloze-options').innerHTML = q.options.map(opt => `<button class="cloze-opt kr" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>`).join('');
+        document.getElementById('cloze-options').querySelectorAll('.cloze-opt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clozeSelected = btn.getAttribute('data-opt');
+                document.getElementById('cloze-options').querySelectorAll('.cloze-opt').forEach(b => b.classList.toggle('selected', b === btn));
+                const isCorrect = clozeSelected === q.correct;
+                const fb = document.getElementById('cloze-immediate-feedback');
+                fb.className = 'cloze-immediate-feedback ' + (isCorrect ? 'correct' : 'wrong');
+                fb.innerText = isCorrect ? '🎉 答對了！' : '❌ 再試一次，或點卡片查看講解';
+                document.getElementById('btn-cloze-next').style.display = 'block';
+            });
+        });
+        document.getElementById('cloze-back-rule').innerText = q.rule;
+        document.getElementById('cloze-back-sentence').innerText = q.full_kr;
+        document.getElementById('cloze-back-explain').innerText = q.explain;
+        document.getElementById('cloze-back-zh').innerText = q.full_zh;
+    }
+    document.getElementById('cloze-card').addEventListener('click', () => { if (!clozeSelected) return; document.getElementById('cloze-card').classList.toggle('flipped'); });
+    document.getElementById('btn-cloze-back-play').addEventListener('click', (e) => { e.stopPropagation(); const q = grammar.cloze.find(c => c.id === clozeQueue[clozeIndex]); speakKorean(q.full_kr); });
+    document.getElementById('btn-cloze-next').addEventListener('click', () => {
+        clozeIndex++;
+        if (clozeIndex >= clozeQueue.length){ document.getElementById('stage-cloze').classList.remove('active'); showEncourage(pick(SECTION_DONE_MSG)); return; }
+        renderClozeQuestion();
+    });
+    attachSwipe(document.getElementById('cloze-card-zone'),
+        () => { if (clozeIndex > 0){ clozeIndex--; renderClozeQuestion(); } },
+        () => { if (document.getElementById('btn-cloze-next').style.display === 'block') document.getElementById('btn-cloze-next').click(); });
+
+    /* =========================================================
+     * 導覽（開場教學，答題畫面不再顯示提示文字；「？」鍵可重看）
+     * ========================================================= */
+    const TUTORIAL_STEPS = [
+        { icon:'fa-hand-pointer', title:'點一下卡片可翻面', desc:'正面是單字或題目，輕點卡片就能看到說明或解析。' },
+        { icon:'fa-arrows-left-right', title:'左右滑動切換卡片', desc:'在卡片上左右滑動，即可切換到上一個／下一個內容。' },
+        { icon:'fa-puzzle-piece', title:'句型題：選好答案再點卡片', desc:'選好答案後，輕點卡片可以看到完整解析；再點一次回到題目。' },
+        { icon:'fa-volume-high', title:'點播放鍵可重播', desc:'不確定發音時，隨時點播放鍵再聽一次。' }
+    ];
+    let tutorialStepIndex = 0;
+    const TUTORIAL_KEY = 'learningLabTutorialSeen';
+    function maybeShowTutorial(){ if (localStorage.getItem(TUTORIAL_KEY)) return; openTutorial(); }
+    function openTutorial(){ tutorialStepIndex = 0; renderTutorialStep(); document.getElementById('tutorial-overlay').classList.add('active'); }
+    function renderTutorialStep(){
+        const s = TUTORIAL_STEPS[tutorialStepIndex];
+        document.getElementById('tutorial-icon').innerHTML = `<i class="fa-solid ${s.icon}"></i>`;
+        document.getElementById('tutorial-title').innerText = s.title;
+        document.getElementById('tutorial-desc').innerText = s.desc;
+        document.querySelectorAll('.tutorial-dot').forEach((d,i) => d.classList.toggle('active', i === tutorialStepIndex));
+        document.getElementById('btn-tutorial-done').innerText = tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? '開始學習' : '知道了';
+    }
+    document.getElementById('btn-tutorial-done').addEventListener('click', () => {
+        if (tutorialStepIndex < TUTORIAL_STEPS.length - 1){ tutorialStepIndex++; renderTutorialStep(); return; }
+        localStorage.setItem(TUTORIAL_KEY, '1');
+        document.getElementById('tutorial-overlay').classList.remove('active');
+    });
+    attachSwipe(document.getElementById('tutorial-card'),
+        () => { if (tutorialStepIndex > 0){ tutorialStepIndex--; renderTutorialStep(); } },
+        () => { if (tutorialStepIndex < TUTORIAL_STEPS.length - 1){ tutorialStepIndex++; renderTutorialStep(); } else { localStorage.setItem(TUTORIAL_KEY, '1'); document.getElementById('tutorial-overlay').classList.remove('active'); } });
+    document.getElementById('btn-replay-tutorial').addEventListener('click', openTutorial);
+
+    /* =========================================================
+     * 啟動
+     * ========================================================= */
+    async function boot(){
+        await Promise.all([loadVocab(), loadGrammar()]);
+        currentPack = 'Core';
+        vocab = buildVocabForPack('Core');
+        vocab.forEach(w => { wordState[w.id] = 'new'; });
+        renderPackRow(); renderGrid(); renderGrammarView();
+    }
+    boot();
+})();
+</script>
+</body>
+</html>
