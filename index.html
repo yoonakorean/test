@@ -48,16 +48,27 @@
     .progress-track{height:6px;background:var(--duo-gray);border-radius:100px;overflow:hidden;margin-bottom:20px;}
     .progress-fill{height:100%;background:var(--duo-green);border-radius:100px;transition:width .5s ease;}
 
-    .action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;}
-    .action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:13px 6px;border-radius:16px;background:#fff;border:1px solid var(--duo-gray);}
-    .action-btn i{font-size:1rem;}
-    .action-btn span{font-size:0.74rem;font-weight:600;}
+    .action-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:22px;}
+    .action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:11px 4px;border-radius:14px;background:#fff;border:1px solid var(--duo-gray);}
+    .action-btn i{font-size:0.92rem;}
+    .action-btn span{font-size:0.66rem;font-weight:600;}
     .action-btn.primary-action{background:var(--duo-green);border-color:var(--duo-green);}
     .action-btn.primary-action i,.action-btn.primary-action span{color:#fff;}
     .action-btn.a2 i,.action-btn.a2 span{color:var(--duo-blue);}
     .action-btn.a3 i,.action-btn.a3 span{color:#2f9e8f;}
     .action-btn.a4 i,.action-btn.a4 span{color:var(--duo-gold);}
     .action-btn:disabled{opacity:0.4;}
+    .action-btn.locked i{color:var(--ink-faint) !important;}
+    .action-btn.locked span{color:var(--ink-faint) !important;}
+
+    /* 過關結果畫面（80% 門檻） */
+    .result-stats-row{display:flex;gap:10px;justify-content:center;margin:14px 0;}
+    .result-stat-chip{background:#f5f5f4;border-radius:12px;padding:10px 16px;text-align:center;min-width:84px;}
+    .result-stat-chip .stat-value{font-weight:700;font-size:1.15rem;color:var(--ink);}
+    .result-stat-chip .stat-label{font-size:0.66rem;color:var(--ink-faint);margin-top:2px;}
+    .result-pass-badge{font-size:0.82rem;font-weight:700;padding:6px 16px;border-radius:100px;display:inline-block;margin-top:4px;}
+    .result-pass-badge.pass{background:#f2fbee;color:#3f8a02;}
+    .result-pass-badge.fail{background:#fdf0f0;color:#c94747;}
 
     .pack-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;}
     .pack-pill{flex-shrink:0;padding:8px 15px;border-radius:100px;border:1px solid var(--duo-gray);background:#fff;font-weight:500;font-size:0.78rem;color:var(--ink-soft);white-space:nowrap;}
@@ -65,15 +76,16 @@
     .pack-pill .pack-core-tag{font-size:0.6rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:100px;margin-left:5px;}
 
     .word-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-    .word-tile{position:relative;background:#fff;border:1px solid var(--duo-gray);border-radius:16px;padding:15px 12px 11px;text-align:left;min-height:88px;}
-    .word-tile-main{width:100%;text-align:left;padding-right:30px;display:flex;flex-direction:column;gap:6px;}
-    .word-tile .kr-word{font-weight:600;font-size:1.25rem;color:var(--ink);}
+    .word-tile{position:relative;background:#fff;border:1px solid var(--duo-gray);border-radius:16px;padding:15px 12px 12px;min-height:88px;}
+    /* 問題（參考截圖）：韓文與音檔對齊在上排（同一 top 值），詞性與中文對齊在下排（同一 bottom 值） */
+    .word-tile-main{width:100%;height:100%;text-align:left;padding-right:34px;display:flex;flex-direction:column;justify-content:space-between;}
+    .word-tile .kr-word{font-weight:600;font-size:1.34rem;color:var(--ink);}
     .word-tile .pos{font-size:0.6rem;color:var(--pos-fg);background:var(--pos-bg);padding:2px 7px;border-radius:100px;font-weight:600;align-self:flex-start;}
-    .word-tile .zh{position:absolute;top:40px;right:11px;font-size:0.68rem;color:var(--ink-soft);font-weight:400;text-align:right;max-width:64px;}
+    .word-tile .zh{position:absolute;bottom:15px;right:12px;font-size:0.7rem;color:var(--ink-soft);font-weight:400;}
     /* 狀態改用左側色條，避開右上角（音檔鍵專用），不擋任何文字 */
     .word-tile.state-seen{border-left:3px solid var(--duo-gold);}
     .word-tile.state-learned{border-left:3px solid var(--duo-green);}
-    .tile-play-btn{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:#f5f5f4;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;font-size:0.62rem;}
+    .tile-play-btn{position:absolute;top:15px;right:12px;width:24px;height:24px;border-radius:50%;background:#f5f5f4;color:var(--ink-faint);display:flex;align-items:center;justify-content:center;font-size:0.62rem;}
     .tile-play-btn:active{transform:scale(0.9);}
 
     .grammar-card{background:#fff;border:1px solid var(--duo-gray);border-radius:18px;padding:22px;margin-bottom:18px;}
@@ -103,22 +115,25 @@
     .stage-card{position:relative;width:100%;max-width:440px;height:100%;max-height:600px;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;cursor:pointer;}
     .stage-card.flipped{transform:rotateY(180deg);}
     .stage-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:24px;display:flex;flex-direction:column;}
-    .stage-front{background:#fefefe;border:1px solid #f0f1f0;align-items:center;justify-content:center;text-align:center;padding:30px;}
-    .stage-back{background:#fefefe;border:1px solid #f0f1f0;transform:rotateY(180deg);padding:30px 26px;overflow-y:auto;}
+    .stage-front{background:#fefefe;border:1px solid #f0f1f0;display:flex;flex-direction:column;padding:24px 26px;}
+    .stage-back{background:#fefefe;border:1px solid #f0f1f0;transform:rotateY(180deg);padding:24px 26px;overflow-y:auto;}
 
-    .face-pos-tag{position:absolute;top:18px;left:20px;font-size:0.72rem;font-weight:700;color:var(--pos-fg);background:var(--pos-bg);padding:4px 12px;border-radius:100px;}
-    .pron-toggle{position:absolute;top:16px;right:16px;display:flex;background:#f5f5f4;border-radius:100px;padding:2px;font-size:0.6rem;font-weight:600;}
+    /* 問題2：正反面共用同一列頂列（左：詞性／右：次要資訊），高度、內距完全一致，左右對稱 */
+    .card-top-row{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;height:30px;}
+    .card-center-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;}
+    .card-bottom-spacer{height:30px;flex-shrink:0;}
+
+    .face-pos-tag{font-size:0.72rem;font-weight:700;color:var(--pos-fg);background:var(--pos-bg);padding:4px 12px;border-radius:100px;}
+    .pron-toggle{display:flex;background:#f5f5f4;border-radius:100px;padding:2px;font-size:0.6rem;font-weight:600;}
     .pron-toggle button{padding:4px 8px;border-radius:100px;color:var(--ink-faint);}
     .pron-toggle button.active{background:#fff;color:var(--ink-soft);}
-    .face-play-icon{position:absolute;top:52px;right:22px;width:30px;height:30px;border-radius:50%;background:#f5f5f4;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:0.76rem;}
-    .face-play-icon:active{transform:scale(0.92);}
+    .front-pron-row{display:flex;align-items:center;justify-content:center;gap:8px;}
 
     .front-word{font-weight:600;font-size:clamp(2.4rem,9.5vw,3.4rem);color:var(--ink);line-height:1.2;}
-    .front-pron{margin-top:16px;font-size:0.94rem;color:var(--ink-faint);font-weight:400;letter-spacing:0.02em;}
+    .front-pron{font-size:0.94rem;color:var(--ink-faint);font-weight:400;letter-spacing:0.02em;}
 
-    .note-word-head{display:flex;align-items:center;gap:10px;margin-bottom:22px;padding-top:30px;}
     .note-word-kr{font-weight:600;font-size:1.2rem;}
-    .note-note{font-size:0.94rem;color:var(--ink);line-height:1.9;font-weight:400;margin-bottom:26px;}
+    .note-note{font-size:0.94rem;color:var(--ink);line-height:1.9;font-weight:400;margin-top:18px;margin-bottom:26px;}
     .note-expr{padding:14px 0;border-top:1px solid #f3f3f1;}
     .note-expr-kr{font-weight:500;font-size:0.92rem;display:flex;align-items:center;gap:8px;color:var(--ink);}
     .note-expr-zh{font-size:0.78rem;color:var(--ink-faint);margin-top:5px;font-weight:400;}
@@ -144,7 +159,14 @@
     .overlay{position:fixed;inset:0;background:rgba(45,51,57,0.5);backdrop-filter:blur(2px);display:none;align-items:flex-end;justify-content:center;z-index:70;}
     .overlay.active{display:flex;}
     @media (min-width:600px){.overlay{align-items:center;}}
-    .sheet{background:#fff;width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:24px 22px 26px;max-height:94vh;overflow-y:auto;}
+    .sheet{background:#fff;width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:22px 22px 24px;max-height:94vh;overflow-y:auto;}
+    /* 問題1：跟讀關卡的 Step1／Step2／結果三種內容高度不同，固定最小高度後三者切換時外框不再跳動 */
+    #overlay-shadowcheck .sheet{min-height:460px;}
+    #overlay-practice .sheet{min-height:440px;}
+    #overlay-typing .sheet{min-height:380px;}
+    /* 問題1：答題後才出現的文字/按鍵，一律用這個 class 預留空間（visibility 切換，不會讓版面跳動） */
+    .reveal{visibility:hidden;opacity:0;transition:opacity .15s ease;}
+    .reveal.show{visibility:visible;opacity:1;}
     @media (min-width:600px){.sheet{border-radius:22px;box-shadow:0 16px 40px rgba(0,0,0,0.18);}}
     .sheet-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
     .link-btn{color:var(--muted-ctrl);font-size:0.74rem;font-weight:500;display:flex;align-items:center;gap:4px;}
@@ -170,7 +192,7 @@
     .result-sub{font-size:0.78rem;color:var(--ink-soft);font-weight:400;}
     .result-zh-chip{font-size:0.8rem;color:var(--ink);background:#f5f5f4;padding:4px 12px;border-radius:100px;margin-top:2px;}
 
-    .rescue-box{background:#fdf6ec;border-radius:14px;padding:16px;margin-top:14px;text-align:center;}
+    .rescue-box{background:#fdf6ec;border-radius:14px;padding:16px;margin-top:14px;text-align:center;min-height:132px;box-sizing:border-box;}
     .rescue-box .rescue-title{font-size:0.82rem;font-weight:600;color:#a9721f;margin-bottom:10px;}
 
     .challenge-progress{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
@@ -203,7 +225,7 @@
     .typing-result-label.far{color:var(--ink-soft);}
     .typing-answer-box{background:#f8f8f7;border-radius:12px;padding:14px;font-size:1.3rem;font-weight:600;letter-spacing:0.02em;}
 
-    .stage-finish-row{padding:0 20px 18px;flex-shrink:0;}
+    .stage-finish-row{padding:0 20px 18px;flex-shrink:0;min-height:64px;box-sizing:border-box;}
     .cloze-sentence{text-align:center;font-weight:600;font-size:clamp(1.25rem,5.8vw,1.6rem);margin:0 0 24px;line-height:1.6;}
     .cloze-dialogue-block{width:100%;}
     .cloze-dialogue-line{text-align:left;font-weight:600;font-size:clamp(1.1rem,5vw,1.4rem);margin:0 0 10px;line-height:1.6;display:flex;gap:8px;}
@@ -248,9 +270,9 @@
 
         <div class="action-row">
             <button class="action-btn primary-action" id="btn-open-shadow"><i class="fa-solid fa-microphone"></i><span>跟讀練習</span></button>
-            <button class="action-btn a4" id="btn-open-typing"><i class="fa-solid fa-keyboard"></i><span>聽打</span></button>
             <button class="action-btn a2" id="btn-open-practice-kr-zh"><i class="fa-solid fa-headphones"></i><span>聽音選中文</span></button>
-            <button class="action-btn a3" id="btn-open-practice-zh-kr"><i class="fa-solid fa-language"></i><span>看中文選韓文</span></button>
+            <button class="action-btn a3" id="btn-open-practice-zh-kr" data-icon="fa-language"><i class="fa-solid fa-lock"></i><span>看中文選韓文</span></button>
+            <button class="action-btn a4" id="btn-open-typing" data-icon="fa-keyboard"><i class="fa-solid fa-lock"></i><span>聽打</span></button>
         </div>
 
         <div class="word-grid" id="word-grid"></div>
@@ -283,18 +305,25 @@
     <div class="stage-card-zone" id="flip-card-zone">
         <div class="stage-card" id="flip-card">
             <div class="stage-face stage-front">
-                <span class="face-pos-tag" id="front-pos">名詞</span>
-                <div class="pron-toggle" id="pron-toggle">
-                    <button class="active" data-mode="kr">한글</button>
-                    <button data-mode="roman">Roman</button>
+                <div class="card-top-row">
+                    <span class="face-pos-tag" id="front-pos">名詞</span>
+                    <div class="pron-toggle" id="pron-toggle">
+                        <button class="active" data-mode="kr">한글</button>
+                        <button data-mode="roman">Roman</button>
+                    </div>
                 </div>
-                <button class="face-play-icon" id="btn-front-play" aria-label="播放發音"><i class="fa-solid fa-volume-high"></i></button>
-                <div class="front-word kr" id="front-word">학생</div>
-                <div class="front-pron" id="front-pron">[학생]</div>
+                <div class="card-center-col">
+                    <div class="front-word kr" id="front-word">학생</div>
+                    <div class="front-pron-row">
+                        <span class="front-pron" id="front-pron">[학생]</span>
+                        <button class="mini-play" id="btn-front-play" aria-label="播放發音"><i class="fa-solid fa-play"></i></button>
+                    </div>
+                </div>
+                <div class="card-bottom-spacer"></div>
             </div>
             <div class="stage-face stage-back">
-                <div class="note-word-head">
-                    <span class="face-pos-tag" style="position:static;" id="note-pos">名詞</span>
+                <div class="card-top-row">
+                    <span class="face-pos-tag" id="note-pos">名詞</span>
                     <span class="note-word-kr kr" id="note-word-kr">학생</span>
                 </div>
                 <div class="note-note" id="note-note">在學校讀書、學習的人。</div>
@@ -330,7 +359,7 @@
         </div>
     </div>
     <div class="stage-finish-row">
-        <button class="btn-soft btn-soft-primary" id="btn-cloze-next" style="width:100%;display:none;">下一題</button>
+        <button class="btn-soft btn-soft-primary reveal" id="btn-cloze-next" style="width:100%;">下一題</button>
     </div>
 </div>
 
@@ -378,7 +407,7 @@
                 <div id="feedback-text">再試一次！</div>
             </div>
 
-            <div class="rescue-box hidden" id="rescue-box">
+            <div class="rescue-box reveal" id="rescue-box">
                 <div class="rescue-title">先聽一次、跟著唸一遍：</div>
                 <div class="xp-word kr" id="rescue-word" style="font-size:1.4rem;margin:4px 0 10px;"></div>
                 <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
@@ -413,7 +442,7 @@
             </div>
             <div class="practice-q-word kr hidden" id="practice-q-zh"></div>
             <div class="practice-choices" id="practice-choices"></div>
-            <div style="margin-top:14px;display:none;" id="practice-next-row">
+            <div class="reveal" style="margin-top:14px;min-height:52px;" id="practice-next-row">
                 <button class="btn-soft btn-soft-primary" id="btn-practice-next" style="width:100%;">下一題</button>
             </div>
         </div>
@@ -440,6 +469,21 @@
                 <button class="btn-soft btn-soft-primary" id="btn-typing-next" style="width:100%;margin-top:14px;">下一個</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ============ 過關結果（80% 門檻，各模式共用） ============ -->
+<div class="overlay" id="overlay-stage-result">
+    <div class="sheet" style="text-align:center;">
+        <div class="result-icon" id="stage-result-icon" style="margin:6px auto 10px;"><i class="fa-solid fa-flag-checkered"></i></div>
+        <div class="result-label" id="stage-result-title">跟讀練習 完成！</div>
+        <div class="result-stats-row">
+            <div class="result-stat-chip"><div class="stat-value" id="stage-result-percent">0%</div><div class="stat-label">答對率</div></div>
+            <div class="result-stat-chip"><div class="stat-value" id="stage-result-score">0/0</div><div class="stat-label">答對題數</div></div>
+            <div class="result-stat-chip"><div class="stat-value" id="stage-result-time">0:00</div><div class="stat-label">花費時間</div></div>
+        </div>
+        <span class="result-pass-badge" id="stage-result-badge">過關！</span>
+        <button class="btn-soft btn-soft-primary" id="btn-stage-result-close" style="width:100%;margin-top:20px;">回到單字列表</button>
     </div>
 </div>
 
@@ -522,6 +566,39 @@
     let currentPack = "Core", vocab = [];
     const wordState = {};          // 'new' | 'seen' | 'learned'
     const browsedIds = new Set();  // 已瀏覽（詳解頁看過）的字，用於「已瀏覽 X/8」
+
+    /* =========================================================
+     * 答題紀錄追蹤（目前只存在瀏覽器記憶體，尚未寫入 Firestore）
+     * 之後要接資料庫時，只需要在 finishStage() 裡多送出這包資料即可，
+     * 不需要重新設計要記錄什麼。
+     * ========================================================= */
+    const PASS_THRESHOLD = 0.8; // 問題1：所有關卡統一 80% 過關門檻
+    const wordAttemptLog = {};  // { [wordId]: { attempts, wrongCount } } — 用來找出「常錯題目」
+    function logWordAttempt(wordId, correct){
+        if (!wordAttemptLog[wordId]) wordAttemptLog[wordId] = { attempts:0, wrongCount:0 };
+        wordAttemptLog[wordId].attempts++;
+        if (!correct) wordAttemptLog[wordId].wrongCount++;
+    }
+    // 每一關（跟讀／聽音選中文／看中文選韓文／聽打）共用的計時與計分器
+    const stageTracker = { modeKey:null, startedAt:0, correctCount:0, totalCount:0, recordedWordIds:null };
+    function startStageTracker(modeKey){
+        stageTracker.modeKey = modeKey;
+        stageTracker.startedAt = Date.now();
+        stageTracker.correctCount = 0;
+        stageTracker.totalCount = 0;
+        stageTracker.recordedWordIds = new Set(); // 只記第一次作答，避免救援重試/重新排入佇列灌水正確率
+    }
+    function recordStageAnswer(wordId, correct){
+        if (wordId && stageTracker.recordedWordIds && stageTracker.recordedWordIds.has(wordId)) return;
+        if (wordId && stageTracker.recordedWordIds) stageTracker.recordedWordIds.add(wordId);
+        stageTracker.totalCount++;
+        if (correct) stageTracker.correctCount++;
+        if (wordId) logWordAttempt(wordId, correct);
+    }
+
+    // 依序解鎖狀態（問題1：跟讀＋聽音選中文預設開放；看中文選韓文需聽音選中文過關；聽打需看中文選韓文過關）
+    const modeUnlockState = { shadow:true, krZh:true, zhKr:false, typing:false };
+    const MODE_LABELS = { shadow:'跟讀練習', krZh:'聽音選中文', zhKr:'看中文選韓文', typing:'聽打' };
 
     let detailWordId = null, pronMode = 'kr';
     let detailOrder = [], detailIndex = 0; // 問題2：固定洗牌順序，離開列表頁前不重新洗牌；重新進入才會再洗一次
@@ -708,6 +785,56 @@
     }
 
     /* =========================================================
+     * 依序解鎖 UI（問題1：聽音選中文/跟讀開放 → 80% 過關才解鎖看中文選韓文 → 再 80% 過關才解鎖聽打）
+     * ========================================================= */
+    function updateActionRowLockUI(){
+        const zhKrBtn = document.getElementById('btn-open-practice-zh-kr');
+        const typingBtn = document.getElementById('btn-open-typing');
+        zhKrBtn.disabled = !modeUnlockState.zhKr;
+        zhKrBtn.classList.toggle('locked', !modeUnlockState.zhKr);
+        zhKrBtn.querySelector('i').className = modeUnlockState.zhKr ? `fa-solid ${zhKrBtn.dataset.icon}` : 'fa-solid fa-lock';
+        typingBtn.disabled = !modeUnlockState.typing;
+        typingBtn.classList.toggle('locked', !modeUnlockState.typing);
+        typingBtn.querySelector('i').className = modeUnlockState.typing ? `fa-solid ${typingBtn.dataset.icon}` : 'fa-solid fa-lock';
+    }
+    document.getElementById('btn-open-practice-zh-kr').addEventListener('click', (e) => { if (!modeUnlockState.zhKr){ e.stopImmediatePropagation(); alert('請先在「聽音選中文」達到 80% 正確率解鎖這一關。'); } }, true);
+    document.getElementById('btn-open-typing').addEventListener('click', (e) => { if (!modeUnlockState.typing){ e.stopImmediatePropagation(); alert('請先在「看中文選韓文」達到 80% 正確率解鎖這一關。'); } }, true);
+
+    /* =========================================================
+     * 過關結果畫面（80% 門檻，四個模式共用）
+     * ========================================================= */
+    function formatDuration(ms){
+        const totalSec = Math.round(ms / 1000);
+        const m = Math.floor(totalSec / 60), s = totalSec % 60;
+        return `${m}:${String(s).padStart(2,'0')}`;
+    }
+    function finishStage(){
+        const { modeKey, startedAt, correctCount, totalCount } = stageTracker;
+        const percent = totalCount ? Math.round((correctCount / totalCount) * 100) : 0;
+        const passed = totalCount > 0 && (correctCount / totalCount) >= PASS_THRESHOLD;
+        const durationMs = Date.now() - startedAt;
+
+        if (modeKey === 'krZh' && passed) modeUnlockState.zhKr = true;
+        if (modeKey === 'zhKr' && passed) modeUnlockState.typing = true;
+        updateActionRowLockUI();
+
+        document.getElementById('stage-result-title').innerText = `${MODE_LABELS[modeKey]} 完成！`;
+        document.getElementById('stage-result-percent').innerText = percent + '%';
+        document.getElementById('stage-result-score').innerText = `${correctCount}/${totalCount}`;
+        document.getElementById('stage-result-time').innerText = formatDuration(durationMs);
+        const icon = document.getElementById('stage-result-icon');
+        const badge = document.getElementById('stage-result-badge');
+        icon.className = 'result-icon ' + (passed ? 'excellent' : 'tryagain');
+        icon.innerHTML = passed ? '<i class="fa-solid fa-trophy"></i>' : '<i class="fa-solid fa-rotate-right"></i>';
+        badge.className = 'result-pass-badge ' + (passed ? 'pass' : 'fail');
+        badge.innerText = passed ? `過關！（需 ${Math.round(PASS_THRESHOLD*100)}% 以上）` : `尚未過關，再練習一次吧（需 ${Math.round(PASS_THRESHOLD*100)}% 以上）`;
+        document.getElementById('overlay-stage-result').classList.add('active');
+    }
+    document.getElementById('btn-stage-result-close').addEventListener('click', () => {
+        document.getElementById('overlay-stage-result').classList.remove('active');
+    });
+
+    /* =========================================================
      * 語音（女聲優先）
      * ========================================================= */
     let cachedFemaleVoice = null;
@@ -859,6 +986,7 @@
     function startShadowFlow(){
         shadowQueue = shuffle(vocab.map(w => w.id));
         shadowTotalOriginal = shadowQueue.length;
+        startStageTracker('shadow');
         document.getElementById('overlay-shadowcheck').classList.add('active');
         nextShadowWord();
     }
@@ -867,7 +995,8 @@
     function nextShadowWord(){
         if (shadowQueue.length === 0){
             document.getElementById('overlay-shadowcheck').classList.remove('active');
-            showEncourage(pick(SECTION_DONE_MSG));
+            releaseMicStream();
+            finishStage();
             return;
         }
         shadowCurrentWord = vocab.find(w => w.id === shadowQueue[0]);
@@ -948,7 +1077,7 @@
         document.getElementById('shadow-step2-zone').classList.remove('hidden');
         document.getElementById('challenge-zh-big').innerText = w.meaning;
         document.getElementById('challenge-feedback').classList.remove('show','correct','wrong');
-        document.getElementById('rescue-box').classList.add('hidden');
+        document.getElementById('rescue-box').classList.remove('show');
         document.getElementById('btn-challenge-mic').style.display = 'flex';
         document.getElementById('btn-challenge-mic').classList.remove('recording');
         document.getElementById('challenge-mic-label').innerText = '點一下開始說';
@@ -969,7 +1098,6 @@
         recognizer.lang = 'ko-KR'; recognizer.interimResults = false; recognizer.maxAlternatives = 3;
         isListening = true;
         document.getElementById('btn-challenge-mic').classList.add('recording');
-        document.getElementById('challenge-mic-label').innerText = '請說出韓文...';
         const finish = (correct) => { clearTimeout(listenTimeoutId); isListening=false; document.getElementById('btn-challenge-mic').classList.remove('recording'); handleStep2Result(correct, w); };
         listenTimeoutId = setTimeout(() => {
             if (!isListening) return;
@@ -986,6 +1114,7 @@
 
     function handleStep2Result(correct, w){
         document.getElementById('btn-challenge-mic').style.display = 'none';
+        recordStageAnswer(w.id, correct);
         const box = document.getElementById('challenge-feedback');
         if (correct){
             wordState[w.id] = 'learned'; renderGrid();
@@ -993,8 +1122,8 @@
             shadowQueue.shift();
             showShadowResult('excellent', w);
         } else {
-            box.classList.add('show','wrong'); document.getElementById('feedback-text').innerText = '沒關係，先聽一次跟讀，等等再挑戰一次：';
-            document.getElementById('rescue-box').classList.remove('hidden');
+            // 問題3：原本 feedback-box 與 rescue-box 各講一句意思重複的話，合併只保留一則
+            document.getElementById('rescue-box').classList.add('show');
             document.getElementById('rescue-word').innerText = w.kr;
         }
     }
@@ -1036,6 +1165,7 @@
         practicePhase = phase;
         practiceQueue = shuffle(vocab.map(w => w.id));
         practiceTotalPerPhase = practiceQueue.length;
+        startStageTracker(phase === 'kr-zh' ? 'krZh' : 'zhKr');
         document.getElementById('practice-phase-tag').innerText = phase === 'kr-zh' ? '聽音選中文' : '看中文選韓文';
         document.getElementById('overlay-practice').classList.add('active');
         showPracticeQuestion();
@@ -1048,10 +1178,10 @@
         return shuffle([correctValue, ...others.slice(0, n)]);
     }
     function showPracticeQuestion(){
-        document.getElementById('practice-next-row').style.display = 'none';
+        document.getElementById('practice-next-row').classList.remove('show');
         if (practiceQueue.length === 0){
             document.getElementById('overlay-practice').classList.remove('active');
-            showEncourage(pick(SECTION_DONE_MSG));
+            finishStage();
             return;
         }
         const w = vocab.find(v => v.id === practiceQueue[0]);
@@ -1081,11 +1211,12 @@
             btn.addEventListener('click', () => {
                 box.querySelectorAll('.practice-choice').forEach(b => b.disabled = true);
                 const isCorrect = btn.getAttribute('data-v') === correctValue;
+                recordStageAnswer(practiceCurrentWord.id, isCorrect);
                 if (isCorrect){ btn.classList.add('correct'); if (onCorrectExtra) onCorrectExtra(); }
                 else { btn.classList.add('wrong'); box.querySelectorAll('.practice-choice').forEach(b => { if (b.getAttribute('data-v') === correctValue) b.classList.add('correct'); }); }
                 if (isCorrect) practiceQueue.shift();
                 else { const id = practiceQueue.shift(); const at = Math.min(practiceQueue.length, 1+Math.floor(Math.random()*(practiceQueue.length+1))); practiceQueue.splice(at, 0, id); }
-                document.getElementById('practice-next-row').style.display = 'block';
+                document.getElementById('practice-next-row').classList.add('show');
             });
         });
     }
@@ -1099,12 +1230,13 @@
         // 問題1：聽打不再需要先跟讀過才能開放，一律涵蓋整份單字表
         typingQueue = shuffle(vocab.map(w => w.id));
         typingTotal = typingQueue.length;
+        startStageTracker('typing');
         document.getElementById('overlay-typing').classList.add('active');
         nextTypingWord();
     }
     document.getElementById('btn-typing-close').addEventListener('click', () => document.getElementById('overlay-typing').classList.remove('active'));
     function nextTypingWord(){
-        if (typingQueue.length === 0){ document.getElementById('overlay-typing').classList.remove('active'); showEncourage(pick(SECTION_DONE_MSG)); return; }
+        if (typingQueue.length === 0){ document.getElementById('overlay-typing').classList.remove('active'); finishStage(); return; }
         typingCurrentWord = vocab.find(v => v.id === typingQueue[0]);
         document.getElementById('typing-progress').innerText = `第 ${typingTotal - typingQueue.length + 1} / ${typingTotal} 個`;
         document.getElementById('typing-input').value = '';
@@ -1132,6 +1264,7 @@
         else if (result.level === 'space'){ labelEl.innerText = '太棒了！詞完全正確，只是空格位置不太一樣'; answerBox.innerText = typingCurrentWord.kr; }
         else if (result.level === 'close'){ labelEl.innerText = '很接近了！只差一點點'; answerBox.innerHTML = result.diffHtml; }
         else { labelEl.innerText = '再聽一次，抓抓看聲音的感覺'; answerBox.innerHTML = result.diffHtml; }
+        recordStageAnswer(typingCurrentWord.id, result.level === 'perfect' || result.level === 'space');
         wordState[typingCurrentWord.id] = wordState[typingCurrentWord.id] === 'new' ? 'seen' : wordState[typingCurrentWord.id];
     }
     document.getElementById('btn-typing-next').addEventListener('click', () => { typingQueue.shift(); nextTypingWord(); });
@@ -1166,7 +1299,7 @@
         clozeSelected = null;
         document.getElementById('cloze-card').classList.remove('flipped');
         document.getElementById('cloze-counter').innerText = `${clozeIndex + 1} / ${clozeTotal}`;
-        document.getElementById('btn-cloze-next').style.display = 'none';
+        document.getElementById('btn-cloze-next').classList.remove('show');
 
         const q = grammar.cloze.find(c => c.id === clozeQueue[clozeIndex]);
         const front = document.getElementById('cloze-front-face');
@@ -1196,7 +1329,7 @@
                 const fb = document.getElementById('cloze-immediate-feedback');
                 fb.className = 'cloze-immediate-feedback ' + (isCorrect ? 'correct' : 'wrong');
                 fb.innerText = isCorrect ? '🎉 答對了！' : '❌ 再試一次，或點卡片查看講解';
-                document.getElementById('btn-cloze-next').style.display = 'block';
+                document.getElementById('btn-cloze-next').classList.add('show');
             });
         });
         document.getElementById('cloze-back-rule').innerText = q.rule;
@@ -1213,7 +1346,7 @@
     });
     attachSwipe(document.getElementById('cloze-card-zone'),
         () => { if (clozeIndex > 0){ clozeIndex--; renderClozeQuestion(); } },
-        () => { if (document.getElementById('btn-cloze-next').style.display === 'block') document.getElementById('btn-cloze-next').click(); });
+        () => { if (document.getElementById('btn-cloze-next').classList.contains('show')) document.getElementById('btn-cloze-next').click(); });
 
     /* =========================================================
      * 導覽（開場教學，答題畫面不再顯示提示文字；「？」鍵可重看）
@@ -1255,6 +1388,7 @@
         vocab = buildVocabForPack('Core');
         vocab.forEach(w => { wordState[w.id] = 'new'; });
         renderPackRow(); renderGrid(); renderGrammarView();
+        updateActionRowLockUI();
     }
     boot();
 })();
